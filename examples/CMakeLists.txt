@@ -10,13 +10,17 @@ install(DIRECTORY ${GLOW_SOURCE_DIR}/data DESTINATION ${INSTALL_EXAMPLES})
 unset(sources)
 unset(api_includes)
 
-include_directories(
-	${GLFW_INCLUDE_DIR})
+include_directories(${GLFW_INCLUDE_DIR})
 
 set(EXAMPLE_COMMON examplecommon)
 add_subdirectory("common")
 include_directories("common")
 
+# add the subdirectory that aggregates the sources of arcsynthesis.org tutorial examples implemented with glow
+# cf. http://arcsynthesis.org/gltut/index.html for the online tutorial/book
+add_subdirectory ("arcsynthesis/chapter1/tutorial1/")
+
+# standard glow examples
 add_subdirectory("camerapath")
 add_subdirectory("commandlineoutput")
 add_subdirectory("computeshader")

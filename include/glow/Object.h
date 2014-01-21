@@ -22,12 +22,20 @@ class ObjectVisitor;
  */
 class GLOW_API Object : public Referenced
 {
+    
 public:
+    
 	virtual ~Object();
 
 	virtual void accept(ObjectVisitor & visitor) = 0;
 
+    /**
+     * Returns the raw OpenGL ID of this OpenGL object as a GLuint.
+     */
 	GLuint id() const;
+    /**
+     * Cast operator to cast this Object to a GLuint
+     */
 	operator GLuint() const;
 
 	bool ownsGLObject() const;
@@ -35,21 +43,41 @@ public:
 	const std::string & name() const;
 	void setName(const std::string & name);
 
+    
 private:
+    /**
+     * Private default c'tor.
+     */
     Object();
+    /**
+     * Private copy c'tor.
+     */
     Object(const Object &);
+    /**
+     * Private assign operator.
+     */
     Object & operator=(const Object &);
 
     void registerObject();
     void deregisterObject();
 
+    
 protected:
     Object(GLuint id, bool ownsGLObject = true);
 
+    
 protected:
+    /**
+     * The OpenGL id of this object as a GLuint
+     */
 	GLuint m_id;
+    /**
+     * The OpenGL id of this object as a GLuint *//** Flag that indicates if this object is responsible for another OpenGL object.
+     */
 	bool m_ownsGLObject;
-
+    /**
+     * The name of this object if set.
+     */
     std::string m_name;
 };
 
