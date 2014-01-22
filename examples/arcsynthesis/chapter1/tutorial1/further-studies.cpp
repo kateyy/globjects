@@ -24,12 +24,10 @@
 // [END] Includes of GLOWWINDOW
 
 
-
-
-
 /**
- * Ananonymous namespace in which the vertex and fragment shader source code is declared and initialized
- * as well as the float array that maintains the raw vertex positions of the triangle to draw.
+ * Ananonymous namespace in which the vertex and fragment shader source code is declared and
+ * initialized as well as the float array that maintains the raw vertex positions of the
+ * triangle to draw.
  */
 namespace {
     /**
@@ -56,16 +54,16 @@ namespace {
         "\n"
         "void main() {\n"
         "\n"
-        "outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+        "outputColor = vec4(0.6f, 0.2f, 0.3f, 1.0f);\n"
         "}\n"
     };
-
+    
     /**
      * The vertex positions of the triangle to draw (in clip-space).
      */
     const float vertexPositions[] {
         0.75f, 0.75f, 0.0f, 1.0f,
-        0.75f, -0.75f, 0.0f, 1.0f,
+        0.35f, -0.35f, 0.0f, 1.0f,
         -0.75f, -0.75f, 0.0f, 1.0f
     };
 }
@@ -77,14 +75,14 @@ namespace {
  */
 class EventHandler : public glowwindow::WindowEventHandler {
     
-// [BEGIN] :: public
+    // [BEGIN] :: public
 public:
     
     /**
      * Default "do nothing" c'tor.
      */
 	EventHandler() { /* do nothing*/ }
-
+    
     /**
      * Default "do nothing" destructor.
      */
@@ -116,7 +114,7 @@ public:
          */
 		vao = new glow::VertexArrayObject();
         vao->bind();
-
+        
     }
     
     /**
@@ -124,12 +122,33 @@ public:
      * corresponds to function tut1.cpp::reshape()
      */
     virtual void framebufferResizeEvent(glowwindow::ResizeEvent& event) override {
+        
         /**
-         * Resizes the viewport without maintaining the aspect ratio of the window, thus,
-         * possibly deforming the rendered geometry.
+         * The following code lines are one possible solution to (1) maintain the aspect ratio
+         * of the rendered geometry when changing window size and (2) keep the rendered geometry
+         * in the center of the viewport.
          */
-        glViewport(0, 0, event.width(), event.height());
+        GLint x {
+            event.width() > event.height()
+            ? (event.width() - event.height()) / 2
+            : 0
+        };
+        
+        GLint y {
+            event.height() > event.width()
+            ? (event.height() - event.width()) / 2
+            : 0
+        };
+        
+        GLint size {
+            event.width() >= event.height()
+            ? event.height()
+            : event.width()
+        };
+        
+        glViewport(x, y, size, size);
         CheckGLError();
+        
     }
     
     /**
@@ -162,27 +181,27 @@ public:
         
         // set color to clear the screen, check for an OpenGL error, actually
         // clear the screen and check for an OpenGL error again.
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         CheckGLError();
         
         glClear(GL_COLOR_BUFFER_BIT);
         CheckGLError();
-
+        
         
         /*
          * Set the shader program to use by the subsequent rendering commands. The plain OpenGL
          * function call encapsulated by program->use() is glUseProgram(GLuint theProgram).
          *
          * Original tutorial source snippet:
-         * 
+         *
          *      glUseProgram(theProgram);
          *
          * As member theProgram is a glow::Program object theProgram-id() must be used to obtain
          * the GLuint that identifies the program.
          */
 		theProgram->use();
-//        glUseProgram(theProgram->id());
-//        CheckGLError();
+        //        glUseProgram(theProgram->id());
+        //        CheckGLError();
         
         
         /*
@@ -193,8 +212,8 @@ public:
          *      glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
          */
         positionBufferObject->bind();
-//        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionsBuffer->id());
-//        CheckGLError();
+        //        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionsBuffer->id());
+        //        CheckGLError();
         
         /*
          * This encapsulates the OpenGL call:
@@ -202,14 +221,14 @@ public:
          *      glEnableVertexAttribArray (0);
          */
         vao->enable(0);
-//        glEnableVertexAttribArray(0);
-//        CheckGLError();
+        //        glEnableVertexAttribArray(0);
+        //        CheckGLError();
         
         
         /*
          * The following three lines prepare the rendering of the triangle. The OpenGL function
          * call that ist equivalent to these three lines is the glVertexAttribPointer(...).
-         * 
+         *
          * Original tutorial source snippet:
          *
          *      glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -222,20 +241,20 @@ public:
         vao->binding(0)->setAttribute(0);
         vao->binding(0)->setFormat(4, GL_FLOAT);
         vao->binding(0)->setBuffer(positionBufferObject, 0, 0);
-//        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-//        CheckGLError();
+        //        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+        //        CheckGLError();
         
-
+        
         /**
          * The following method call encapsulates the plain OpenGL function call glDrawArrays.
          *
          * Original tutorial source snippet:
-         *  
+         *
          *      glDrawArrays(GL_TRIANGLES, 0, 3);
          */
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 3);
-//        glDrawArrays(GL_TRIANGLES, 0, 3);
-//        CheckGLError();
+        //        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //        CheckGLError();
         
         /*
          * Encapsulates the plain OpenGL function call glDisableVertexAttribArray ()
@@ -245,8 +264,8 @@ public:
          *      glDisableVertexAttribArray(0);
          */
         vao->disable(0);
-//        glDisableVertexAttribArray(0);
-//        CheckGLError();
+        //        glDisableVertexAttribArray(0);
+        //        CheckGLError();
         
         
         /*
@@ -254,24 +273,24 @@ public:
          * the shader program used for rendering.
          */
         positionBufferObject->unbind();
-//        glBindBuffer(GL_ARRAY_BUFFER, 0);
-//        CheckGLError();
+        //        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //        CheckGLError();
         
         theProgram->release();
-//        glUseProgram(0);
-//        CheckGLError();
+        //        glUseProgram(0);
+        //        CheckGLError();
         
     }
     
     virtual void idle(glowwindow::Window & window) override {
         window.repaint();
     }
-// [END] :: public
-
+    // [END] :: public
     
     
     
-// [BEGIN] :: protected
+    
+    // [BEGIN] :: protected
 protected:
     /**
      * This method corresponds to function tut1.cpp::InitializeProgram(). The original function
@@ -298,9 +317,9 @@ protected:
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                        glow::Shader::fromString(GL_VERTEX_SHADER, vertexShaderSource),
-                        glow::Shader::fromString(GL_FRAGMENT_SHADER, fragmentShaderSource)
-                        );
+                           glow::Shader::fromString(GL_VERTEX_SHADER, vertexShaderSource),
+                           glow::Shader::fromString(GL_FRAGMENT_SHADER, fragmentShaderSource)
+                           );
     }
     
     /**
@@ -370,29 +389,29 @@ protected:
          */
         positionBufferObject->unbind();
     }
-// [END] :: protected
-
+    // [END] :: protected
     
     
-
-// [BEGIN] :: private
+    
+    
+    // [BEGIN] :: private
 private:
     
     /**
      * The glow::VertexArrayObject that replaces the GLuint field with the same name in the original tutorial.
      */
 	glow::VertexArrayObject* vao;
-//    GLuint vao;
+    //    GLuint vao;
     
     /**
      * The glow::Buffer object that replaces the GLuint field with the same name in the original tutorial.
      *
      * Original tutorial field declaration is:
-     * 
+     *
      *      GLuint positionBufferObject;
      */
 	glow::Buffer* positionBufferObject;
-//    GLuint positionBufferObject;
+    //    GLuint positionBufferObject;
     
     /**
      * The glow::Program object that replaces the GLuint field with the same name in the original tutorial.
@@ -402,17 +421,24 @@ private:
      *      GLuint theProgram;
      */
 	glow::Program* theProgram;
-//    GLuint theProgram;
+    //    GLuint theProgram;
     
-// [END] :: private
+    // [END] :: private
     
 }; // [END] class EventHandler
 
 
 
 /**
- * This example implements the first tutorial of "Learning Modern 3D Graphics Programming" by
- * Jason L. McKesson (cf. http://arcsynthesis.org/gltut/index.html) using glow instead of freeglut.
+ * This example implements some of the "further studies" topics listed at the end of the first tutorial of
+ * Jason L. McKesson (cf. http://arcsynthesis.org/gltut/index.html) . Specifically, the following topics are
+ * addressed:
+ * 
+ * (1) Maintain the aspect ratio of the rendered geometry when resizing the window.
+ * (2) Keep the rendered geometry in the center of the window/viewport when resizing the window.
+ * (3) Change the background clear-color.
+ * (4) Change the output color of the fragment shader.
+ * (5) Change the coordinates of the raw vertex data.
  */
 int main(int /*argc*/, char* /*argv*/[]) {
     
