@@ -233,7 +233,7 @@ public:
          *  
          *      glDrawArrays(GL_TRIANGLES, 0, 3);
          */
-        vao->drawArrays(GL_TRIANGLE_STRIP, 0, 3);
+        vao->drawArrays(GL_TRIANGLES, 0, 3);
 //        glDrawArrays(GL_TRIANGLES, 0, 3);
 //        CheckGLError();
         

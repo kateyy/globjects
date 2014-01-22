@@ -64,7 +64,10 @@ namespace {
     const float vertexPositions[] {
         0.75f, 0.75f, 0.0f, 1.0f,
         0.35f, -0.35f, 0.0f, 1.0f,
-        -0.75f, -0.75f, 0.0f, 1.0f
+        -0.75f, -0.75f, 0.0f, 1.0f,
+        0.8f, 0.9f, 0.0f, 1.0f,
+        -0.45f, 0.45f, 0.0f, 1.0f,
+        -0.9f, -0.8f, 0.0f, 1.0f
     };
 }
 
@@ -252,7 +255,7 @@ public:
          *
          *      glDrawArrays(GL_TRIANGLES, 0, 3);
          */
-        vao->drawArrays(GL_TRIANGLE_STRIP, 0, 3);
+        vao->drawArrays(GL_TRIANGLES, 0, 6);
         //        glDrawArrays(GL_TRIANGLES, 0, 3);
         //        CheckGLError();
         
@@ -439,6 +442,7 @@ private:
  * (3) Change the background clear-color.
  * (4) Change the output color of the fragment shader.
  * (5) Change the coordinates of the raw vertex data.
+ * (6) Add another three vertex coordinates to the raw vertex data float array and render the second triangle.
  */
 int main(int /*argc*/, char* /*argv*/[]) {
     
