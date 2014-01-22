@@ -7,7 +7,6 @@
 #include <glow/logging.h>
 
 #include "NamedStrings.h"
-#include "FeatureRegistry.h"
 
 namespace glow
 {
@@ -35,25 +34,6 @@ bool initializeGLEW(bool showWarnings)
 
     return true;
 }
-void initializeExtensions(bool showWarnings)
-{
-    for (const std::string& extensionName : getExtensions())
-    {
-        Extension extension = FeatureRegistry::getExtensionValue(extensionName);
-
-        if (extension == GLOW_Unknown_Extension)
-        {
-            if (showWarnings)
-            {
-                glow::warning() << "OpenGL supports unregistered extension " << extensionName;
-            }
-        }
-        else
-        {
-            FeatureRegistry::instance().addSupportedFeature(extension);
-        }
-    }
-}
 
 bool isInitialized()
 {
@@ -76,8 +56,6 @@ bool init(bool showWarnings)
     {
         return false;
     }
-
-    initializeExtensions(showWarnings);
 
     glowIsInitialized = true;
 
@@ -176,6 +154,46 @@ GLboolean getBoolean(GLenum pname, GLuint index)
     CheckGLError();
 
     return value;
+}
+
+std::string vendor()
+{
+    return getString(GL_VENDOR);
+}
+
+std::string renderer()
+{
+    return getString(GL_RENDERER);
+}
+
+std::string versionString()
+{
+    return getString(GL_VERSION);
+}
+
+GLint majorVersion()
+{
+    return getInteger(GL_MAJOR_VERSION);
+}
+
+GLint minorVersion()
+{
+    return getInteger(GL_MINOR_VERSION);
+}
+
+Version version()
+{
+    return Version(majorVersion(), minorVersion());
+}
+
+bool isCoreProfile()
+{
+    if (version()<Version(3,2))
+    {
+        return false;
+    }
+
+    return (getInteger(GL_CONTEXT_PROFILE_MASK) & GL_CONTEXT_CORE_PROFILE_BIT) > 0;
 }
 
 std::vector<std::string> getExtensions()
