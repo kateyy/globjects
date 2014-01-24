@@ -33,9 +33,9 @@
  */
 namespace {
     /**
-     * The vertex positions of the triangle to draw (in clip-space).
+     * The vertex positions/data of the triangle to draw (in clip-space).
      */
-    const float vertexPositions[] {
+    const float vertexData[] {
         0.75f, 0.75f, 0.0f, 1.0f,
         0.75f, -0.75f, 0.0f, 1.0f,
         -0.75f, -0.75f, 0.0f, 1.0f
@@ -63,11 +63,11 @@ public:
     virtual ~EventHandler() { /* do nothing*/ }
     
     /**
-     * Initializes the shader program and the vertex buffer that stores the data of the geometry to be
-     * rendered.
+     * Initializes the shader program and the vertex buffer that stores the data of the geometry to
+     * be rendered.
      *
-     * This method corresponds to function tut1.cpp::init() -- that in turn calls function InitializePorgram()
-     * and InitializeVertexBuffer() -- in the original source code of the tutorial.
+     * This method corresponds to function FragPosition.cpp::init() -- that in turn calls function
+     * InitializePorgram() and InitializeVertexBuffer() -- in the original source code of the tutorial.
      */
     virtual void initialize(glowwindow::Window& /*window*/) override {
         
@@ -164,7 +164,7 @@ public:
          *
          *      glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
          */
-        positionBufferObject->bind();
+        vertexBufferObject->bind();
         //        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionsBuffer->id());
         //        CheckGLError();
         
@@ -193,7 +193,7 @@ public:
          */
         vao->binding(0)->setAttribute(0);
         vao->binding(0)->setFormat(4, GL_FLOAT);
-        vao->binding(0)->setBuffer(positionBufferObject, 0, 0);
+        vao->binding(0)->setBuffer(vertexBufferObject, 0, 0);
         //        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
         //        CheckGLError();
         
@@ -225,7 +225,7 @@ public:
          * Some cleanup work, (1) unbind the vertexPositionsBuffer, (2) release
          * the shader program used for rendering.
          */
-        positionBufferObject->unbind();
+        vertexBufferObject->unbind();
         //        glBindBuffer(GL_ARRAY_BUFFER, 0);
         //        CheckGLError();
         
@@ -246,25 +246,23 @@ public:
     // [BEGIN] :: protected
 protected:
     /**
-     * This method corresponds to function tut1.cpp::InitializeProgram(). The original function
-     * source code is as follows:
+     * This method corresponds to function FragPosition.cpp::InitializeProgram().
+     * The original function source code is as follows:
      *
      *      void InitializeProgram() {
      *
-     *              std::vector<GLuint> shaderList;
+     *          std::vector<GLuint> shaderList;
      *
-     *              shaderList.push_back(CreateShader(GL_VERTEX_SHADER, strVertexShader));
-     *              shaderList.push_back(CreateShader(GL_FRAGMENT_SHADER, strFragmentShader));
+     *          shaderList.push_back(Framework::LoadShader(GL_VERTEX_SHADER, "FragPosition.vert"));
+     *          shaderList.push_back(Framework::LoadShader(GL_FRAGMENT_SHADER, "FragPosition.frag"));
      *
-     *              theProgram = CreateProgram(shaderList);
-     *
-     *              std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
+     *          theProgram = Framework::CreateProgram(shaderList);
      *      }
      *
-     * Note that the creation of the shaders and the program by calling function "CrateShader(...)"
-     * and "CreateProgram(...)", as it was done in the tutorial, is completely encapsulated in the
-     * glow library. Thus, there is no equivalent implementation for functions CreateProgram(...)
-     * and CreateShader(...) in this adapted example!
+     * Note that the creation of the shaders and the program by calling function "Framework::LoadShader(...)"
+     * and "Framework::CreateProgram(...)", as it is done in the tutorial, is completely encapsulated in the
+     * glow library. Likewise, the glow library supports creating shaders from source files which is shown here
+     * using function glowutils::createShaderFromFile(...).
      */
     void initializeProgram () {
         
@@ -276,8 +274,8 @@ protected:
     }
     
     /**
-     * This method corresponds to function tut1.cpp::InitializeVertexBuffer(). The original function
-     * source code is as follows:
+     * This method corresponds to function FragPosition.cpp::InitializeVertexBuffer().
+     * The original function source code is as follows:
      *
      *      void InitializeVertexBuffer() {
      *
@@ -298,7 +296,7 @@ protected:
          *
          *      glGenBuffers(1, &positionBufferObject);
          */
-		positionBufferObject = new glow::Buffer(GL_ARRAY_BUFFER);
+		vertexBufferObject = new glow::Buffer(GL_ARRAY_BUFFER);
         
         /*
          * Bind the new glow::Buffer. This call replaces the call to the OpenGL function glBindBuffer(...)
@@ -310,7 +308,7 @@ protected:
          *
          *      glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
          */
-        positionBufferObject->bind();
+        vertexBufferObject->bind();
         
         /**
          * Allocate the memory for the vertex positions data and copy the vertex positions array to the
@@ -331,7 +329,7 @@ protected:
          * value is already GL_STATIC_DRAW, however, we decided to explicitly state it here to stay as
          * close as possible to the original tutorial's code.
          */
-        positionBufferObject->setData(sizeof(vertexPositions), &vertexPositions, GL_STATIC_DRAW);
+        vertexBufferObject->setData(sizeof(vertexData), &vertexData, GL_STATIC_DRAW);
         
         /*
          * Unbind the vertexPositionsBuffer as it is done in the tutorial.
@@ -340,14 +338,14 @@ protected:
          *
          * glBindBuffer(GL_ARRAY_BUFFER, 0);
          */
-        positionBufferObject->unbind();
+        vertexBufferObject->unbind();
     }
-    // [END] :: protected
+// [END] :: protected
     
     
     
     
-    // [BEGIN] :: private
+// [BEGIN] :: private
 private:
     
     /**
@@ -361,10 +359,10 @@ private:
      *
      * Original tutorial field declaration is:
      *
-     *      GLuint positionBufferObject;
+     *      GLuint vertexBufferObject;
      */
-	glow::Buffer* positionBufferObject;
-    //    GLuint positionBufferObject;
+	glow::Buffer* vertexBufferObject;
+    //    GLuint vertexBufferObject;
     
     /**
      * The glow::Program object that replaces the GLuint field with the same name in the original tutorial.
@@ -376,7 +374,7 @@ private:
 	glow::Program* theProgram;
     //    GLuint theProgram;
     
-    // [END] :: private
+// [END] :: private
     
 }; // [END] class EventHandler
 

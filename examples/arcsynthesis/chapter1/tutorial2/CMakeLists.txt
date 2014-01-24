@@ -1,16 +1,13 @@
 
-### The main target of the 1st chapter, 2nd tutorial
+### The target of the 1st chapter, tutorial 2.1 (FragPosition)
 
-set(target chapter1-tutorial2)
+set(target-tutorial2.1 chapter1-tutorial2.1)
 
-message(STATUS "example ${target}")
+message(STATUS "example ${target-tutorial2.1}")
 
-add_executable(
-    ${target}
-    main.cpp
-)
+add_executable(${target-tutorial2.1} FragPosition.cpp)
 
-target_link_libraries(${target} 
+target_link_libraries(${target-tutorial2.1}
     ${GLEW_LIBRARIES}
     glow
     glowutils
@@ -18,7 +15,7 @@ target_link_libraries(${target}
     ${EXAMPLE_COMMON}
 )
 
-set_target_properties(${target}
+set_target_properties(${target-tutorial2.1}
     PROPERTIES
     LINKER_LANGUAGE CXX
     FOLDER ${GLOW_EXAMPLES_FOLDER}
@@ -29,7 +26,7 @@ set_target_properties(${target}
     LINK_FLAGS_RELEASE          "${DEFAULT_LINKER_FLAGS_RELEASE}"
     DEBUG_POSTFIX               "d${DEBUG_POSTFIX}")
 
-install(TARGETS ${target}
+install(TARGETS ${target-tutorial2.1}
     RUNTIME DESTINATION ${INSTALL_EXAMPLES}
 #    LIBRARY DESTINATION ${INSTALL_SHARED}
 #    ARCHIVE DESTINATION ${INSTALL_LIB}
