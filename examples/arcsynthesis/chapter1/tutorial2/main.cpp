@@ -385,6 +385,11 @@ private:
 /**
  * This example implements the first tutorial of "Learning Modern 3D Graphics Programming" by
  * Jason L. McKesson (cf. http://arcsynthesis.org/gltut/index.html) using glow instead of freeglut.
+ *
+ * IMPORTANT: On computers with retina displays or high resolution displays the result of this
+ * tutorial will differ from normal displays and from the result presented in the tutorial! Try
+ * to adapt the shader "frag-position.frag" as explained in the shader source codes to get the
+ * same result on a high resolution display.
  */
 int main(int /*argc*/, char* /*argv*/[]) {
     

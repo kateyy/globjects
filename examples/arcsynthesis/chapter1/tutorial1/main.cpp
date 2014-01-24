@@ -426,7 +426,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
-        window.resize(640, 640);
+        window.resize(500, 500);
         
         return glowwindow::MainLoop::run();
         
