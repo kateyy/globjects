@@ -18,8 +18,10 @@ include_directories("common")
 
 # add the subdirectory that aggregates the sources of arcsynthesis.org tutorial examples implemented with glow
 # cf. http://arcsynthesis.org/gltut/index.html for the online tutorial/book
-add_subdirectory ("arcsynthesis/chapter1/tutorial1/")
-add_subdirectory ("arcsynthesis/chapter1/tutorial2/")
+#add_subdirectory ("arcsynthesis/chapter1/tutorial1/")
+#add_subdirectory ("arcsynthesis/chapter1/tutorial2/")
+add_subdirectory("arcsynthesis/chapter1")
+add_subdirectory("arcsynthesis/chapter2")
 
 # standard glow examples
 add_subdirectory("camerapath")
