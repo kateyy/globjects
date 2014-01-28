@@ -28,8 +28,8 @@
 
 
 /**
- * Ananonymous namespace in which the vertex and fragment shader source code is declared and initialized
- * as well as the float array that maintains the raw vertex positions of the triangle to draw.
+ * Ananonymous namespace used to declare and initialize the raw vertex positions
+ * of the triangle to draw.
  */
 namespace {
     /**
@@ -397,7 +397,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Playing with Colors")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Playing with Colors [FragPosition]")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();

@@ -1,6 +1,7 @@
 
 
 #include <string>
+#include <iostream>
 
 // [BEGIN] Includes of GLOW
 #include <glow/Buffer.h>
@@ -28,27 +29,26 @@
 
 
 /**
- * Ananonymous namespace used to declare and initialize the raw vertex positions/
- * colors of the triangle to draw.
+ * Ananonymous namespace used to declare and initialize the raw vertex positions
+ * of the triangle to draw.
  */
 namespace {
     /**
-     * The vertex positions/data (vertex positions followed by vertex colors) of
-     * the triangle to draw (in clip-space).
+     * The vertex positions/data of the triangle to draw (in clip-space).
      */
     const float vertexData[] {
-        //position of vertex 1 (upper)
-        0.0f, 0.5f, 0.0f, 1.0f,
-        //position of vertex 2 (lower-right)
-        0.5f, -0.366f, 0.0f, 1.0f,
-        //position of vertex 3 (lower-left)
-        -0.5f, -0.366f, 0.0f, 1.0f,
-        //color (red) of vertex 1 (upper)
-        1.0f, 0.0f, 0.0f, 1.0f,
-        //color (green) of vertex 2 (lower-right)
-        0.0f, 1.0f, 0.0f, 1.0f,
-        //color (blue) of vertex 3 (lower-left)
-        0.0f, 0.0f, 1.0f, 1.0f
+        0.75f, 0.75f, 0.0f, 1.0f,
+        0.75f, -0.75f, 0.0f, 1.0f,
+        -0.75f, -0.75f, 0.0f, 1.0f
+    };
+    
+    /**
+     * The enum that maintains the possible viewport positions.
+     */
+    enum Viewport {
+        DEFAULT,
+        UPPER_HALF,
+        LOWER_HALF
     };
 }
 
@@ -106,12 +106,44 @@ public:
      * corresponds to function tut1.cpp::reshape()
      */
     virtual void framebufferResizeEvent(glowwindow::ResizeEvent& event) override {
-        /**
-         * Resizes the viewport without maintaining the aspect ratio of the window, thus,
-         * possibly deforming the rendered geometry.
-         */
-        glViewport(0, 0, event.width(), event.height());
-        CheckGLError();
+        
+//        /*
+//         * Check for the viewport flag.
+//         */
+//        if (activeViewport == Viewport::DEFAULT) {
+//            
+//            /*
+//             * Resizes the viewport without maintaining the aspect ratio of the window, thus,
+//             * possibly deforming the rendered geometry.
+//             */
+//            glViewport(0, 0, event.width(), event.height());
+//            CheckGLError();
+//            
+//        } else if (activeViewport == Viewport::UPPER_HALF) {
+//            
+//            /*
+//             * Resizes the viewport without maintaining the aspect ratio of the window, thus,
+//             * possibly deforming the rendered geometry.
+//             */
+//            glViewport(0, event.height()/2, event.width(), event.height()/2);
+//            CheckGLError();
+//            
+//        } else if (activeViewport == Viewport::LOWER_HALF) {
+//            
+//            /*
+//             * Resizes the viewport without maintaining the aspect ratio of the window, thus,
+//             * possibly deforming the rendered geometry.
+//             */
+//            glViewport(0, 0, event.width(), event.height()/2);
+//            CheckGLError();
+//            
+//        } else {
+//            std::cout << "UNDEFINED VIEWPORT POSITION!" << std::endl;
+//        }
+        
+          glViewport(0, 0, event.width(), event.height());
+          CheckGLError();
+        
     }
     
     /**
@@ -167,7 +199,6 @@ public:
 //        CheckGLError();
         
         
-        
         /*
          * (Re-)Bind the vertexPositionsBuffer object.
          *
@@ -178,48 +209,34 @@ public:
         vertexBufferObject->bind();
 //        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionsBuffer->id());
 //        CheckGLError();
-
-        
         
         /*
-         * Enable the two vertex attributes (position and color of the vertices) used for rendering.
-         * This encapsulates the OpenGL calls:
+         * This encapsulates the OpenGL call:
          *
          *      glEnableVertexAttribArray (0);
-         *      glEnableVertexAttribArray (1);
-         *
-         * Note that the values passed to enable/glEnableVertexAttribArray are the attribute indices
-         * used in the vertex shader (layout(location=0) and layout(location=1), cf. vertex-colors.vert).
          */
         vao->enable(0);
-        vao->enable(1);
 //        glEnableVertexAttribArray(0);
 //        CheckGLError();
-//        glEnableVertexAttribArray(1);
-//        CheckGLError();
-
+        
         
         /*
-         * The following six lines prepare the rendering of the triangle. The OpenGL function
+         * The following three lines prepare the rendering of the triangle. The OpenGL function
          * call that ist equivalent to these three lines is the glVertexAttribPointer(...).
          *
-         * Original tutorial source snippet (only two lines!):
+         * Original tutorial source snippet:
          *
          *      glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-         *      glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)48);
          *
-         * Note that glow is a little more "verbose" as using the plain OpenGL functions as it is
-         * done in the original tutorial.
+         * Note, this is one of the few parts in the glow version of the original tutorial where
+         * glow does not support a 1:1 mapping of the OpenGL functions and seems to be a bit more
+         * "cumbersome" then using plain OpenGL. However, the glow version is easier to read as
+         * glow groups setting the parameters in a more meaningfull manner.
          */
         vao->binding(0)->setAttribute(0);
         vao->binding(0)->setFormat(4, GL_FLOAT);
         vao->binding(0)->setBuffer(vertexBufferObject, 0, 0);
-        //        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-        //        CheckGLError();
-        vao->binding(0)->setAttribute(1);
-        vao->binding(0)->setFormat(4, GL_FLOAT);
-        vao->binding(0)->setBuffer(vertexBufferObject, 48, 0);
-//        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)48);
+//        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 //        CheckGLError();
         
         
@@ -235,19 +252,14 @@ public:
 //        CheckGLError();
         
         /*
-         * Disable the two vertex attributes in use. This encapsulates the plain OpenGL function
-         * call glDisableVertexAttribArray() for both of the attributes in use.
+         * Encapsulates the plain OpenGL function call glDisableVertexAttribArray ()
          *
          * Original tutorial source snippet:
          *
          *      glDisableVertexAttribArray(0);
-         *      glDisableVertexAttribArray(1);
          */
         vao->disable(0);
 //        glDisableVertexAttribArray(0);
-//        CheckGLError();
-        vao->disable(1);
-//        glDisableVertexAttribArray(1);
 //        CheckGLError();
         
         
@@ -258,7 +270,7 @@ public:
         vertexBufferObject->unbind();
 //        glBindBuffer(GL_ARRAY_BUFFER, 0);
 //        CheckGLError();
-
+        
         theProgram->release();
 //        glUseProgram(0);
 //        CheckGLError();
@@ -268,6 +280,80 @@ public:
     virtual void idle(glowwindow::Window & window) override {
         window.repaint();
     }
+
+    /**
+     * Handles keyboard events to change the viewport as suggested in the "Further Studies" section of
+     * the original FragPosition tutorial (chapter 1, tutorial 2.1).
+     */
+    virtual void keyPressEvent(glowwindow::KeyEvent & event) override
+    {
+        switch (event.key())
+        {
+            case GLFW_KEY_C: {
+                
+                /*
+                 * Maintain the new viewport position and dimension in a glm vec of four int values.
+                 * Note that the framebufferSize is used to comput the new viewport NOT the window
+                 * size. While using the window size (e.g. event.window()->width()) would work on a
+                 * non-retina/-high-resolution display, using the window size on a retina display will
+                 * not work properly. Thererfore, it is best to use the framebufferSize to compute the
+                 * viewport position/dimension.
+                 */
+                glm::ivec4 vpv {0,0,event.window()->framebufferSize()};
+                
+                // Check the viewport flag.
+                if (activeViewport == Viewport::DEFAULT) {
+                    
+                    activeViewport = Viewport::UPPER_HALF;
+                    /*
+                     * Resizes the viewport so that the viewport only occupies the upper half of the
+                     * space provided by the window.
+                     */
+                    glViewport(vpv.x, vpv.y, vpv.z, vpv.w);
+                    CheckGLError();
+                    
+                } else if (activeViewport == Viewport::UPPER_HALF) {
+                    
+                    activeViewport = Viewport::LOWER_HALF;
+                    /*
+                     * Resizes the viewport so that the viewport only occupies the lower half of the
+                     * space provided by the window.
+                     */
+                    glViewport(vpv.x, vpv.w/2, vpv.z, vpv.w/2);
+                    CheckGLError();
+                    
+                } else if (activeViewport == Viewport::LOWER_HALF) {
+                    
+                    activeViewport = Viewport::DEFAULT;
+                    /*
+                     * Resizes the viewport so that the viewport occupies the whole space provided by
+                     * the window.
+                     */
+                    glViewport(vpv.x, vpv.y, vpv.z, vpv.w/2);
+                    CheckGLError();
+                    
+                } else {
+                    std::cout << "UNDEFINED VIEWPORT POSITION! Setting to Viewport::DEFAULT" << std::endl;
+                    activeViewport = Viewport::DEFAULT;
+                    /*
+                     * Resizes the viewport so that the viewport occupies the whole space provided by
+                     * the window.
+                     */
+                    glViewport(vpv.x, vpv.y, vpv.z, vpv.w);
+                    CheckGLError();
+                }
+                
+                break;
+            }
+                
+            default: {
+                
+                std::cout << "Please use the \'c\' key to iterate between possible viewport positions" << std::endl;
+                break;
+            }
+        }
+                
+    }
     // [END] :: public
     
     
@@ -276,15 +362,15 @@ public:
     // [BEGIN] :: protected
 protected:
     /**
-     * This method corresponds to function VertexPositions.cpp::InitializeProgram().
+     * This method corresponds to function FragPosition.cpp::InitializeProgram().
      * The original function source code is as follows:
      *
      *      void InitializeProgram() {
      *
      *          std::vector<GLuint> shaderList;
      *
-     *          shaderList.push_back(Framework::LoadShader(GL_VERTEX_SHADER, "VertexColors.vert"));
-     *          shaderList.push_back(Framework::LoadShader(GL_FRAGMENT_SHADER, "VertexColors.frag"));
+     *          shaderList.push_back(Framework::LoadShader(GL_VERTEX_SHADER, "FragPosition.vert"));
+     *          shaderList.push_back(Framework::LoadShader(GL_FRAGMENT_SHADER, "FragPosition.frag"));
      *
      *          theProgram = Framework::CreateProgram(shaderList);
      *      }
@@ -298,13 +384,13 @@ protected:
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter1/tutorial2/vertex-colors.vert"),
-                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter1/tutorial2/vertex-colors.frag")
+                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter1/tutorial2/frag-position.vert"),
+                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter1/tutorial2/frag-position.frag")
                            );
     }
     
     /**
-     * This method corresponds to function VertexPositions.cpp::InitializeVertexBuffer().
+     * This method corresponds to function FragPosition.cpp::InitializeVertexBuffer().
      * The original function source code is as follows:
      *
      *      void InitializeVertexBuffer() {
@@ -370,13 +456,18 @@ protected:
          */
         vertexBufferObject->unbind();
     }
-// [END] :: protected
+    // [END] :: protected
     
     
     
     
-// [BEGIN] :: private
+    // [BEGIN] :: private
 private:
+    
+    /**
+     * The active viewport(-position) to use.
+     */
+    Viewport activeViewport {DEFAULT};
     
     /**
      * The glow::VertexArrayObject that replaces the GLuint field with the same name in the original tutorial.
@@ -404,7 +495,7 @@ private:
 	glow::Program* theProgram;
 //    GLuint theProgram;
     
-// [END] :: private
+    // [END] :: private
     
 }; // [END] class EventHandler
 
@@ -414,8 +505,9 @@ private:
  * This example implements the first tutorial of "Learning Modern 3D Graphics Programming" by
  * Jason L. McKesson (cf. http://arcsynthesis.org/gltut/index.html) using glow instead of freeglut.
  *
- * This file corresponds to VertexPositions.cpp of tutorial 2.2 in chapter 1 of the afforementioned
- * tutorial.
+ * This extension of tutorial 2.1 (Playing with Colors -- FragPosition) in chapter 1 of the tutorial
+ * referenced above illustrates the effect of the fragment shader when resizing the OpenGL viewport.
+ * In addition, this implementation demonstrates key event handling as it is done in glow.
  *
  * IMPORTANT: On computers with retina displays or high resolution displays the result of this
  * tutorial will differ from normal displays and from the result presented in the tutorial! Try
@@ -430,7 +522,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Playing with Colors [VertexColors]")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Playing with Colors")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
