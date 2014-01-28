@@ -1,7 +1,7 @@
 
-### The target of the 1st chapter, tutorial 2.1 (FragPosition)
+### The target of the 2nd chapter, 1st tutorial (FragPosition)
 
-set(target-tutorial2.1 chapter1-tutorial2.1)
+set(target-tutorial2.1 tutorial2.1)
 
 message(STATUS "example ${target-tutorial2.1}")
 
@@ -38,9 +38,9 @@ install(TARGETS ${target-tutorial2.1}
 
 
 
-### The target of the 1st chapter, tutorial 2.2 (VertexColors)
+### The target of the 2nd chapter, 2nd tutorial (VertexColors)
 
-set(target-tutorial2.2 chapter1-tutorial2.2)
+set(target-tutorial2.2 tutorial2.2)
 
 message(STATUS "example ${target-tutorial2.2}")
 
@@ -77,18 +77,15 @@ install(TARGETS ${target-tutorial2.2}
 
 
 
-### The further studies target of the 1st chapter, tutorial 2.1
+### The further studies target of the 2nd chapter, 1st tutorial
 
-set(target-further-studies-2.1 chapter1-tutorial2.1-further-studies)
+set(target-fs2.1 tutorial2.1-further-studies)
 
-message(STATUS "example ${target-further-studies-2.1}")
+message(STATUS "example ${target-fs2.1}")
 
-add_executable(
-    ${target-further-studies-2.1}
-    FragPosition-FurtherStudies.cpp
-)
+add_executable(${target-fs2.1} FragPosition-FurtherStudies.cpp)
 
-target_link_libraries(${target-further-studies-2.1}
+target_link_libraries(${target-fs2.1}
     ${GLEW_LIBRARIES}
     glow
     glowutils
@@ -96,7 +93,7 @@ target_link_libraries(${target-further-studies-2.1}
     ${EXAMPLE_COMMON}
 )
 
-set_target_properties(${target-further-studies-2.1}
+set_target_properties(${target-fs2.1}
     PROPERTIES
     LINKER_LANGUAGE CXX
     FOLDER ${GLOW_EXAMPLES_FOLDER}
@@ -107,7 +104,7 @@ set_target_properties(${target-further-studies-2.1}
     LINK_FLAGS_RELEASE          "${DEFAULT_LINKER_FLAGS_RELEASE}"
     DEBUG_POSTFIX               "d${DEBUG_POSTFIX}")
 
-install(TARGETS ${target-further-studies-2.1}
+install(TARGETS ${target-fs2.1}
     RUNTIME DESTINATION ${INSTALL_EXAMPLES}
 #    LIBRARY DESTINATION ${INSTALL_SHARED}
 #    ARCHIVE DESTINATION ${INSTALL_LIB}
@@ -117,18 +114,18 @@ install(TARGETS ${target-further-studies-2.1}
 
 
 
-### The further studies target of the 1st chapter, tutorial 2.2
+### The further studies target of the 2nd chapter, 2nd tutorial
 
-set(target-further-studies-2.2 chapter1-tutorial2.2-further-studies)
+set(target-fs2.2 tutorial2.2-further-studies)
 
-message(STATUS "example ${target-further-studies-2.2}")
+message(STATUS "example ${target-fs2.2}")
 
 add_executable(
-    ${target-further-studies-2.2}
+    ${target-fs2.2}
     VertexColors-FurtherStudies.cpp
 )
 
-target_link_libraries(${target-further-studies-2.2}
+target_link_libraries(${target-fs2.2}
     ${GLEW_LIBRARIES}
     glow
     glowutils
@@ -136,7 +133,7 @@ target_link_libraries(${target-further-studies-2.2}
     ${EXAMPLE_COMMON}
 )
 
-set_target_properties(${target-further-studies-2.2}
+set_target_properties(${target-fs2.2}
     PROPERTIES
     LINKER_LANGUAGE CXX
     FOLDER ${GLOW_EXAMPLES_FOLDER}
@@ -147,7 +144,7 @@ set_target_properties(${target-further-studies-2.2}
     LINK_FLAGS_RELEASE          "${DEFAULT_LINKER_FLAGS_RELEASE}"
     DEBUG_POSTFIX               "d${DEBUG_POSTFIX}")
 
-install(TARGETS ${target-further-studies-2.2}
+install(TARGETS ${target-fs2.2}
     RUNTIME DESTINATION ${INSTALL_EXAMPLES}
 #    LIBRARY DESTINATION ${INSTALL_SHARED}
 #    ARCHIVE DESTINATION ${INSTALL_LIB}

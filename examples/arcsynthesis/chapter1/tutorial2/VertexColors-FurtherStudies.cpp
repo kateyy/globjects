@@ -1,6 +1,7 @@
 
 
 #include <string>
+#include <iostream>
 
 // [BEGIN] Includes of GLOW
 #include <glow/Buffer.h>
@@ -50,6 +51,16 @@ namespace {
         //color (blue) of vertex 3 (lower-left)
         0.0f, 0.0f, 1.0f, 1.0f
     };
+    
+    /**
+     * The enum that maintains the possible viewport positions.
+     */
+    enum Viewport {
+        DEFAULT,
+        UPPER_HALF,
+        LOWER_HALF
+    };
+    
 }
 
 
@@ -268,6 +279,80 @@ public:
     virtual void idle(glowwindow::Window & window) override {
         window.repaint();
     }
+    
+    /**
+     * Handles keyboard events to change the viewport as suggested in the "Further Studies" section of
+     * the original FragPosition tutorial (chapter 1, tutorial 2.1).
+     */
+    virtual void keyPressEvent(glowwindow::KeyEvent & event) override
+    {
+        switch (event.key())
+        {
+            case GLFW_KEY_C: {
+                
+                /*
+                 * Maintain the new viewport position and dimension in a glm vec of four int values.
+                 * Note that the framebufferSize is used to comput the new viewport NOT the window
+                 * size. While using the window size (e.g. event.window()->width()) would work on a
+                 * non-retina/-high-resolution display, using the window size on a retina display will
+                 * not work properly. Thererfore, it is best to use the framebufferSize to compute the
+                 * viewport position/dimension.
+                 */
+                glm::ivec4 vpv {0,0,event.window()->framebufferSize()};
+                
+                // Check the viewport flag.
+                if (activeViewport == Viewport::DEFAULT) {
+                    
+                    activeViewport = Viewport::UPPER_HALF;
+                    /*
+                     * Resizes the viewport so that the viewport only occupies the upper half of the
+                     * space provided by the window.
+                     */
+                    glViewport(vpv.x, vpv.y, vpv.z, vpv.w);
+                    CheckGLError();
+                    
+                } else if (activeViewport == Viewport::UPPER_HALF) {
+                    
+                    activeViewport = Viewport::LOWER_HALF;
+                    /*
+                     * Resizes the viewport so that the viewport only occupies the lower half of the
+                     * space provided by the window.
+                     */
+                    glViewport(vpv.x, vpv.w/2, vpv.z, vpv.w/2);
+                    CheckGLError();
+                    
+                } else if (activeViewport == Viewport::LOWER_HALF) {
+                    
+                    activeViewport = Viewport::DEFAULT;
+                    /*
+                     * Resizes the viewport so that the viewport occupies the whole space provided by
+                     * the window.
+                     */
+                    glViewport(vpv.x, vpv.y, vpv.z, vpv.w/2);
+                    CheckGLError();
+                    
+                } else {
+                    std::cout << "UNDEFINED VIEWPORT POSITION! Setting to Viewport::DEFAULT" << std::endl;
+                    activeViewport = Viewport::DEFAULT;
+                    /*
+                     * Resizes the viewport so that the viewport occupies the whole space provided by
+                     * the window.
+                     */
+                    glViewport(vpv.x, vpv.y, vpv.z, vpv.w);
+                    CheckGLError();
+                }
+                
+                break;
+            }
+                
+            default: {
+                
+                std::cout << "Please use the \'c\' key to iterate between possible viewport positions" << std::endl;
+                break;
+            }
+        }
+        
+    }
     // [END] :: public
     
     
@@ -377,6 +462,11 @@ protected:
     
 // [BEGIN] :: private
 private:
+    
+    /**
+     * The active viewport(-position) to use.
+     */
+    Viewport activeViewport {DEFAULT};
     
     /**
      * The glow::VertexArrayObject that replaces the GLuint field with the same name in the original tutorial.

@@ -1,7 +1,7 @@
 
 ### The main target of the 1st chapter, 1st tutorial
 
-set(target chapter1-tutorial1)
+set(target tutorial1.1)
 
 message(STATUS "example ${target}")
 
@@ -43,16 +43,16 @@ install(TARGETS ${target}
 
 ### The further studies target of the 1st chapter, 1st tutorial
 
-set(target-further-studies chapter1-tutorial1-further-studies)
+set(target-fs tutorial1.1-further-studies)
 
-message(STATUS "example ${target-further-studies}")
+message(STATUS "example ${target-fs}")
 
 add_executable(
-    ${target-further-studies}
+    ${target-fs}
     further-studies.cpp
 )
 
-target_link_libraries(${target-further-studies}
+target_link_libraries(${target-fs}
     ${GLEW_LIBRARIES}
     glow
     glowutils
@@ -60,7 +60,7 @@ target_link_libraries(${target-further-studies}
     ${EXAMPLE_COMMON}
 )
 
-set_target_properties(${target-further-studies}
+set_target_properties(${target-fs}
     PROPERTIES
     LINKER_LANGUAGE CXX
     FOLDER ${GLOW_EXAMPLES_FOLDER}
@@ -71,7 +71,7 @@ set_target_properties(${target-further-studies}
     LINK_FLAGS_RELEASE          "${DEFAULT_LINKER_FLAGS_RELEASE}"
     DEBUG_POSTFIX               "d${DEBUG_POSTFIX}")
 
-install(TARGETS ${target-further-studies}
+install(TARGETS ${target-fs}
     RUNTIME DESTINATION ${INSTALL_EXAMPLES}
 #    LIBRARY DESTINATION ${INSTALL_SHARED}
 #    ARCHIVE DESTINATION ${INSTALL_LIB}
