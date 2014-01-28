@@ -22,6 +22,7 @@ include_directories("common")
 #add_subdirectory ("arcsynthesis/chapter1/tutorial2/")
 add_subdirectory("arcsynthesis/chapter1")
 add_subdirectory("arcsynthesis/chapter2")
+add_subdirectory("arcsynthesis/chapter3")
 
 # standard glow examples
 add_subdirectory("camerapath")
