@@ -11,6 +11,7 @@
 #include <glow/Program.h>
 #include <glow/Shader.h>
 #include <glow/String.h>
+#include <glow/Uniform.h>
 #include <glow/VertexArrayObject.h>
 #include <glow/VertexAttributeBinding.h>
 // [END] Includes of GLOW
@@ -156,7 +157,7 @@ public:
         float yOffset {0.0};
         
         computePositionOffset(xOffset, yOffset);
-        adjustVertexData(xOffset, yOffset);
+
         
         
         // set color to clear the screen, check for an OpenGL error, actually
@@ -180,6 +181,26 @@ public:
          */
 		theProgram->use();
 //        glUseProgram(theProgram->id());
+//        CheckGLError();
+        
+
+        /*
+         * Set the uniform value. In this case a `glm::vec2()` is used to store the x-/y-offset
+         * values in the uniform.
+         *
+         * Original tutorial source snippet:
+         *
+         *      glUniform2f(offsetLocation, xOffset, yOffset);
+         *
+         * Note that two slightly different "plain OpenGL versions" alternatives are provided bellow.
+         * The first alternative can easily be substituted with the glow-version provided, the second
+         * alternativ requires two more changes at other places in this tutorial, namely, a change in
+         * method "initializProgram()" and the activation of member "offsetLocation".
+         */
+        theProgram->setUniform(offsetUniform->name(), glm::vec2(xOffset, yOffset));
+//        glUniform2f(theProgram->getUniformLocation(offsetUniform->name(), xOffset, yOffset);
+//        CheckGLError();
+//        glUniform2f(offsetLocation, xOffset, yOffset);
 //        CheckGLError();
         
         
@@ -272,8 +293,12 @@ public:
 // [BEGIN] :: protected
 protected:
     /**
-     * This method corresponds to function tut1.cpp::InitializeProgram(). The original function
-     * source code is as follows:
+     * Initializes the program by compiling the vertex shader and fragment shader, and link them (in)to the program
+     * object.
+     *
+     * This method corresponds to function `VertPositionOffset.cpp::InitializeProgram()` in the original tutorial.
+     *
+     * The original function source code is as follows:
      *
      *      void InitializeProgram() {
      *
@@ -285,6 +310,8 @@ protected:
      *              theProgram = CreateProgram(shaderList);
      *
      *              std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
+     *
+     *              offsetLocation = glGetUniformLocation(theProgram, "offset");
      *      }
      *
      * Note that the creation of the shaders and the program by calling function "CrateShader(...)"
@@ -296,9 +323,31 @@ protected:
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter3/cpu-position-offset.vert"),
-                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter3/cpu-position-offset.frag")
+                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter3/vert-position-offset.vert"),
+                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter3/vert-position-offset.frag")
                         );
+
+        /*
+         * Explicitly link the program and thereby also compile all the shaders attached to the program.
+         * In general, glow will automatically link the program before it is `use()`d, however, to be a
+         * little more "verbose" linking is explicitly done here. Further, it is necessary to explicitly
+         * link the program here as a plain call to `glGetUniformLocation(...)` will not work otherwise.
+         */
+        theProgram->link();
+        
+        /*
+         * Create the uniform that will be used to maintain the x-/y-offset in the vertex shader.
+         * An alternative to implicitly create the glow::Uniform object is to explicitly create the
+         * uniform and add it to the program as follows:
+         *
+         *        offsetUniform = new glow::Uniform<glm::vec2>("offset");
+         *        theProgram->addUniform(offsetUniform);
+         *
+         */
+        offsetUniform = theProgram->getUniform<glm::vec2>("offset");
+//        offsetLocation = glGetUniformLocation(theProgram->id(), "offset");
+//        CheckGLError();
+        
     }
     
     /**
@@ -427,72 +476,6 @@ protected:
         fYOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
     }
     
-    /**
-     * Adjust the vertex positions of the geometry according to the passed _x-offset_ and _y-offset_.
-     *
-     * This method corresponds to function `AdjustVertexData()` from the original tutorial. The original
-     * tutorial source code is as follows:
-     *
-     *     void AdjustVertexData(float fXOffset, float fYOffset)
-     *     {
-     *          std::vector<float> fNewData(ARRAY_COUNT(vertexPositions));
-     *          memcpy(&fNewData[0], vertexPositions, sizeof(vertexPositions));
-     *
-     *          for(int iVertex = 0; iVertex < ARRAY_COUNT(vertexPositions); iVertex += 4)
-     *          {
-     *              fNewData[iVertex] += fXOffset;
-     *              fNewData[iVertex + 1] += fYOffset;
-     *          }
-     *
-     *          glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
-     *          glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexPositions), &fNewData[0]);
-     *          glBindBuffer(GL_ARRAY_BUFFER, 0);
-     *     }
-     *
-     * Note that the original tutorial source code uses a macro defined as follows:
-     *
-     *      #define ARRAY_COUNT( array )
-     *          (sizeof( array ) / (sizeof( array[0] ) * (sizeof( array ) 
-     *          != sizeof(void*) || sizeof( array[0] ) <= sizeof(void*))))
-     *
-     * @param fXOffset The `float` that maintains the x-offset to add to all vertices of the geometry.
-     * @param fYOffset The `float` that maintains the y-offset to add to all vertices of the geometry.
-     */
-    void adjustVertexData (const float& fXOffset, const float& fYOffset) {
-
-        /*
-         * Copies the vertex positions into a vector of floats and subsequently...
-         */
-        std::vector<float> fNewData (
-                                     vertexPositions,
-                                     vertexPositions + sizeof(vertexPositions) / sizeof(vertexPositions[0])
-                                     );
-        /*
-         * ... iterates through the vector to add the x-/y-offset to the vertex positions.
-         */
-        for (int i = 0; i < fNewData.size(); i+=4) {
-            fNewData[i] += fXOffset;
-            fNewData[i+1] += fYOffset;
-        }
-
-        /*
-         * Update the vertex positions by (1) bind the buffer maintaining the vertex positions to the
-         * current context, (2) call setSubData(...) on the buffer object to update the vertex positions
-         * in the buffer object, and (3) unbind the buffer again.
-         */
-        positionBufferObject->bind();
-//        glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject->id());
-//        CheckGLError();
-        
-        positionBufferObject->setSubData(sizeof(vertexPositions), 0, &fNewData[0]);
-//        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexPositions), &fNewData[0]);
-//        CheckGLError();
-        
-        positionBufferObject->unbind();
-//        glBindBuffer(GL_ARRAY_BUFFER, 0);
-//        CheckGLError();
-    }
-     
 // [END] :: protected
 
     
@@ -510,17 +493,33 @@ private:
     /**
      * The glow::Buffer object that replaces the GLuint field with the same name in the original tutorial.
      *
-     * Original tutorial field declaration is:
+     * Original tutorial member declaration is:
      * 
      *      GLuint positionBufferObject;
      */
 	glow::Buffer* positionBufferObject;
-//    GLuint positionBufferObject;
+//    GLuint positionBufferObject; 
+    
+    /**
+     * The `glow::Uniform` of type `glm::vec2` that is used to maintain the x-/y-offset to be applied to the
+     * geometry in the vertex shader.
+     *
+     * Original tutorial member declaration is:
+     *
+     *      GLuint offsetLocation;
+     *
+     * Note that the name of the `glow::Uniform` member differs from the name of the original tutorial (that
+     * is _offsetLocation_). This is different to the names of the other members and this difference in the
+     * naming is _on purpose_ to highlight that the member is not only a location index but an offset uniform
+     * object (all other members do not imply such a constraint, therefore, they names where retained).
+     */
+    glow::Uniform<glm::vec2>* offsetUniform;
+//    GLuint offsetLocation;
     
     /**
      * The glow::Program object that replaces the GLuint field with the same name in the original tutorial.
      *
-     * Original tutorial field declaration is:
+     * Original tutorial member declaration is:
      *
      *      GLuint theProgram;
      */
@@ -550,7 +549,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Moving Triangle [CPU Position Offset]")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Moving Triangle [Vertex Position Offset]")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
