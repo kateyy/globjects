@@ -1,6 +1,7 @@
 
 
 #include <string>
+#include <cmath>
 #include <iostream>
 
 // [BEGIN] Includes of GLOW
@@ -16,6 +17,8 @@
 
 // [BEGIN] Includes of GLOWUTILS
 #include <glowutils/StringTemplate.h>
+#include <glowutils/Timer.h>
+#include <glowutils/global.h>
 // [END] Includes of GLOWUTILS
 
 // [BEGIN] Includes of GLOWWINDOW
@@ -33,34 +36,6 @@
  * as well as the float array that maintains the raw vertex positions of the triangle to draw.
  */
 namespace {
-    /**
-     * The source of the vertex shader as a string.
-     */
-    const std::string vertexShaderSource {
-        "#version 330\n"
-        "\n"
-        "layout(location = 0) in vec4 position;\n"
-        "\n"
-        "void main() {\n"
-        "\n"
-        "gl_Position = position;\n"
-        "}\n"
-    };
-    
-    /**
-     * The source of the fragment shader as a string.
-     */
-    const std::string fragmentShaderSource {
-        "#version 330\n"
-        "\n"
-        "out vec4 outputColor;\n"
-        "\n"
-        "void main() {\n"
-        "\n"
-        "outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
-        "}\n"
-    };
-
     /**
      * The vertex positions of the triangle to draw (in clip-space).
      */
@@ -102,6 +77,9 @@ public:
         
         // enable context specific debug message output (don't bother ;)).
         glow::debugmessageoutput::enable();
+        
+        // create the timer
+        timer = new glowutils::Timer();
         
         // cf. protected methods for implementation of "initializeProgram()" and "initializeVertexBuffer()"
         initializeProgram();
@@ -169,6 +147,11 @@ public:
         glClear(GL_COLOR_BUFFER_BIT);
         CheckGLError();
 
+        float xOffset {0.0};
+        float yOffset {0.0};
+        
+        computePositionOffset(xOffset, yOffset);
+        adjustVertexData(xOffset, yOffset);
         
         /*
          * Set the shader program to use by the subsequent rendering commands. The plain OpenGL
@@ -299,8 +282,8 @@ protected:
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                        glow::Shader::fromString(GL_VERTEX_SHADER, vertexShaderSource),
-                        glow::Shader::fromString(GL_FRAGMENT_SHADER, fragmentShaderSource)
+                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter3/cpu-position-offset.vert"),
+                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter3/cpu-position-offset.frag")
                         );
     }
     
@@ -371,6 +354,55 @@ protected:
          */
         positionBufferObject->unbind();
     }
+    
+    /**
+     *
+     */
+    void computePositionOffset (float& xOffset, float& yOffset) {
+        const float fLoopDuration = 5.0f;
+        const long double fScale = 3.14159f * 2.0f / fLoopDuration;
+        
+        /*
+         * The glowutils::Timer returns the timer->elapsed() time in nanoseconds.
+         */
+        float fElapsedTime {static_cast<float>(timer->elapsed() / 1000000000.0f)};
+
+        
+        float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
+        
+        xOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
+        yOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
+    }
+    
+    /**
+     *
+     */
+    void adjustVertexData (const float& xOffset, const float& yOffset) {
+        
+        std::vector<float> fNewData (
+                                     vertexPositions,
+                                     vertexPositions + sizeof(vertexPositions) / sizeof(vertexPositions[0])
+                                     );
+
+        
+        for (int i = 0; i < fNewData.size(); i+=4) {
+            fNewData[i] += xOffset;
+            fNewData[i+1] += yOffset;
+        }
+        
+
+        
+        positionBufferObject->bind();
+//        glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject->id());
+//        CheckGLError();
+        
+        positionBufferObject->setSubData(sizeof(vertexPositions), 0, &fNewData[0]);
+//        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexPositions), &fNewData[0]);
+//        CheckGLError();
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        CheckGLError();
+    }
+     
 // [END] :: protected
 
     
@@ -405,6 +437,11 @@ private:
 	glow::Program* theProgram;
 //    GLuint theProgram;
     
+    /**
+     * A glowutils::Timer to keep track of the elapsed time and update triangle positions accordingly.
+     */
+    glowutils::Timer* timer;
+    
 // [END] :: private
     
 }; // [END] class EventHandler
@@ -423,7 +460,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Hello, Triangle!")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Moving Triangle")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
