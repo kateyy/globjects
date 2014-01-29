@@ -124,12 +124,13 @@ public:
      *
      *          float fXOffset = 0.0f, fYOffset = 0.0f;
      *          ComputePositionOffsets(fXOffset, fYOffset);
-     *          AdjustVertexData(fXOffset, fYOffset);
      *
      *          glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
      *          glClear(GL_COLOR_BUFFER_BIT);
      *
      *          glUseProgram(theProgram);
+     *
+     *          glUniform2f(offsetLocation, fXOffset, fYOffset);
      *
      *          glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
      *          glEnableVertexAttribArray(0);
