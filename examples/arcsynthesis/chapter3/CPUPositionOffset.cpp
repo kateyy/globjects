@@ -112,11 +112,19 @@ public:
     }
     
     /**
-     * This method corresponds to tut1.cpp::display() and is called whenever
-     * a "PaintEvent" is triggered. The original function source code is as
-     * follows:
+     * This method implements the rendering code of this tutorial.
+     *
+     * This method is a callback to handle `glowwindow::PaintEvent`s and corresponds to the
+     * original tutorial's `cpuPositionsOffset.cpp::display()` function.
+     *
+     * The original function source code is as follows:
      *
      *      void display() {
+     *
+     *          float fXOffset = 0.0f, fYOffset = 0.0f;
+     *          ComputePositionOffsets(fXOffset, fYOffset);
+     *          AdjustVertexData(fXOffset, fYOffset);
+     *
      *          glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
      *          glClear(GL_COLOR_BUFFER_BIT);
      *
@@ -132,12 +140,24 @@ public:
      *          glUseProgram(0);
      *
      *          glutSwapBuffers();
+     *          glutPostRedisplay();
      *      }
      *
      * Note, the function call "glutSwapBuffers()" is a call of a freeglut function. As this tutorial
      * does not use freeglut this function call is not to be found in this method!
      */
     virtual void paintEvent(glowwindow::PaintEvent &) override {
+
+        /*
+         * Compute the new x-/y-offset according to the elapsed time and adjust the x-/y-coordinates
+         * of the geometry by adding the new x-/y-offset.
+         */
+        float xOffset {0.0};
+        float yOffset {0.0};
+        
+        computePositionOffset(xOffset, yOffset);
+        adjustVertexData(xOffset, yOffset);
+        
         
         // set color to clear the screen, check for an OpenGL error, actually
         // clear the screen and check for an OpenGL error again.
@@ -146,12 +166,6 @@ public:
         
         glClear(GL_COLOR_BUFFER_BIT);
         CheckGLError();
-
-        float xOffset {0.0};
-        float yOffset {0.0};
-        
-        computePositionOffset(xOffset, yOffset);
-        adjustVertexData(xOffset, yOffset);
         
         /*
          * Set the shader program to use by the subsequent rendering commands. The plain OpenGL
@@ -288,17 +302,20 @@ protected:
     }
     
     /**
-     * This method corresponds to function tut1.cpp::InitializeVertexBuffer(). The original function
-     * source code is as follows:
+     * This method corresponds to function `cpuPositionsOffset.cpp::InitializeVertexBuffer()`.
+     *
+     * The original function source code is as follows:
      *
      *      void InitializeVertexBuffer() {
      *
      *          glGenBuffers(1, &positionBufferObject);
      *
      *          glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
-     *          glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+     *          glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STREAM_DRAW);
      *          glBindBuffer(GL_ARRAY_BUFFER, 0);
      *      }
+     *
+     * Note that `GL_STREAM_DRAW` is used instead of `GL_STATIC_DRAW` in this tutorial.
      */
     void initializeVertexBuffer () {
         /*
@@ -335,15 +352,15 @@ protected:
          *              GL_ARRAY_BUFFER,
          *              sizeof(vertexPositions),
          *              vertexPositions,
-         *              GL_STATIC_DRAW
+         *              GL_STREAM_DRAW
          *              );
          *
          * The constant GL_ARRAY_BUFFER is omitted as the vertexPositionsBuffer object encapsulates this
-         * constant. Further, the constant GL_STATIC_DRAW could be omitted too as that parameter's default
-         * value is already GL_STATIC_DRAW, however, we decided to explicitly state it here to stay as
-         * close as possible to the original tutorial's code.
+         * constant.
+         * 
+         * Note the use of `GL_STREAM_DRAW` instead of `GL_STATIC_DRAW` as it was used in previous tutorials.
          */
-        positionBufferObject->setData(sizeof(vertexPositions), &vertexPositions, GL_STATIC_DRAW);
+        positionBufferObject->setData(sizeof(vertexPositions), &vertexPositions, GL_STREAM_DRAW);
         
         /*
          * Unbind the vertexPositionsBuffer as it is done in the tutorial.
@@ -356,42 +373,113 @@ protected:
     }
     
     /**
+     * Computes the x-/y-offset of the triangle depending on the elapsed time.
      *
+     * This method computes the x-/y-offset to move the rendered geometry on a circular path around the
+     * center of the current viewport so that it will be at its initial position every `fLoopDuration`
+     * seconds.
+     *
+     * This method also demonstrates the use of the `glowutils::Timer` class that replaces the use of
+     * `glutGet(GLUT_ELAPSED_TIME)` as used in the original tutorial source code.
+     *
+     * This method corresonds to function `ComputePositionOffset()` in the original tutorial source code
+     * of file `cpuPositionOffset.cpp`. The original source code of function `ComputePositionOFfset()` is
+     * as follows:
+     *
+     *     void ComputePositionOffsets(float &fXOffset, float &fYOffset)
+     *     {
+     *          const float fLoopDuration = 5.0f;
+     *          const float fScale = 3.14159f * 2.0f / fLoopDuration;
+     *
+     *          float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+     *
+     *          float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
+     *
+     *          fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
+     *          fYOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
+     *     }
+     *
+     * @param fXOffset Reference to a `float` to store the _x-offset_ for the next rendering pass.
+     * @param fYOffset Reference to a `float` to store the _y-offset_ for the next rendering pass.
      */
-    void computePositionOffset (float& xOffset, float& yOffset) {
+    void computePositionOffset (float& fXOffset, float& fYOffset) {
+        
         const float fLoopDuration = 5.0f;
-        const long double fScale = 3.14159f * 2.0f / fLoopDuration;
+        const float fScale = 3.14159f * 2.0f / fLoopDuration;
         
         /*
-         * The glowutils::Timer returns the timer->elapsed() time in nanoseconds.
+         * The glowutils::Timer returns the timer->elapsed() time in nanoseconds. This is a pretty
+         * simple example of using the glowutils::Timer class and replaces the freeglut function
+         * calls.
+         * 
+         * Original tutorial source code snipet:
+         *
+         *      float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+         *
+         * Note that the division is done by 1,000,000,000.0f instead of 1000.0f as (per default)
+         * the `glowutils::Timer` has a higher resolution as the corresponding freeglut function.
          */
         float fElapsedTime {static_cast<float>(timer->elapsed() / 1000000000.0f)};
 
-        
         float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
         
-        xOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
-        yOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
+        fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
+        fYOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
     }
     
     /**
+     * Adjust the vertex positions of the geometry according to the passed _x-offset_ and _y-offset_.
      *
+     * This method corresponds to function `AdjustVertexData()` from the original tutorial. The original
+     * tutorial source code is as follows:
+     *
+     *     void AdjustVertexData(float fXOffset, float fYOffset)
+     *     {
+     *          std::vector<float> fNewData(ARRAY_COUNT(vertexPositions));
+     *          memcpy(&fNewData[0], vertexPositions, sizeof(vertexPositions));
+     *
+     *          for(int iVertex = 0; iVertex < ARRAY_COUNT(vertexPositions); iVertex += 4)
+     *          {
+     *              fNewData[iVertex] += fXOffset;
+     *              fNewData[iVertex + 1] += fYOffset;
+     *          }
+     *
+     *          glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+     *          glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexPositions), &fNewData[0]);
+     *          glBindBuffer(GL_ARRAY_BUFFER, 0);
+     *     }
+     *
+     * Note that the original tutorial source code uses a macro defined as follows:
+     *
+     *      #define ARRAY_COUNT( array )
+     *          (sizeof( array ) / (sizeof( array[0] ) * (sizeof( array ) 
+     *          != sizeof(void*) || sizeof( array[0] ) <= sizeof(void*))))
+     *
+     * @param fXOffset The `float` that maintains the x-offset to add to all vertices of the geometry.
+     * @param fYOffset The `float` that maintains the y-offset to add to all vertices of the geometry.
      */
-    void adjustVertexData (const float& xOffset, const float& yOffset) {
-        
+    void adjustVertexData (const float& fXOffset, const float& fYOffset) {
+
+        /*
+         * Copies the vertex positions into a vector of floats and subsequently...
+         */
         std::vector<float> fNewData (
                                      vertexPositions,
                                      vertexPositions + sizeof(vertexPositions) / sizeof(vertexPositions[0])
                                      );
-
-        
+        /*
+         * ... iterates through the vector to add the x-/y-offset to the vertex positions.
+         */
         for (int i = 0; i < fNewData.size(); i+=4) {
-            fNewData[i] += xOffset;
-            fNewData[i+1] += yOffset;
+            fNewData[i] += fXOffset;
+            fNewData[i+1] += fYOffset;
         }
-        
 
-        
+        /*
+         * Update the vertex positions by (1) bind the buffer maintaining the vertex positions to the
+         * current context, (2) call setSubData(...) on the buffer object to update the vertex positions
+         * in the buffer object, and (3) unbind the buffer again.
+         */
         positionBufferObject->bind();
 //        glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject->id());
 //        CheckGLError();
@@ -399,8 +487,10 @@ protected:
         positionBufferObject->setSubData(sizeof(vertexPositions), 0, &fNewData[0]);
 //        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexPositions), &fNewData[0]);
 //        CheckGLError();
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        CheckGLError();
+        
+        positionBufferObject->unbind();
+//        glBindBuffer(GL_ARRAY_BUFFER, 0);
+//        CheckGLError();
     }
      
 // [END] :: protected
@@ -460,7 +550,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Moving Triangle")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Moving Triangle [CPU Position Offset]")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
