@@ -45,6 +45,12 @@ namespace {
         0.25f, -0.25f, 0.0f, 1.0f,
         -0.25f, -0.25f, 0.0f, 1.0f
     };
+    
+    /**
+     * The time interval (in seconds) that the geometry (in this simple example a triangle) will need to
+     * circle the center of the viewport once.
+     */
+    const float LOOP_DURATION {5.0};
 }
 
 
@@ -123,13 +129,13 @@ public:
      *      void display() {
      *
      *          float fXOffset = 0.0f, fYOffset = 0.0f;
-     *          ComputePositionOffsets(fXOffset, fYOffset);
-     *          AdjustVertexData(fXOffset, fYOffset);
      *
      *          glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
      *          glClear(GL_COLOR_BUFFER_BIT);
      *
      *          glUseProgram(theProgram);
+     *
+     *          glUniform1f(elapsedTimeUniform, glutGet(GLUT_ELAPSED_TIME) / 1000.0f);
      *
      *          glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
      *          glEnableVertexAttribArray(0);
@@ -144,29 +150,35 @@ public:
      *          glutPostRedisplay();
      *      }
      *
-     * Note, the function call "glutSwapBuffers()" is a call of a freeglut function. As this tutorial
-     * does not use freeglut this function call is not to be found in this method!
+     * Note, the function calls to `glutSwapBuffers()` and `glutPostRedisplay()` are part of the freeglut
+     * framework and will not be used in the glow version of this tutorial.
      */
     virtual void paintEvent(glowwindow::PaintEvent &) override {
-
-        /*
-         * Compute the new x-/y-offset according to the elapsed time and adjust the x-/y-coordinates
-         * of the geometry by adding the new x-/y-offset.
-         */
-        float xOffset {0.0};
-        float yOffset {0.0};
         
-        computePositionOffset(xOffset, yOffset);
-
+        /*
+         * The glowutils::Timer returns the timer->elapsed() time in nanoseconds. This is a pretty
+         * simple example of using the glowutils::Timer class and replaces the freeglut function
+         * calls.
+         *
+         * Original tutorial source code snipet:
+         *
+         *      float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+         *
+         * Note that the division is done by 1,000,000,000.0f instead of 1000.0f as (per default)
+         * the `glowutils::Timer` has a higher resolution as the corresponding freeglut function.
+         */
+        float fElapsedTime {
+            static_cast<float>(timer->elapsed() / 1000000000.0f)
+        };
         
         
         // set color to clear the screen, check for an OpenGL error, actually
         // clear the screen and check for an OpenGL error again.
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         CheckGLError();
-        
         glClear(GL_COLOR_BUFFER_BIT);
         CheckGLError();
+
         
         /*
          * Set the shader program to use by the subsequent rendering commands. The plain OpenGL
@@ -190,17 +202,15 @@ public:
          *
          * Original tutorial source snippet:
          *
-         *      glUniform2f(offsetLocation, xOffset, yOffset);
+         *      glUniform1f("time", fElapsedTime);
          *
          * Note that two slightly different "plain OpenGL versions" alternatives are provided bellow.
          * The first alternative can easily be substituted with the glow-version provided, the second
          * alternativ requires two more changes at other places in this tutorial, namely, a change in
          * method "initializProgram()" and the activation of member "offsetLocation".
          */
-        theProgram->setUniform(offsetUniform->name(), glm::vec2(xOffset, yOffset));
-//        glUniform2f(theProgram->getUniformLocation(offsetUniform->name(), xOffset, yOffset);
-//        CheckGLError();
-//        glUniform2f(offsetLocation, xOffset, yOffset);
+        theProgram->setUniform(timeUniform->name(), fElapsedTime);
+//        glUniform1f(theProgram->getUniformLocation(timeUniform->name()), fElapsedTime);
 //        CheckGLError();
         
         
@@ -214,6 +224,7 @@ public:
         positionBufferObject->bind();
 //        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionsBuffer->id());
 //        CheckGLError();
+
         
         /*
          * This encapsulates the OpenGL call:
@@ -229,14 +240,9 @@ public:
          * The following three lines prepare the rendering of the triangle. The OpenGL function
          * call that ist equivalent to these three lines is the glVertexAttribPointer(...).
          * 
-         * Original tutorial source snippet:
+         * Original tutorial source snippet (using OpenGL 3.x):
          *
          *      glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-         *
-         * Note, this is one of the few parts in the glow version of the original tutorial where
-         * glow does not support a 1:1 mapping of the OpenGL functions and seems to be a bit more
-         * "cumbersome" then using plain OpenGL. However, the glow version is easier to read as
-         * glow groups setting the parameters in a more meaningfull manner.
          */
         vao->binding(0)->setAttribute(0);
         vao->binding(0)->setFormat(4, GL_FLOAT);
@@ -275,6 +281,7 @@ public:
         positionBufferObject->unbind();
 //        glBindBuffer(GL_ARRAY_BUFFER, 0);
 //        CheckGLError();
+
         
         theProgram->release();
 //        glUseProgram(0);
@@ -309,44 +316,42 @@ protected:
      *
      *              theProgram = CreateProgram(shaderList);
      *
-     *              std::for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
+     *              elapsedTimeUniform = glGetUniformLocation(theProgram, "time");
      *
-     *              offsetLocation = glGetUniformLocation(theProgram, "offset");
+     *              GLuint loopDurationUnf = glGetUniformLocation(theProgram, "loopDuration");
+     *              glUseProgram(theProgram);
+     *              glUniform1f(loopDurationUnf, 5.0f);
+     *              glUseProgram(0);
+     *
      *      }
      *
-     * Note that the creation of the shaders and the program by calling function "CrateShader(...)"
-     * and "CreateProgram(...)", as it was done in the tutorial, is completely encapsulated in the
-     * glow library. Thus, there is no equivalent implementation for functions CreateProgram(...)
-     * and CreateShader(...) in this adapted example!
+     * Note that the alternativ raw/plain OpenGL function calls are omitted in this method for the sake of simplicity.
      */
     void initializeProgram () {
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter3/vert-position-offset.vert"),
-                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter3/vert-position-offset.frag")
+                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter3/vert-calc-offset.vert"),
+                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter3/vert-calc-offset.frag")
                         );
 
         /*
-         * Explicitly link the program and thereby also compile all the shaders attached to the program.
-         * In general, glow will automatically link the program before it is `use()`d, however, to be a
-         * little more "verbose" linking is explicitly done here. Further, it is necessary to explicitly
-         * link the program here as a plain call to `glGetUniformLocation(...)` will not work otherwise.
+         * Create the glow::Uniform object with the name "time".
          */
-        theProgram->link();
+        timeUniform = theProgram->getUniform<float>("time");
         
         /*
-         * Create the uniform that will be used to maintain the x-/y-offset in the vertex shader.
-         * An alternative to implicitly create the glow::Uniform object is to explicitly create the
-         * uniform and add it to the program as follows:
-         *
-         *        offsetUniform = new glow::Uniform<glm::vec2>("offset");
-         *        theProgram->addUniform(offsetUniform);
-         *
+         * Create a second uniform object to maintain the loop duration.
          */
-        offsetUniform = theProgram->getUniform<glm::vec2>("offset");
-//        offsetLocation = glGetUniformLocation(theProgram->id(), "offset");
-//        CheckGLError();
+        glow::Uniform<float>* loopDurationUniform = theProgram->getUniform<float>("loopDuration");
+        
+        /*
+         * (1) Attach the program, (2) set the value for the loopDuration uniform, and (3) release the
+         * program again.
+         */
+        theProgram->use();
+        theProgram->setUniform(loopDurationUniform->name(), LOOP_DURATION);
+        theProgram->release();
         
     }
     
@@ -420,62 +425,6 @@ protected:
          */
         positionBufferObject->unbind();
     }
-    
-    /**
-     * Computes the x-/y-offset of the triangle depending on the elapsed time.
-     *
-     * This method computes the x-/y-offset to move the rendered geometry on a circular path around the
-     * center of the current viewport so that it will be at its initial position every `fLoopDuration`
-     * seconds.
-     *
-     * This method also demonstrates the use of the `glowutils::Timer` class that replaces the use of
-     * `glutGet(GLUT_ELAPSED_TIME)` as used in the original tutorial source code.
-     *
-     * This method corresonds to function `ComputePositionOffset()` in the original tutorial source code
-     * of file `cpuPositionOffset.cpp`. The original source code of function `ComputePositionOFfset()` is
-     * as follows:
-     *
-     *     void ComputePositionOffsets(float &fXOffset, float &fYOffset)
-     *     {
-     *          const float fLoopDuration = 5.0f;
-     *          const float fScale = 3.14159f * 2.0f / fLoopDuration;
-     *
-     *          float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-     *
-     *          float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
-     *
-     *          fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
-     *          fYOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
-     *     }
-     *
-     * @param fXOffset Reference to a `float` to store the _x-offset_ for the next rendering pass.
-     * @param fYOffset Reference to a `float` to store the _y-offset_ for the next rendering pass.
-     */
-    void computePositionOffset (float& fXOffset, float& fYOffset) {
-        
-        const float fLoopDuration = 5.0f;
-        const float fScale = 3.14159f * 2.0f / fLoopDuration;
-        
-        /*
-         * The glowutils::Timer returns the timer->elapsed() time in nanoseconds. This is a pretty
-         * simple example of using the glowutils::Timer class and replaces the freeglut function
-         * calls.
-         * 
-         * Original tutorial source code snipet:
-         *
-         *      float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-         *
-         * Note that the division is done by 1,000,000,000.0f instead of 1000.0f as (per default)
-         * the `glowutils::Timer` has a higher resolution as the corresponding freeglut function.
-         */
-        float fElapsedTime {static_cast<float>(timer->elapsed() / 1000000000.0f)};
-
-        float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
-        
-        fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
-        fYOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
-    }
-    
 // [END] :: protected
 
     
@@ -501,20 +450,14 @@ private:
 //    GLuint positionBufferObject; 
     
     /**
-     * The `glow::Uniform` of type `glm::vec2` that is used to maintain the x-/y-offset to be applied to the
-     * geometry in the vertex shader.
+     * The `glow::Uniform` of type `float` that replaces the `GLuint` member `elapsedTimeUniform` from the
+     * original tutorial.
      *
      * Original tutorial member declaration is:
      *
-     *      GLuint offsetLocation;
-     *
-     * Note that the name of the `glow::Uniform` member differs from the name of the original tutorial (that
-     * is _offsetLocation_). This is different to the names of the other members and this difference in the
-     * naming is _on purpose_ to highlight that the member is not only a location index but an offset uniform
-     * object (all other members do not imply such a constraint, therefore, they names where retained).
+     *      GLuint elapsedTimeUniform;
      */
-    glow::Uniform<glm::vec2>* offsetUniform;
-//    GLuint offsetLocation;
+    glow::Uniform<float>* timeUniform;
     
     /**
      * The glow::Program object that replaces the GLuint field with the same name in the original tutorial.
