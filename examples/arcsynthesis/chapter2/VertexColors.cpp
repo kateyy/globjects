@@ -19,6 +19,7 @@
 
 // [BEGIN] Includes of GLOWWINDOW
 #include <glowwindow/Context.h>
+#include <glowwindow/events.h>
 #include <glowwindow/WindowEventHandler.h>
 #include <glowwindow/Window.h>
 // [END] Includes of GLOWWINDOW

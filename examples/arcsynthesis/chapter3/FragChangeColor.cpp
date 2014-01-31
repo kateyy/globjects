@@ -1,6 +1,8 @@
 
 
 #include <string>
+#include <cmath>
+#include <iostream>
 
 // [BEGIN] Includes of GLOW
 #include <glow/Buffer.h>
@@ -9,11 +11,14 @@
 #include <glow/Program.h>
 #include <glow/Shader.h>
 #include <glow/String.h>
+#include <glow/Uniform.h>
 #include <glow/VertexArrayObject.h>
 #include <glow/VertexAttributeBinding.h>
 // [END] Includes of GLOW
 
 // [BEGIN] Includes of GLOWUTILS
+#include <glowutils/StringTemplate.h>
+#include <glowutils/Timer.h>
 #include <glowutils/global.h>
 // [END] Includes of GLOWUTILS
 
@@ -29,18 +34,24 @@
 
 
 /**
- * Ananonymous namespace used to declare and initialize the raw vertex positions
- * of the triangle to draw.
+ * Ananonymous namespace in which the vertex and fragment shader source code is declared and initialized
+ * as well as the float array that maintains the raw vertex positions of the triangle to draw.
  */
 namespace {
     /**
-     * The vertex positions/data of the triangle to draw (in clip-space).
+     * The vertex positions of the triangle to draw (in clip-space).
      */
-    const float vertexData[] {
-        0.75f, 0.75f, 0.0f, 1.0f,
-        0.75f, -0.75f, 0.0f, 1.0f,
-        -0.75f, -0.75f, 0.0f, 1.0f
+    const float vertexPositions[] {
+        0.25f, 0.25f, 0.0f, 1.0f,
+        0.25f, -0.25f, 0.0f, 1.0f,
+        -0.25f, -0.25f, 0.0f, 1.0f
     };
+    
+    /**
+     * The time interval (in seconds) that the geometry (in this simple example a triangle) will need to
+     * circle the center of the viewport once.
+     */
+    const float LOOP_DURATION {5.0};
 }
 
 
@@ -50,30 +61,33 @@ namespace {
  */
 class EventHandler : public glowwindow::WindowEventHandler {
     
-    // [BEGIN] :: public
+// [BEGIN] :: public
 public:
     
     /**
      * Default "do nothing" c'tor.
      */
 	EventHandler() { /* do nothing*/ }
-    
+
     /**
      * Default "do nothing" destructor.
      */
     virtual ~EventHandler() { /* do nothing*/ }
     
     /**
-     * Initializes the shader program and the vertex buffer that stores the data of the geometry to
-     * be rendered.
+     * Initializes the shader program and the vertex buffer that stores the data of the geometry to be
+     * rendered.
      *
-     * This method corresponds to function FragPosition.cpp::init() -- that in turn calls function
-     * InitializePorgram() and InitializeVertexBuffer() -- in the original source code of the tutorial.
+     * This method corresponds to function tut1.cpp::init() -- that in turn calls function InitializePorgram()
+     * and InitializeVertexBuffer() -- in the original source code of the tutorial.
      */
     virtual void initialize(glowwindow::Window& /*window*/) override {
         
         // enable context specific debug message output (don't bother ;)).
         glow::debugmessageoutput::enable();
+        
+        // create the timer
+        timer = new glowutils::Timer();
         
         // cf. protected methods for implementation of "initializeProgram()" and "initializeVertexBuffer()"
         initializeProgram();
@@ -89,7 +103,7 @@ public:
          */
 		vao = new glow::VertexArrayObject();
         vao->bind();
-        
+
     }
     
     /**
@@ -106,15 +120,23 @@ public:
     }
     
     /**
-     * This method corresponds to tut1.cpp::display() and is called whenever
-     * a "PaintEvent" is triggered. The original function source code is as
-     * follows:
+     * This method implements the rendering code of this tutorial.
+     *
+     * This method is a callback to handle `glowwindow::PaintEvent`s and corresponds to the
+     * original tutorial's `cpuPositionsOffset.cpp::display()` function.
+     *
+     * The original function source code is as follows:
      *
      *      void display() {
+     *
+     *          float fXOffset = 0.0f, fYOffset = 0.0f;
+     *
      *          glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
      *          glClear(GL_COLOR_BUFFER_BIT);
      *
      *          glUseProgram(theProgram);
+     *
+     *          glUniform1f(elapsedTimeUniform, glutGet(GLUT_ELAPSED_TIME) / 1000.0f);
      *
      *          glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
      *          glEnableVertexAttribArray(0);
@@ -126,36 +148,71 @@ public:
      *          glUseProgram(0);
      *
      *          glutSwapBuffers();
+     *          glutPostRedisplay();
      *      }
      *
-     * Note, the function call "glutSwapBuffers()" is a call of a freeglut function. As this tutorial
-     * does not use freeglut this function call is not to be found in this method!
+     * Note, the function calls to `glutSwapBuffers()` and `glutPostRedisplay()` are part of the freeglut
+     * framework and will not be used in the glow version of this tutorial.
      */
     virtual void paintEvent(glowwindow::PaintEvent &) override {
+        
+        /*
+         * The glowutils::Timer returns the timer->elapsed() time in nanoseconds. This is a pretty
+         * simple example of using the glowutils::Timer class and replaces the freeglut function
+         * calls.
+         *
+         * Original tutorial source code snipet:
+         *
+         *      float fElapsedTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+         *
+         * Note that the division is done by 1,000,000,000.0f instead of 1000.0f as (per default)
+         * the `glowutils::Timer` has a higher resolution as the corresponding freeglut function.
+         */
+        float fElapsedTime {
+            static_cast<float>(timer->elapsed() / 1000000000.0f)
+        };
+        
         
         // set color to clear the screen, check for an OpenGL error, actually
         // clear the screen and check for an OpenGL error again.
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         CheckGLError();
-        
         glClear(GL_COLOR_BUFFER_BIT);
         CheckGLError();
-        
+
         
         /*
          * Set the shader program to use by the subsequent rendering commands. The plain OpenGL
          * function call encapsulated by program->use() is glUseProgram(GLuint theProgram).
          *
          * Original tutorial source snippet:
-         *
+         * 
          *      glUseProgram(theProgram);
          *
          * As member theProgram is a glow::Program object theProgram-id() must be used to obtain
          * the GLuint that identifies the program.
          */
 		theProgram->use();
-        //        glUseProgram(theProgram->id());
-        //        CheckGLError();
+//        glUseProgram(theProgram->id());
+//        CheckGLError();
+        
+
+        /*
+         * Set the uniform value. In this case a `glm::vec2()` is used to store the x-/y-offset
+         * values in the uniform.
+         *
+         * Original tutorial source snippet:
+         *
+         *      glUniform1f("time", fElapsedTime);
+         *
+         * Note that two slightly different "plain OpenGL versions" alternatives are provided bellow.
+         * The first alternative can easily be substituted with the glow-version provided, the second
+         * alternativ requires two more changes at other places in this tutorial, namely, a change in
+         * method "initializProgram()" and the activation of member "offsetLocation".
+         */
+        theProgram->setUniform(timeUniform->name(), fElapsedTime);
+//        glUniform1f(theProgram->getUniformLocation(timeUniform->name()), fElapsedTime);
+//        CheckGLError();
         
         
         /*
@@ -165,9 +222,10 @@ public:
          *
          *      glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
          */
-        vertexBufferObject->bind();
-        //        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionsBuffer->id());
-        //        CheckGLError();
+        positionBufferObject->bind();
+//        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionsBuffer->id());
+//        CheckGLError();
+
         
         /*
          * This encapsulates the OpenGL call:
@@ -175,40 +233,35 @@ public:
          *      glEnableVertexAttribArray (0);
          */
         vao->enable(0);
-        //        glEnableVertexAttribArray(0);
-        //        CheckGLError();
+//        glEnableVertexAttribArray(0);
+//        CheckGLError();
         
         
         /*
          * The following three lines prepare the rendering of the triangle. The OpenGL function
          * call that ist equivalent to these three lines is the glVertexAttribPointer(...).
-         *
-         * Original tutorial source snippet:
+         * 
+         * Original tutorial source snippet (using OpenGL 3.x):
          *
          *      glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-         *
-         * Note, this is one of the few parts in the glow version of the original tutorial where
-         * glow does not support a 1:1 mapping of the OpenGL functions and seems to be a bit more
-         * "cumbersome" then using plain OpenGL. However, the glow version is easier to read as
-         * glow groups setting the parameters in a more meaningfull manner.
          */
         vao->binding(0)->setAttribute(0);
         vao->binding(0)->setFormat(4, GL_FLOAT);
-        vao->binding(0)->setBuffer(vertexBufferObject, 0, 0);
-        //        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-        //        CheckGLError();
+        vao->binding(0)->setBuffer(positionBufferObject, 0, 0);
+//        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+//        CheckGLError();
         
-        
+
         /**
          * The following method call encapsulates the plain OpenGL function call glDrawArrays.
          *
          * Original tutorial source snippet:
-         *
+         *  
          *      glDrawArrays(GL_TRIANGLES, 0, 3);
          */
         vao->drawArrays(GL_TRIANGLES, 0, 3);
-        //        glDrawArrays(GL_TRIANGLES, 0, 3);
-        //        CheckGLError();
+//        glDrawArrays(GL_TRIANGLES, 0, 3);
+//        CheckGLError();
         
         /*
          * Encapsulates the plain OpenGL function call glDisableVertexAttribArray ()
@@ -218,64 +271,94 @@ public:
          *      glDisableVertexAttribArray(0);
          */
         vao->disable(0);
-        //        glDisableVertexAttribArray(0);
-        //        CheckGLError();
+//        glDisableVertexAttribArray(0);
+//        CheckGLError();
         
         
         /*
          * Some cleanup work, (1) unbind the vertexPositionsBuffer, (2) release
          * the shader program used for rendering.
          */
-        vertexBufferObject->unbind();
-        //        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //        CheckGLError();
+        positionBufferObject->unbind();
+//        glBindBuffer(GL_ARRAY_BUFFER, 0);
+//        CheckGLError();
+
         
         theProgram->release();
-        //        glUseProgram(0);
-        //        CheckGLError();
+//        glUseProgram(0);
+//        CheckGLError();
         
     }
     
     virtual void idle(glowwindow::Window & window) override {
         window.repaint();
     }
-    // [END] :: public
+// [END] :: public
+
     
     
     
-    
-    // [BEGIN] :: protected
+// [BEGIN] :: protected
 protected:
     /**
-     * This method corresponds to function FragPosition.cpp::InitializeProgram().
+     * Initializes the program by compiling the vertex shader and fragment shader, and link them (in)to the program
+     * object.
+     *
+     * This method corresponds to function `VertPositionOffset.cpp::InitializeProgram()` in the original tutorial.
+     *
      * The original function source code is as follows:
      *
      *      void InitializeProgram() {
      *
-     *          std::vector<GLuint> shaderList;
+     *              std::vector<GLuint> shaderList;
      *
-     *          shaderList.push_back(Framework::LoadShader(GL_VERTEX_SHADER, "FragPosition.vert"));
-     *          shaderList.push_back(Framework::LoadShader(GL_FRAGMENT_SHADER, "FragPosition.frag"));
+     *              shaderList.push_back(CreateShader(GL_VERTEX_SHADER, strVertexShader));
+     *              shaderList.push_back(CreateShader(GL_FRAGMENT_SHADER, strFragmentShader));
      *
-     *          theProgram = Framework::CreateProgram(shaderList);
+     *              theProgram = CreateProgram(shaderList);
+     *
+     *              elapsedTimeUniform = glGetUniformLocation(theProgram, "time");
+     *
+     *              GLuint loopDurationUnf = glGetUniformLocation(theProgram, "loopDuration");
+     *              glUseProgram(theProgram);
+     *              glUniform1f(loopDurationUnf, 5.0f);
+     *              glUseProgram(0);
+     *
      *      }
      *
-     * Note that the creation of the shaders and the program by calling function "Framework::LoadShader(...)"
-     * and "Framework::CreateProgram(...)", as it is done in the tutorial, is completely encapsulated in the
-     * glow library. Likewise, the glow library supports creating shaders from source files which is shown here
-     * using function glowutils::createShaderFromFile(...).
+     * Note that the alternativ raw/plain OpenGL function calls are omitted in this method for the sake of simplicity.
      */
     void initializeProgram () {
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter1/frag-position.vert"),
-                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter1/frag-position.frag")
-                           );
+                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter3/calc-color.vert"),
+                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter3/calc-color.frag")
+                        );
+
+        /*
+         * Create the glow::Uniform object with the name "time".
+         */
+        timeUniform = theProgram->getUniform<float>("time");
+        
+        /*
+         * Create a second uniform object to maintain the loop duration.
+         */
+        glow::Uniform<float>* loopDurationUniform = theProgram->getUniform<float>("loopDuration");
+        
+        /*
+         * (1) Attach the program, (2) set the value for the loopDuration uniform, and (3) release the
+         * program again.
+         */
+        theProgram->use();
+        theProgram->setUniform(loopDurationUniform->name(), LOOP_DURATION);
+        theProgram->release();
+        
     }
     
     /**
-     * This method corresponds to function FragPosition.cpp::InitializeVertexBuffer().
+     * This method corresponds to function `cpuPositionsOffset.cpp::InitializeVertexBuffer()`.
+     *
      * The original function source code is as follows:
      *
      *      void InitializeVertexBuffer() {
@@ -283,9 +366,11 @@ protected:
      *          glGenBuffers(1, &positionBufferObject);
      *
      *          glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
-     *          glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+     *          glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STREAM_DRAW);
      *          glBindBuffer(GL_ARRAY_BUFFER, 0);
      *      }
+     *
+     * Note that `GL_STREAM_DRAW` is used instead of `GL_STATIC_DRAW` in this tutorial.
      */
     void initializeVertexBuffer () {
         /*
@@ -297,7 +382,7 @@ protected:
          *
          *      glGenBuffers(1, &positionBufferObject);
          */
-		vertexBufferObject = new glow::Buffer(GL_ARRAY_BUFFER);
+		positionBufferObject = new glow::Buffer(GL_ARRAY_BUFFER);
         
         /*
          * Bind the new glow::Buffer. This call replaces the call to the OpenGL function glBindBuffer(...)
@@ -309,7 +394,7 @@ protected:
          *
          *      glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
          */
-        vertexBufferObject->bind();
+        positionBufferObject->bind();
         
         /**
          * Allocate the memory for the vertex positions data and copy the vertex positions array to the
@@ -322,15 +407,15 @@ protected:
          *              GL_ARRAY_BUFFER,
          *              sizeof(vertexPositions),
          *              vertexPositions,
-         *              GL_STATIC_DRAW
+         *              GL_STREAM_DRAW
          *              );
          *
          * The constant GL_ARRAY_BUFFER is omitted as the vertexPositionsBuffer object encapsulates this
-         * constant. Further, the constant GL_STATIC_DRAW could be omitted too as that parameter's default
-         * value is already GL_STATIC_DRAW, however, we decided to explicitly state it here to stay as
-         * close as possible to the original tutorial's code.
+         * constant.
+         * 
+         * Note the use of `GL_STREAM_DRAW` instead of `GL_STATIC_DRAW` as it was used in previous tutorials.
          */
-        vertexBufferObject->setData(sizeof(vertexData), &vertexData, GL_STATIC_DRAW);
+        positionBufferObject->setData(sizeof(vertexPositions), &vertexPositions, GL_STREAM_DRAW);
         
         /*
          * Unbind the vertexPositionsBuffer as it is done in the tutorial.
@@ -339,13 +424,13 @@ protected:
          *
          * glBindBuffer(GL_ARRAY_BUFFER, 0);
          */
-        vertexBufferObject->unbind();
+        positionBufferObject->unbind();
     }
 // [END] :: protected
+
     
     
-    
-    
+
 // [BEGIN] :: private
 private:
     
@@ -353,27 +438,42 @@ private:
      * The glow::VertexArrayObject that replaces the GLuint field with the same name in the original tutorial.
      */
 	glow::VertexArrayObject* vao;
-    //    GLuint vao;
+//    GLuint vao;
     
     /**
      * The glow::Buffer object that replaces the GLuint field with the same name in the original tutorial.
      *
-     * Original tutorial field declaration is:
-     *
-     *      GLuint vertexBufferObject;
+     * Original tutorial member declaration is:
+     * 
+     *      GLuint positionBufferObject;
      */
-	glow::Buffer* vertexBufferObject;
-    //    GLuint vertexBufferObject;
+	glow::Buffer* positionBufferObject;
+//    GLuint positionBufferObject; 
+    
+    /**
+     * The `glow::Uniform` of type `float` that replaces the `GLuint` member `elapsedTimeUniform` from the
+     * original tutorial.
+     *
+     * Original tutorial member declaration is:
+     *
+     *      GLuint elapsedTimeUniform;
+     */
+    glow::Uniform<float>* timeUniform;
     
     /**
      * The glow::Program object that replaces the GLuint field with the same name in the original tutorial.
      *
-     * Original tutorial field declaration is:
+     * Original tutorial member declaration is:
      *
      *      GLuint theProgram;
      */
 	glow::Program* theProgram;
-    //    GLuint theProgram;
+//    GLuint theProgram;
+    
+    /**
+     * A glowutils::Timer to keep track of the elapsed time and update triangle positions accordingly.
+     */
+    glowutils::Timer* timer;
     
 // [END] :: private
     
@@ -384,11 +484,6 @@ private:
 /**
  * This example implements the first tutorial of "Learning Modern 3D Graphics Programming" by
  * Jason L. McKesson (cf. http://arcsynthesis.org/gltut/index.html) using glow instead of freeglut.
- *
- * IMPORTANT: On computers with retina displays or high resolution displays the result of this
- * tutorial will differ from normal displays and from the result presented in the tutorial! Try
- * to adapt the shader "frag-position.frag" as explained in the shader source codes to get the
- * same result on a high resolution display.
  */
 int main(int /*argc*/, char* /*argv*/[]) {
     
@@ -398,7 +493,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Playing with Colors [FragPosition]")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Moving Triangle [Vertex Position Offset]")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
