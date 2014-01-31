@@ -1,3 +1,4 @@
+#include <glow/DebugInfo.h>
 
 #include <sstream>
 #include <algorithm>
@@ -17,15 +18,13 @@
 #include <glow/RenderBufferObject.h>
 #include <glow/Sampler.h>
 #include <glow/Shader.h>
-#include <glow/StringSource.h>
+#include <glow/AbstractStringSource.h>
 #include <glow/Texture.h>
 #include <glow/TransformFeedback.h>
 #include <glow/VertexArrayObject.h>
 #include <glow/VertexAttributeBinding.h>
 #include <glow/TextureAttachment.h>
 #include <glow/RenderBufferAttachment.h>
-
-#include <glow/DebugInfo.h>
 
 namespace glow
 {

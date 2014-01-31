@@ -1,11 +1,10 @@
 #pragma once
 
+#include <map>
+
 #include <GL/glew.h>
 
 #include <glow/glow.h>
-
-#include <map>
-#include <functional>
 
 namespace glow
 {
@@ -45,7 +44,6 @@ public:
         T_CullFace,
         T_DepthFunc,
         T_DepthRange,
-        T_LineWidth,
         T_SampleCoverage,
         T_PolygonMode,
         T_PolygonOffset,
@@ -124,16 +122,6 @@ protected:
     GLfloat nearValF;
     GLfloat farValF;
     bool useFloat;
-};
-
-class GLOW_API LineWidth : public AbstractCapabilitySetting
-{
-public:
-    LineWidth(GLfloat width);
-
-    virtual void apply() override;
-protected:
-    GLfloat width;
 };
 
 class GLOW_API PointSize : public AbstractCapabilitySetting

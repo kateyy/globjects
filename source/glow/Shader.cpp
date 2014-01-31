@@ -1,17 +1,16 @@
+#include <glow/Shader.h>
+
 #include <vector>
 #include <sstream>
 
 #include <glow/Program.h>
 #include <glow/logging.h>
-#include <glow/StringSource.h>
-#include <glow/String.h>
+#include <glow/AbstractStringSource.h>
+#include <glow/StaticStringSource.h>
 #include <glow/Error.h>
 #include <glow/ObjectVisitor.h>
 #include <glow/Version.h>
 #include <glow/Extension.h>
-
-#include <glow/Shader.h>
-
 #include <glow/ref_ptr.h>
 
 #include "IncludeProcessor.h"
@@ -48,13 +47,13 @@ Shader::Shader(const GLenum type)
 }
 
 
-Shader::Shader(const GLenum type, StringSource * source)
+Shader::Shader(const GLenum type, AbstractStringSource * source)
 : Shader(type)
 {
     setSource(source);
 }
 
-Shader::Shader(const GLenum type, StringSource * source, const std::vector<std::string> & includePaths)
+Shader::Shader(const GLenum type, AbstractStringSource * source, const std::vector<std::string> & includePaths)
 : Shader(type)
 {
     setIncludePaths(includePaths);
@@ -63,7 +62,7 @@ Shader::Shader(const GLenum type, StringSource * source, const std::vector<std::
 
 Shader * Shader::fromString(const GLenum type, const std::string & sourceString)
 {
-    return new Shader(type, new String(sourceString));
+    return new Shader(type, new StaticStringSource(sourceString));
 }
 
 Shader::~Shader()
@@ -97,7 +96,7 @@ GLenum Shader::type() const
 	return m_type;
 }
 
-void Shader::setSource(StringSource * source)
+void Shader::setSource(AbstractStringSource * source)
 {
     if (source == m_source)
         return;
@@ -115,15 +114,15 @@ void Shader::setSource(StringSource * source)
 
 void Shader::setSource(const std::string & source)
 {
-    setSource(new String(source));
+    setSource(new StaticStringSource(source));
 }
 
-const StringSource* Shader::source() const
+const AbstractStringSource* Shader::source() const
 {
 	return m_source;
 }
 
-void Shader::notifyChanged()
+void Shader::notifyChanged(Changeable *)
 {
 	updateSource();
 }
@@ -140,7 +139,7 @@ void Shader::updateSource()
         }
         else
         {
-            ref_ptr<StringSource> resolvedSource = IncludeProcessor::resolveIncludes(m_source, m_includePaths);
+            ref_ptr<AbstractStringSource> resolvedSource = IncludeProcessor::resolveIncludes(m_source, m_includePaths);
 
             sources = resolvedSource->strings();
         }
