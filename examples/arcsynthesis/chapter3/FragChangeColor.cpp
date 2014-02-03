@@ -52,6 +52,11 @@ namespace {
      * circle the center of the viewport once.
      */
     const float LOOP_DURATION {5.0};
+    
+    /**
+     *
+     */
+    const float COLOR_DURATION {10.0};
 }
 
 
@@ -322,6 +327,7 @@ protected:
      *              GLuint loopDurationUnf = glGetUniformLocation(theProgram, "loopDuration");
      *              glUseProgram(theProgram);
      *              glUniform1f(loopDurationUnf, 5.0f);
+     *              glUniform1f(fragLoopDurationUnf, 10.0f);
      *              glUseProgram(0);
      *
      *      }
@@ -347,11 +353,17 @@ protected:
         glow::Uniform<float>* loopDurationUniform = theProgram->getUniform<float>("loopDuration");
         
         /*
+         * Create a second uniform object to maintain the loop duration.
+         */
+        glow::Uniform<float>* fragLoopDurationUniform = theProgram->getUniform<float>("fragLoopDuration");
+        
+        /*
          * (1) Attach the program, (2) set the value for the loopDuration uniform, and (3) release the
          * program again.
          */
         theProgram->use();
         theProgram->setUniform(loopDurationUniform->name(), LOOP_DURATION);
+        theProgram->setUniform(fragLoopDurationUniform->name(), COLOR_DURATION);
         theProgram->release();
         
     }
