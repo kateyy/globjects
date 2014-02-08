@@ -42,9 +42,12 @@ namespace {
      * The vertex positions of the triangle to draw (in clip-space).
      */
     const float vertexPositions[] {
-        0.25f, 0.25f, 0.0f, 1.0f,
-        0.25f, -0.25f, 0.0f, 1.0f,
-        -0.25f, -0.25f, 0.0f, 1.0f
+        0.35f, 0.35f, 0.0f, 1.0f,
+        0.15f, -0.15f, 0.0f, 1.0f,
+        -0.35f, -0.35f, 0.0f, 1.0f,
+        0.4f, 0.5f, 0.0f, 1.0f,
+        -0.25f, 0.25f, 0.0f, 1.0f,
+        -0.5f, -0.4f, 0.0f, 1.0f
     };
     
     /**
@@ -52,6 +55,11 @@ namespace {
      * circle the center of the viewport once.
      */
     const float LOOP_DURATION {5.0};
+    
+    /**
+     *
+     */
+    const float COLOR_DURATION {10.0};
 }
 
 
@@ -175,7 +183,7 @@ public:
         
         // set color to clear the screen, check for an OpenGL error, actually
         // clear the screen and check for an OpenGL error again.
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.4f, 0.4f, 0.4f, 0.0f);
         CheckGLError();
         glClear(GL_COLOR_BUFFER_BIT);
         CheckGLError();
@@ -252,7 +260,7 @@ public:
 //        CheckGLError();
         
 
-        /**
+        /*
          * The following method call encapsulates the plain OpenGL function call glDrawArrays.
          *
          * Original tutorial source snippet:
@@ -262,6 +270,24 @@ public:
         vao->drawArrays(GL_TRIANGLES, 0, 3);
 //        glDrawArrays(GL_TRIANGLES, 0, 3);
 //        CheckGLError();
+        
+
+        /*
+         * This line is the "magic" of this further studies example, it simply sets the time uniform
+         * again and adds half the LOOP_DURATION to the time uniform.
+         */
+        theProgram->setUniform(timeUniform->name(), (fElapsedTime + LOOP_DURATION / 2));
+//        glUniform1f(theProgram->getUniformLocation(timeUniform->name()), (fElapsedTime + LOOP_DURATION / 2));
+//        CheckGLError();
+        
+        
+        /*
+         * Draw the second triangle...
+         */
+        vao->drawArrays(GL_TRIANGLES, 3, 6);
+//        glDrawArrays(GL_TRIANGLES, 3, 6);
+//        CheckGLError();
+        
         
         /*
          * Encapsulates the plain OpenGL function call glDisableVertexAttribArray ()
@@ -282,7 +308,6 @@ public:
         positionBufferObject->unbind();
 //        glBindBuffer(GL_ARRAY_BUFFER, 0);
 //        CheckGLError();
-
         
         theProgram->release();
 //        glUseProgram(0);
@@ -322,6 +347,7 @@ protected:
      *              GLuint loopDurationUnf = glGetUniformLocation(theProgram, "loopDuration");
      *              glUseProgram(theProgram);
      *              glUniform1f(loopDurationUnf, 5.0f);
+     *              glUniform1f(fragLoopDurationUnf, 10.0f);
      *              glUseProgram(0);
      *
      *      }
@@ -332,8 +358,8 @@ protected:
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter3/vert-calc-offset.vert"),
-                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter3/vert-calc-offset.frag")
+                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter3/calc-color-further-studies.vert"),
+                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter3/calc-color-further-studies.frag")
                         );
 
         /*
@@ -347,11 +373,17 @@ protected:
         glow::Uniform<float>* loopDurationUniform = theProgram->getUniform<float>("loopDuration");
         
         /*
+         * Create a second uniform object to maintain the loop duration.
+         */
+        glow::Uniform<float>* fragLoopDurationUniform = theProgram->getUniform<float>("fragLoopDuration");
+        
+        /*
          * (1) Attach the program, (2) set the value for the loopDuration uniform, and (3) release the
          * program again.
          */
         theProgram->use();
         theProgram->setUniform(loopDurationUniform->name(), LOOP_DURATION);
+        theProgram->setUniform(fragLoopDurationUniform->name(), COLOR_DURATION);
         theProgram->release();
         
     }
@@ -448,7 +480,7 @@ private:
      *      GLuint positionBufferObject;
      */
 	glow::Buffer* positionBufferObject;
-//    GLuint positionBufferObject; 
+//    GLuint positionBufferObject;
     
     /**
      * The `glow::Uniform` of type `float` that replaces the `GLuint` member `elapsedTimeUniform` from the
@@ -493,7 +525,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Moving Triangle [Vertex Calc Offset]")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Moving Triangle [Vertex Calc Offset :: Further Studies]")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
