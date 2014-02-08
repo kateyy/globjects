@@ -11,8 +11,6 @@
 namespace glow
 {
 
-class AbstractArray;
-
 /** \brief Wrapper for OpenGL buffer objects.
  *
  * The Buffer class encapsulates OpenGL buffer objects.
@@ -95,11 +93,7 @@ public:
      * @param usage used as a performance hint on how the buffer is used
      * \see https://www.opengl.org/sdk/docs/man4/xhtml/glBufferData.xml
      */
-    void setData(GLsizei size, const GLvoid * data = nullptr, GLenum usage = GL_STATIC_DRAW);
-    /**
-     * Convenience method to simplify passing of data in form of an AbstractArray object.
-     */
-    void setData(const AbstractArray & data, GLenum usage = GL_STATIC_DRAW);
+    void setData(GLsizeiptr size, const GLvoid * data = nullptr, GLenum usage = GL_STATIC_DRAW);
     /**
      * Convenience method to simplify passing of data in form of an std::vector.
      */
@@ -108,7 +102,7 @@ public:
     /**
      * Convenience method to simplify passing of data in form of an std::array.
      */
-    template <typename T, int Count>
+    template <typename T, std::size_t Count>
     void setData(const std::array<T, Count> & data, GLenum usage = GL_STATIC_DRAW);
     /**
      * Wraps the OpenGL function glBufferSubData.
@@ -118,11 +112,7 @@ public:
      * @param data memory location containing the data
      * \see http://www.opengl.org/sdk/docs/man/xhtml/glBufferSubData.xml
      */
-    void setSubData(GLsizeiptr size, GLintptr offset = 0, const GLvoid* data = nullptr);
-    /**
-     * Convenience method to simplify passing of data in form of an AbstractArray object.
-     */
-    void setSubData(const AbstractArray& data, GLintptr offset = 0);
+    void setSubData(GLintptr offset, GLsizeiptr size, const GLvoid* data = nullptr);
     /**
      * Convenience method to simplify passing of data in form of an std::vector.
      */
@@ -131,8 +121,27 @@ public:
     /**
      * Convenience method to simplify passing of data in form of an std::array.
      */
-    template <typename T, int Count>
+    template <typename T, std::size_t Count>
     void setSubData(const std::array<T, Count> & data, GLintptr offset = 0);
+
+    /**
+     * Wraps the OpenGL function glBufferStorage.
+     * @param size size of the new memory in bytes
+     * @param data data memory location containing the data.
+     * @param flags flags indicating usage
+     * \see www.opengl.org/sdk/docs/man/xhtml/glBufferStorage.xml
+     */
+    void setStorage(GLsizeiptr size, const GLvoid * data, GLbitfield flags);
+    /**
+     * Convenience method to simplify passing of data in form of an std::vector.
+     */
+    template <typename T>
+    void setStorage(const std::vector<T> & data, GLbitfield flags);
+    /**
+     * Convenience method to simplify passing of data in form of an std::array.
+     */
+    template <typename T, std::size_t Count>
+    void setStorage(const std::array<T, Count> & data, GLbitfield flags);
 
     /**
      * Wraps the OpenGL function glGetBufferParameter.
@@ -149,7 +158,6 @@ public:
      * @return a pointer to the mapped memory
      */
 	void * map(GLenum access = GL_READ_ONLY);
-
     /**
      * Wraps the OpenGL function glMapBuffer.
      * Binds the Buffer to target and then maps the buffer's video memory to application memory.

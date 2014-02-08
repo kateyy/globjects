@@ -29,10 +29,9 @@ set(api_includes
 
     ${header_path}/AbstractLogHandler.h
     ${header_path}/AbstractUniform.h
-    ${header_path}/AbstractArray.h
+    ${header_path}/AbstractState.h
+    ${header_path}/AbstractState.hpp
     ${header_path}/AbstractStringSource.h
-    ${header_path}/Array.h
-    ${header_path}/Array.hpp
     ${header_path}/Buffer.h
     ${header_path}/Buffer.hpp
     ${header_path}/Capability.h
@@ -50,6 +49,8 @@ set(api_includes
     ${header_path}/FrameBufferObject.h
     ${header_path}/formatString.h
     ${header_path}/formatString.hpp
+    ${header_path}/FunctionCall.h
+    ${header_path}/FunctionCall.hpp
     ${header_path}/global.h
     ${header_path}/global.hpp
     ${header_path}/logging.h
@@ -73,11 +74,14 @@ set(api_includes
     ${header_path}/Sampler.h
     ${header_path}/Shader.h
     ${header_path}/State.h
+    ${header_path}/StateSetting.h
+    ${header_path}/StateSetting.hpp
     ${header_path}/StaticStringSource.h
     ${header_path}/Texture.h
     ${header_path}/TextureAttachment.h
     ${header_path}/TextureHandle.h
     ${header_path}/TransformFeedback.h
+    ${header_path}/TransformFeedback.hpp
     ${header_path}/Uniform.h
     ${header_path}/Uniform.hpp
     ${header_path}/UniformSetter.h
@@ -88,6 +92,7 @@ set(api_includes
 
 set(sources
     ${source_path}/AbstractUniform.cpp
+    ${source_path}/AbstractState.cpp
     ${source_path}/AbstractStringSource.cpp
     ${source_path}/Buffer.cpp
     ${source_path}/Capability.cpp
@@ -129,6 +134,7 @@ set(sources
     ${source_path}/Sampler.cpp
     ${source_path}/Shader.cpp
     ${source_path}/State.cpp
+    ${source_path}/StateSetting.cpp
     ${source_path}/StaticStringSource.cpp
     ${source_path}/Texture.cpp
     ${source_path}/TextureAttachment.cpp
