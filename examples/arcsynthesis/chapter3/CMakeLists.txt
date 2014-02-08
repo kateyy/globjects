@@ -155,35 +155,109 @@ install(TARGETS ${target-tutorial3.4}
 
 
 
-### The further studies target of the 2nd chapter, 1st tutorial
+### The further studies targets of the 3rd chapter
 
-#set(target-fs3.1 tutorial3.1-further-studies)
+set(target-fs3.1 tutorial3_further-studies1)
 
-#message(STATUS "example ${target-fs3.1}")
+message(STATUS "example ${target-fs3.1}")
 
-#add_executable(${target-fs3.1} FragPosition-FurtherStudies.cpp)
+add_executable(${target-fs3.1} VertCalcOffset-FurtherStudies.cpp)
 
-#target_link_libraries(${target-fs3.1}
-#    ${GLEW_LIBRARIES}
-#    glow
-#    glowutils
-#    glowwindow
-#    ${EXAMPLE_COMMON}
-#)
+target_link_libraries(${target-fs3.1}
+    ${GLEW_LIBRARIES}
+    glow
+    glowutils
+    glowwindow
+    ${EXAMPLE_COMMON}
+)
 
-#set_target_properties(${target-fs3.1}
-#    PROPERTIES
-#    LINKER_LANGUAGE CXX
-#    FOLDER ${GLOW_EXAMPLES_FOLDER}
-#    COMPILE_DEFINITIONS_DEBUG   "${DEFAULT_COMPILE_DEFS_DEBUG}"
-#    COMPILE_DEFINITIONS_RELEASE "${DEFAULT_COMPILE_DEFS_RELEASE}"
-#    COMPILE_FLAGS               "${DEFAULT_COMPILE_FLAGS}"
-#    LINK_FLAGS_DEBUG            "${DEFAULT_LINKER_FLAGS_DEBUG}"
-#    LINK_FLAGS_RELEASE          "${DEFAULT_LINKER_FLAGS_RELEASE}"
-#    DEBUG_POSTFIX               "d${DEBUG_POSTFIX}")
+set_target_properties(${target-fs3.1}
+    PROPERTIES
+    LINKER_LANGUAGE CXX
+    FOLDER ${GLOW_EXAMPLES_FOLDER}
+    COMPILE_DEFINITIONS_DEBUG   "${DEFAULT_COMPILE_DEFS_DEBUG}"
+    COMPILE_DEFINITIONS_RELEASE "${DEFAULT_COMPILE_DEFS_RELEASE}"
+    COMPILE_FLAGS               "${DEFAULT_COMPILE_FLAGS}"
+    LINK_FLAGS_DEBUG            "${DEFAULT_LINKER_FLAGS_DEBUG}"
+    LINK_FLAGS_RELEASE          "${DEFAULT_LINKER_FLAGS_RELEASE}"
+    DEBUG_POSTFIX               "d${DEBUG_POSTFIX}")
 
-#install(TARGETS ${target-fs3.1}
-#    RUNTIME DESTINATION ${INSTALL_EXAMPLES}
-##    LIBRARY DESTINATION ${INSTALL_SHARED}
-##    ARCHIVE DESTINATION ${INSTALL_LIB}
-#)
+install(TARGETS ${target-fs3.1}
+    RUNTIME DESTINATION ${INSTALL_EXAMPLES}
+#    LIBRARY DESTINATION ${INSTALL_SHARED}
+#    ARCHIVE DESTINATION ${INSTALL_LIB}
+)
+
+
+
+
+
+### The further studies targets of the 3rd chapter
+
+set(target-fs3.2 tutorial3_further-studies2)
+
+message(STATUS "example ${target-fs3.2}")
+
+add_executable(${target-fs3.2} FragChangeColor-FurtherStudies.cpp)
+
+target_link_libraries(${target-fs3.2}
+    ${GLEW_LIBRARIES}
+    glow
+    glowutils
+    glowwindow
+    ${EXAMPLE_COMMON}
+)
+
+set_target_properties(${target-fs3.2}
+    PROPERTIES
+    LINKER_LANGUAGE CXX
+    FOLDER ${GLOW_EXAMPLES_FOLDER}
+    COMPILE_DEFINITIONS_DEBUG   "${DEFAULT_COMPILE_DEFS_DEBUG}"
+    COMPILE_DEFINITIONS_RELEASE "${DEFAULT_COMPILE_DEFS_RELEASE}"
+    COMPILE_FLAGS               "${DEFAULT_COMPILE_FLAGS}"
+    LINK_FLAGS_DEBUG            "${DEFAULT_LINKER_FLAGS_DEBUG}"
+    LINK_FLAGS_RELEASE          "${DEFAULT_LINKER_FLAGS_RELEASE}"
+    DEBUG_POSTFIX               "d${DEBUG_POSTFIX}")
+
+install(TARGETS ${target-fs3.2}
+    RUNTIME DESTINATION ${INSTALL_EXAMPLES}
+#    LIBRARY DESTINATION ${INSTALL_SHARED}
+#    ARCHIVE DESTINATION ${INSTALL_LIB}
+)
+
+
+
+
+
+### The further studies targets of the 3rd chapter
+
+set(target-fs3.3 tutorial3_further-studies3)
+
+message(STATUS "example ${target-fs3.3}")
+
+add_executable(${target-fs3.3} FragPosition-FurtherStudies.cpp)
+
+target_link_libraries(${target-fs3.3}
+    ${GLEW_LIBRARIES}
+    glow
+    glowutils
+    glowwindow
+    ${EXAMPLE_COMMON}
+)
+
+set_target_properties(${target-fs3.3}
+    PROPERTIES
+    LINKER_LANGUAGE CXX
+    FOLDER ${GLOW_EXAMPLES_FOLDER}
+    COMPILE_DEFINITIONS_DEBUG   "${DEFAULT_COMPILE_DEFS_DEBUG}"
+    COMPILE_DEFINITIONS_RELEASE "${DEFAULT_COMPILE_DEFS_RELEASE}"
+    COMPILE_FLAGS               "${DEFAULT_COMPILE_FLAGS}"
+    LINK_FLAGS_DEBUG            "${DEFAULT_LINKER_FLAGS_DEBUG}"
+    LINK_FLAGS_RELEASE          "${DEFAULT_LINKER_FLAGS_RELEASE}"
+    DEBUG_POSTFIX               "d${DEBUG_POSTFIX}")
+
+install(TARGETS ${target-fs3.3}
+    RUNTIME DESTINATION ${INSTALL_EXAMPLES}
+#    LIBRARY DESTINATION ${INSTALL_SHARED}
+#    ARCHIVE DESTINATION ${INSTALL_LIB}
+)

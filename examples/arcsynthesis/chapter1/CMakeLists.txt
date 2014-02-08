@@ -44,7 +44,7 @@ install(TARGETS ${target}
 
 ### The further studies target of the 1st chapter, 1st tutorial
 
-set(target-fs tutorial1.1-further-studies)
+set(target-fs tutorial1_further-studies1)
 
 message(STATUS "example ${target-fs}")
 

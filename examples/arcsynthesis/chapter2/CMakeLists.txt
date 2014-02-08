@@ -79,7 +79,7 @@ install(TARGETS ${target-tutorial2.2}
 
 ### The further studies target of the 2nd chapter, 1st tutorial
 
-set(target-fs2.1 tutorial2.1-further-studies)
+set(target-fs2.1 tutorial2_further-studies1)
 
 message(STATUS "example ${target-fs2.1}")
 
@@ -116,7 +116,7 @@ install(TARGETS ${target-fs2.1}
 
 ### The further studies target of the 2nd chapter, 2nd tutorial
 
-set(target-fs2.2 tutorial2.2-further-studies)
+set(target-fs2.2 tutorial2_further-studies2)
 
 message(STATUS "example ${target-fs2.2}")
 
