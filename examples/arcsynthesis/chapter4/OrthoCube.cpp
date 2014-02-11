@@ -4,7 +4,7 @@
 
 // [BEGIN] Includes of GLOW
 #include <glow/debugmessageoutput.h>
-#include <glow/global.h>
+#include <glow/State.h>
 #include <glow/Buffer.h>
 #include <glow/Error.h>
 #include <glow/Program.h>
@@ -224,10 +224,19 @@ public:
          *
          *      	glEnable(GL_CULL_FACE);
          */
-//        glow::enable(GL_CULL_FACE);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glow::State state;
+        state.enable(GL_CULL_FACE);
+        state.cullFace(GL_BACK);
+//        state.frontFace(GL_CCW);
         glFrontFace(GL_CW);
+
+        
+//        glow::enable(GL_CULL_FACE);
+//        glEnable(GL_CULL_FACE);
+//        CheckGLError();
+        
+//        glCullFace(GL_BACK);
+//        glFrontFace(GL_CW);
 
     }
     
