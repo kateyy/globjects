@@ -223,20 +223,19 @@ public:
          * Original tutorial source snippet:
          *
          *      	glEnable(GL_CULL_FACE);
+         *          glCullFace(GL_BACK);
+         *          glFrontFace(GL_CW);
          */
         glow::State state;
         state.enable(GL_CULL_FACE);
         state.cullFace(GL_BACK);
-//        state.frontFace(GL_CCW);
-        glFrontFace(GL_CW);
-
-        
-//        glow::enable(GL_CULL_FACE);
+        state.frontFace(GL_CW);
 //        glEnable(GL_CULL_FACE);
 //        CheckGLError();
-        
 //        glCullFace(GL_BACK);
+//        CheckGLError();
 //        glFrontFace(GL_CW);
+//        CheckGLError();
 
     }
     
