@@ -34,12 +34,6 @@ State* State::currentState()
         GL_BLEND,
         GL_COLOR_LOGIC_OP,
         GL_CULL_FACE,
-        
-#ifndef MAC_OS
-        GL_DEBUG_OUTPUT,
-        GL_DEBUG_OUTPUT_SYNCHRONOUS,
-#endif
-        
         GL_DEPTH_CLAMP,
         GL_DEPTH_TEST,
         GL_DITHER,
@@ -81,6 +75,10 @@ State* State::currentState()
         {
             state->provokingVertex(getEnum(GL_PROVOKING_VERTEX));
         }
+        if (hasExtension(GLOW_KHR_debug)) {
+            capabilities.push_back(GL_DEBUG_OUTPUT);
+            capabilities.push_back(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        }
     }
 
     for (GLenum capability : capabilities)
@@ -97,6 +95,7 @@ State* State::currentState()
     state->cullFace(getInteger(GL_CULL_FACE_MODE));
     state->depthFunc(getInteger(GL_DEPTH_FUNC));
     state->depthRange(getFloats<2>(GL_DEPTH_RANGE));
+    state->frontFace(getEnum(GL_FRONT_FACE));
     state->logicOp(getInteger(GL_LOGIC_OP_MODE));
     state->pointParameter(GL_POINT_FADE_THRESHOLD_SIZE, getEnum(GL_POINT_FADE_THRESHOLD_SIZE));
     state->pointParameter(GL_POINT_SPRITE_COORD_ORIGIN, getEnum(GL_POINT_SPRITE_COORD_ORIGIN));
