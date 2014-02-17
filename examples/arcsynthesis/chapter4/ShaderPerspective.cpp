@@ -43,66 +43,65 @@ namespace {
         /*
          * Vertex positions of the rectangular prism (cuboid) to render.
          */
-        
         //1st triangle of the front-facing cuboid surface.
-        0.25f,  0.25f, 0.75f, 1.0f,
-        0.25f, -0.25f, 0.75f, 1.0f,
-        -0.25f,  0.25f, 0.75f, 1.0f,
+        0.25f,  0.25f, -1.25f, 1.0f,
+        0.25f, -0.25f, -1.25f, 1.0f,
+        -0.25f,  0.25f, -1.25f, 1.0f,
         
         //2nd triangle of the front-facing cuboid surface.
-        0.25f, -0.25f, 0.75f, 1.0f,
-        -0.25f, -0.25f, 0.75f, 1.0f,
-        -0.25f,  0.25f, 0.75f, 1.0f,
+        0.25f, -0.25f, -1.25f, 1.0f,
+        -0.25f, -0.25f, -1.25f, 1.0f,
+        -0.25f,  0.25f, -1.25f, 1.0f,
         
         //1st triangle of the back-facing cuboid surface.
-        0.25f,  0.25f, -0.75f, 1.0f,
-        -0.25f,  0.25f, -0.75f, 1.0f,
-        0.25f, -0.25f, -0.75f, 1.0f,
+        0.25f,  0.25f, -2.75f, 1.0f,
+        -0.25f,  0.25f, -2.75f, 1.0f,
+        0.25f, -0.25f, -2.75f, 1.0f,
         
         //2nd triangle of the back-facing cuboid surface.
-        0.25f, -0.25f, -0.75f, 1.0f,
-        -0.25f,  0.25f, -0.75f, 1.0f,
-        -0.25f, -0.25f, -0.75f, 1.0f,
+        0.25f, -0.25f, -2.75f, 1.0f,
+        -0.25f,  0.25f, -2.75f, 1.0f,
+        -0.25f, -0.25f, -2.75f, 1.0f,
         
         //1st triangle of the left-facing cuboid surface.
-        -0.25f,  0.25f,  0.75f, 1.0f,
-        -0.25f, -0.25f,  0.75f, 1.0f,
-        -0.25f, -0.25f, -0.75f, 1.0f,
+        -0.25f,  0.25f, -1.25f, 1.0f,
+        -0.25f, -0.25f, -1.25f, 1.0f,
+        -0.25f, -0.25f, -2.75f, 1.0f,
         
         //2nd triangle of the left-facing cuboid surface.
-        -0.25f,  0.25f,  0.75f, 1.0f,
-        -0.25f, -0.25f, -0.75f, 1.0f,
-        -0.25f,  0.25f, -0.75f, 1.0f,
+        -0.25f,  0.25f, -1.25f, 1.0f,
+        -0.25f, -0.25f, -2.75f, 1.0f,
+        -0.25f,  0.25f, -2.75f, 1.0f,
         
         //1st triangle of the right-facing cuboid surface.
-        0.25f,  0.25f,  0.75f, 1.0f,
-        0.25f, -0.25f, -0.75f, 1.0f,
-        0.25f, -0.25f,  0.75f, 1.0f,
+        0.25f,  0.25f, -1.25f, 1.0f,
+        0.25f, -0.25f, -2.75f, 1.0f,
+        0.25f, -0.25f, -1.25f, 1.0f,
         
         //2nd triangle of the right-facing cuboid surface.
-        0.25f,  0.25f,  0.75f, 1.0f,
-        0.25f,  0.25f, -0.75f, 1.0f,
-        0.25f, -0.25f, -0.75f, 1.0f,
+        0.25f,  0.25f, -1.25f, 1.0f,
+        0.25f,  0.25f, -2.75f, 1.0f,
+        0.25f, -0.25f, -2.75f, 1.0f,
         
         //1st triangle of the top-facing cuboid surface.
-        0.25f,  0.25f, -0.75f, 1.0f,
-        0.25f,  0.25f,  0.75f, 1.0f,
-        -0.25f,  0.25f,  0.75f, 1.0f,
+        0.25f,  0.25f, -2.75f, 1.0f,
+        0.25f,  0.25f, -1.25f, 1.0f,
+        -0.25f,  0.25f, -1.25f, 1.0f,
         
         //2nd triangle of the top-facing cuboid surface.
-        0.25f,  0.25f, -0.75f, 1.0f,
-        -0.25f,  0.25f,  0.75f, 1.0f,
-        -0.25f,  0.25f, -0.75f, 1.0f,
+        0.25f,  0.25f, -2.75f, 1.0f,
+        -0.25f,  0.25f, -1.25f, 1.0f,
+        -0.25f,  0.25f, -2.75f, 1.0f,
         
         //1st triangle of the bottom-facing cuboid surface.
-        0.25f, -0.25f, -0.75f, 1.0f,
-        -0.25f, -0.25f,  0.75f, 1.0f,
-        0.25f, -0.25f,  0.75f, 1.0f,
+        0.25f, -0.25f, -2.75f, 1.0f,
+        -0.25f, -0.25f, -1.25f, 1.0f,
+        0.25f, -0.25f, -1.25f, 1.0f,
         
         //2nd triangle of the bottom-facing cuboid surface.
-        0.25f, -0.25f, -0.75f, 1.0f,
-        -0.25f, -0.25f, -0.75f, 1.0f,
-        -0.25f, -0.25f,  0.75f, 1.0f,
+        0.25f, -0.25f, -2.75f, 1.0f,
+        -0.25f, -0.25f, -2.75f, 1.0f,
+        -0.25f, -0.25f, -1.25f, 1.0f,
         
         
         /*
@@ -228,12 +227,12 @@ public:
          */
         glow::State state;
         state.enable(GL_CULL_FACE);
-        state.cullFace(GL_BACK);
-        state.frontFace(GL_CW);
 //        glEnable(GL_CULL_FACE);
 //        CheckGLError();
+        state.cullFace(GL_BACK);
 //        glCullFace(GL_BACK);
 //        CheckGLError();
+        state.frontFace(GL_CW);
 //        glFrontFace(GL_CW);
 //        CheckGLError();
 
@@ -253,7 +252,7 @@ public:
     }
     
     /**
-     * This method corresponds to OrthoCube.cpp::display() and is called whenever
+     * This method corresponds to tut1.cpp::display() and is called whenever
      * a "PaintEvent" is triggered. The original function source code is as
      * follows:
      *
@@ -263,7 +262,7 @@ public:
      *
      *          glUseProgram(theProgram);
      *
-     *          glUniform2f(offsetUniform, 0.5f, 0.25f);
+     *          glUniform2f(offsetUniform, 0.5f, 0.5f);
      *
      *          size_t colorData = sizeof(vertexData) / 2;
      *          glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
@@ -320,7 +319,7 @@ public:
          * 
          *      glUniform2f(offsetUniform, 0.5f, 0.25f);
          */
-        theProgram->setUniform(offsetUniform->name(), glm::vec2 {0.5f, 0.25f});
+        theProgram->setUniform(offsetUniform->name(), glm::vec2 {0.5f, 0.5f});
 //        glUniform2f(theProgram->getUniformLocation(offsetUniform->name()), 0.5f, 0.25f);
 //        CheckGLError();
         
@@ -428,12 +427,22 @@ protected:
      *
      *              std::vector<GLuint> shaderList;
      *
-     *              shaderList.push_back(Framework::LoadShader(GL_VERTEX_SHADER, "OrthoWithOffset.vert"));
+     *              shaderList.push_back(Framework::LoadShader(GL_VERTEX_SHADER, "ManualPerspective.vert"));
      *              shaderList.push_back(Framework::LoadShader(GL_FRAGMENT_SHADER, "StandardColors.frag"));
      *
      *              theProgram = CreateProgram(shaderList);
      *
      *              offsetUniform = glGetUniformLocation(theProgram, "offset");
+     *
+     *              frustumScaleUnif = glGetUniformLocation(theProgram, "frustumScale");
+     *              zNearUnif = glGetUniformLocation(theProgram, "zNear");
+     *              zFarUnif = glGetUniformLocation(theProgram, "zFar");
+     *
+     *              glUseProgram(theProgram);
+     *              glUniform1f(frustumScaleUnif, 1.0f);
+     *              glUniform1f(zNearUnif, 1.0f);
+     *              glUniform1f(zFarUnif, 3.0f);
+     *              glUseProgram(0);
      *
      *      }
      */
@@ -441,12 +450,22 @@ protected:
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter4/ortho-cube.vert"),
-                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter4/ortho-cube.frag")
-                        );
+                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter4/shader-perspective.vert"),
+                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter4/shader-perspective.frag")
+                           );
         
-        // create the offset uniform
+        // create the uniforms used in the vertex shader
         offsetUniform = theProgram->getUniform<glm::vec2>("offset");
+        frustumScaleUniform = theProgram->getUniform<float>("frustumScale");
+        zNearUniform = theProgram->getUniform<float>("zNear");
+        zFarUniform = theProgram->getUniform<float>("zFar");
+        
+        // use/set the program to set the uniform values and release it afterwards
+        theProgram->use();
+        theProgram->setUniform(frustumScaleUniform->name(), 1.0f);
+        theProgram->setUniform(zNearUniform->name(), 1.0f);
+        theProgram->setUniform(zFarUniform->name(), 3.0f);
+        theProgram->release();
     }
     
     /**
@@ -552,6 +571,21 @@ private:
      */
     glow::Uniform<glm::vec2>* offsetUniform;
     
+    /**
+     *
+     */
+    glow::Uniform<float>* frustumScaleUniform;
+    
+    /**
+     *
+     */
+    glow::Uniform<float>* zNearUniform;
+    
+    /**
+     *
+     */
+    glow::Uniform<float>* zFarUniform;
+    
 // [END] :: private
     
 }; // [END] class EventHandler
@@ -570,7 +604,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Ortho Cube")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Shader Perspective")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
