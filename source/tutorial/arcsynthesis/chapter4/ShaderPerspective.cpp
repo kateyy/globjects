@@ -320,7 +320,7 @@ public:
          *      glUniform2f(offsetUniform, 0.5f, 0.25f);
          */
         theProgram->setUniform(offsetUniform->name(), glm::vec2 {0.5f, 0.5f});
-//        glUniform2f(theProgram->getUniformLocation(offsetUniform->name()), 0.5f, 0.25f);
+//        glUniform2f(theProgram->getUniformLocation(offsetUniform->name()), 0.5f, 0.5f);
 //        CheckGLError();
         
         

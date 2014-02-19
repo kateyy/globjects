@@ -18,7 +18,7 @@ void main()
 	
 	clipPos.xy = cameraPos.xy * frustumScale;
 	
-	clipPos.z = cameraPos.z * (zNear + zFar) / (zNear - zFar);
+	clipPos.z = cameraPos.z * (zFar + zNear) / (zNear - zFar);
 	clipPos.z += 2 * zNear * zFar / (zNear - zFar);
 	
 	clipPos.w = -cameraPos.z;
