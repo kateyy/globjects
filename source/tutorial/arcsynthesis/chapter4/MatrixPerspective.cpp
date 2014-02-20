@@ -409,9 +409,13 @@ public:
         
     }
     
+    /**
+     *
+     */
     virtual void idle(glowwindow::Window & window) override {
         window.repaint();
     }
+    
 // [END] :: public
 
     
@@ -434,14 +438,21 @@ protected:
      *
      *              offsetUniform = glGetUniformLocation(theProgram, "offset");
      *
-     *              frustumScaleUnif = glGetUniformLocation(theProgram, "frustumScale");
-     *              zNearUnif = glGetUniformLocation(theProgram, "zNear");
-     *              zFarUnif = glGetUniformLocation(theProgram, "zFar");
+     *              perspectiveMatrixUnif = glGetUniformLocation(theProgram, "perspectiveMatrix");
+     *
+     *              float fFrustumScale = 1.0f; float fzNear = 0.5f; float fzFar = 3.0f;
+     *
+     *              float theMatrix[16];
+     *              memset(theMatrix, 0, sizeof(float) * 16);
+     *
+     *              theMatrix[0] = fFrustumScale;
+     *              theMatrix[5] = fFrustumScale;
+     *              theMatrix[10] = (fzFar + fzNear) / (fzNear - fzFar);
+     *              theMatrix[14] = (2 * fzFar * fzNear) / (fzNear - fzFar);
+     *              theMatrix[11] = -1.0f;
      *
      *              glUseProgram(theProgram);
-     *              glUniform1f(frustumScaleUnif, 1.0f);
-     *              glUniform1f(zNearUnif, 1.0f);
-     *              glUniform1f(zFarUnif, 3.0f);
+     *              glUniformMatrix4fv(perspectiveMatrixUnif, 1, GL_FALSE, theMatrix);
      *              glUseProgram(0);
      *
      *      }
@@ -450,21 +461,52 @@ protected:
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter4/shader-perspective.vert"),
-                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter4/shader-perspective.frag")
+                           glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/arcsynthesis/chapter4/matrix-perspective.vert"),
+                           glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/arcsynthesis/chapter4/matrix-perspective.frag")
                            );
         
-        // create the uniforms used in the vertex shader
+        // create the offset uniform and the perspectiveMatrix uniform used in the vertex shader
         offsetUniform = theProgram->getUniform<glm::vec2>("offset");
-        frustumScaleUniform = theProgram->getUniform<float>("frustumScale");
-        zNearUniform = theProgram->getUniform<float>("zNear");
-        zFarUniform = theProgram->getUniform<float>("zFar");
+        perspectiveMatrix = theProgram->getUniform<glm::mat4>("perspectiveMatrix");
+
+        float fFrustumScale {1.0f};
+        float fzNear {0.5f};
+        float fzFar {3.0f};
+        
+        /*
+         * Store the values of the perspective matrix in column-major format. A glm::mat4 matrix
+         * is used instead of a plain float array.
+         */
+        glm::mat4 matrix {0.0f};
+
+        // set x-component in 1st column (0th column in C & co like array parlance)
+        matrix[0].x = fFrustumScale;
+        // set y-component in 2nd column (1st column in C & co like array parlance)
+        matrix[1].y = fFrustumScale;
+        // set z-/w-component in 3rd column (2nd column in C & co like array parlance)
+        matrix[2].z = (fzFar + fzNear) / (fzNear - fzFar);
+        matrix[2].w = -1.0f;
+        // set z-componentn in 4th column (3rd column in C & co like array parlance)
+        matrix[3].z = (2 * fzFar * fzNear) / (fzNear - fzFar);
+
         
         // use/set the program to set the uniform values and release it afterwards
         theProgram->use();
-        theProgram->setUniform(frustumScaleUniform->name(), 1.0f);
-        theProgram->setUniform(zNearUniform->name(), 1.0f);
-        theProgram->setUniform(zFarUniform->name(), 3.0f);
+        
+        /*
+         * The perspectiveMatrix uniform's value is set here. Note the simplified syntax of setting
+         * the uniform in contrast to the plain OpenGL function call as:
+         *
+         *      glUniformMatrix4fv(perspectiveMatrixUnif, 1, GL_FALSE, theMatrix);
+         * 
+         * The second and third parameter of the plain OpenGL function can be omitted using glow.
+         * In general, glow always(!) assumes that a matrix will be passed in column-major order.
+         * To tell glow (thus, OpenGL) that more then one matrix should be passed, a vector of
+         * the type corresponding to the type of the uniform can be passed.
+         */
+        theProgram->setUniform(perspectiveMatrix->name(), matrix);
+        
+        // release the program
         theProgram->release();
     }
     
@@ -574,17 +616,7 @@ private:
     /**
      *
      */
-    glow::Uniform<float>* frustumScaleUniform;
-    
-    /**
-     *
-     */
-    glow::Uniform<float>* zNearUniform;
-    
-    /**
-     *
-     */
-    glow::Uniform<float>* zFarUniform;
+    glow::Uniform<glm::mat4>* perspectiveMatrix;
     
 // [END] :: private
     
@@ -604,7 +636,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     glowwindow::Window window;
     window.setEventHandler(new EventHandler());
     
-    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Shader Perspective")) {
+    if (window.create(format, "Learning Modern 3D Graphics Programming [with glow] -- Matrix Perspective")) {
         
         window.context()->setSwapInterval(glowwindow::Context::VerticalSyncronization);
         window.show();
