@@ -118,12 +118,23 @@ float filter(in ivec2 coord)
     return w/273.0;
 }
 
+float aastep(float threshold, float value)
+{
+    float afwidth = 1.0 * length(vec2(dFdx( value ) , dFdy( value ))) ;
+
+    // GLSL's fwidth(value) is abs(dFdx(value)) + abs(dFdy(value))
+
+    return smoothstep( threshold - afwidth , threshold + afwidth , value ) ;
+}
+
 vec3 col(in ivec2 coord)
 {
-    vec3 c = vec3(0.0);
-    float tw = 0.0;
+    vec3 avgc = vec3(0.0);
 
-    const int SIZE_2 = 2;
+    float tc = 0.0;
+    float twc = 0.0;
+
+    const int SIZE_2 = 3;
 
     for (int y=-SIZE_2;y<=SIZE_2;++y)
     {
@@ -132,18 +143,35 @@ vec3 col(in ivec2 coord)
             float count = texelFetch(countTexture, coord+ivec2(x,y), 0).r;
             vec3 color = texelFetch(colorTexture, coord+ivec2(x,y), 0).rgb;
 
-            if (count>0.0)
-            {
-                float w = length(vec2(x,y));
-
-                c += color/count*w;
-
-                tw += w;
+            if (count>0.0) {
+                avgc += color;
+                tc += count;
             }
+
+            float r = sqrt(float(x*x+y*y));
+            float maxr = float(SIZE_2);
+            float invr = maxr - r;
+            invr = clamp(invr, 0.0, maxr) / maxr;
+
+            float w = pow(invr, 2.0);
+
+            twc += count * w;
         }
     }
 
-    return c/tw;
+    avgc /= tc;
+
+
+    float f = clamp(log(twc+1.0)/3.0, 0.0, 1.0);
+
+    //float f = clamp(sqrt(twc)/3.0, 0.0, 1.0);
+
+    //f = step(0.5, f);
+    f = aastep(0.25, f);
+
+    //return mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), f);
+
+    return avgc * f;
 }
 
 void main()
@@ -153,6 +181,8 @@ void main()
 
     //float count = texelFetch(countTexture, coord, 0).r;
     //vec3 color = texture(colorTexture, v_uv).rgb/count;
+
+
     vec3 color = col(coord);
     //float f = filter(coord);
     //vec3 color = vec3(f>0.0?mix(0.5, 1.0, f):0.0, 0.0, 0.0);
@@ -262,7 +292,7 @@ public:
         glViewport((width - side) / 2, (height - side) / 2, side, side);
         CheckGLError();
 
-        m_colorTexture->image2D(0, GL_RGBA8, glm::ivec2(width, height), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        m_colorTexture->image2D(0, GL_RGBA32F, glm::ivec2(width, height), 0, GL_RGBA, GL_FLOAT, nullptr);
         m_countTexture->image2D(0, GL_RGBA32F, glm::ivec2(width, height), 0, GL_RGBA, GL_FLOAT, nullptr);
 
         m_fbo->printStatus(true);
@@ -331,12 +361,14 @@ protected:
     void makeVertices()
     {
         m_vertices.clear();
-        for (int i=0; i<2000; ++i)
+        for (int i=0; i<1000; ++i)
         {
-            m_vertices.push_back(Vertex{
+            /*m_vertices.push_back(Vertex{
                 glm::circularRand(1.f),
                 glm::vec4(glm::sphericalRand(1.f), 1.f)
-            });
+            });*/
+            m_vertices.push_back(Vertex{glm::circularRand(1.f), glm::vec4(0.0, 1.0, 0.0, 1.f)});
+            m_vertices.push_back(Vertex{glm::circularRand(1.f), glm::vec4(1.0, 0.0, 0.0, 1.f)});
         }
 
         m_vbo->setData(m_vertices);
