@@ -21,7 +21,7 @@ namespace
     static const vec3 DEFAULT_CENTER = vec3(0.f, 0.0f, 0.0f);
     static const vec3 DEFAULT_UP     = vec3(0.f, 1.0f, 0.0f);
 
-    static const float DEFAULT_SCALE_STEP = 0.1f;
+//  static const float DEFAULT_SCALE_STEP = 0.1f;
     static const float DEFAULT_DISTANCE   = 2.0f;
     static const float DEFAULT_DIST_MIN   = 0.1f;
     static const float DEFAULT_DIST_MAX   = 4.0f;
@@ -29,7 +29,7 @@ namespace
     static const float ROTATION_HOR_DOF   = 0.8f * glm::pi<float>();
     static const float ROTATION_VER_DOF   = 0.8f * glm::pi<float>();
 
-    static const float ROTATION_KEY_SCALE = 1.0f;
+//  static const float ROTATION_KEY_SCALE = 1.0f;
 
     //static const float NAV_CONSTRAINT_PAN_CIRCLE_R = 2.83;
     static const float CONSTRAINT_ROT_MAX_V_UP = 0.02f * glm::pi<float>();
@@ -255,9 +255,9 @@ void WorldInHandNavigation::rotateProcess(const ivec2 & mouse)
 
     const vec2 delta(m_m0 - mouse);
     // setup the degree of freedom for horizontal rotation within a single action
-    const float wDeltaX = glm::degrees(delta.x / static_cast<float>(m_camera->viewport().x));
+    const float wDeltaX = delta.x / static_cast<float>(m_camera->viewport().x);
     // setup the degree of freedom for vertical rotation within a single action
-    const float wDeltaY = glm::degrees(delta.y / static_cast<float>(m_camera->viewport().y));
+    const float wDeltaY = delta.y / static_cast<float>(m_camera->viewport().y);
 
     rotate(wDeltaX, wDeltaY);
 }
@@ -390,12 +390,12 @@ void WorldInHandNavigation::enforceRotationConstraints(float & /*hAngle*/, float
     // to up/down it can be rotated and clamp if required.
 
     static const vec3 up(0.f, 1.f, 0.f);
-    const float va = glm::degrees(glm::acos(dot(normalize(m_eye - m_center), up)));
+    const float va = glm::acos(dot(normalize(m_eye - m_center), up));
 
     if (vAngle <= 0.f)
-        vAngle = std::max(vAngle, glm::degrees(CONSTRAINT_ROT_MAX_V_UP) - va);
+        vAngle = std::max(vAngle, CONSTRAINT_ROT_MAX_V_UP - va);
     else
-        vAngle = std::min(vAngle, glm::degrees(CONSTRAINT_ROT_MAX_V_LO) - va);
+        vAngle = std::min(vAngle, CONSTRAINT_ROT_MAX_V_LO - va);
 }
  
 void WorldInHandNavigation::enforceScaleConstraints(

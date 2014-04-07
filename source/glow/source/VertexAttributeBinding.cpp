@@ -35,6 +35,16 @@ VertexAttributeBinding::~VertexAttributeBinding()
     delete m_implementation;
 }
 
+const VertexArrayObject * VertexAttributeBinding::vao() const
+{
+    return m_vao;
+}
+
+VertexArrayObject * VertexAttributeBinding::vao()
+{
+    return m_vao;
+}
+
 void VertexAttributeBinding::setAttribute(GLint attributeIndex)
 {
     m_attributeIndex = attributeIndex;
@@ -74,9 +84,9 @@ void VertexAttributeBinding::setIFormat(GLint size, GLenum type, GLuint relative
     m_implementation->setIFormat(size, type, relativeoffset);
 }
 
-void VertexAttributeBinding::setLFormat(GLint size, GLuint relativeoffset)
+void VertexAttributeBinding::setLFormat(GLint size, GLenum type, GLuint relativeoffset)
 {
-    m_implementation->setLFormat(size, GL_DOUBLE, relativeoffset);
+    m_implementation->setLFormat(size, type, relativeoffset);
 }
 
 } // namespace glow

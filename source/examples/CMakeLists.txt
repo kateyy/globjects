@@ -5,10 +5,14 @@ if(OPTION_BUILD_EXAMPLES)
 	endif()
 
 	set(EXAMPLE_COMMON examplecommon)
+
+        # for compatibility between glm 0.9.4 and 0.9.5
+        add_definitions("-DGLM_FORCE_RADIANS")
 	
 	add_subdirectory("common")
 	include_directories("common")
 
+	add_subdirectory("bindless-textures")
 	add_subdirectory("camerapath")
 	add_subdirectory("commandlineoutput")
 	add_subdirectory("computeshader")
@@ -29,4 +33,5 @@ if(OPTION_BUILD_EXAMPLES)
 	add_subdirectory("vertexarrayattributes")
 	add_subdirectory("wikiexample")
 	add_subdirectory("transparency")
+	add_subdirectory("sparse-texture")
 endif()

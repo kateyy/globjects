@@ -23,7 +23,8 @@ include_directories(
 
 include_directories(
     BEFORE
-    ${CMAKE_BINARY_DIR}/source/pre-build/
+    ${CMAKE_BINARY_DIR}/source/codegeneration
+    ${CMAKE_SOURCE_DIR}/source/codegeneration
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
@@ -47,10 +48,13 @@ else()
 endif()
 
 if (OPTION_ERRORS_AS_EXCEPTION)
-	add_definitions("-DGLOW_GL_ERROR_RAISE_EXCEPTION")
+    add_definitions("-DGLOW_GL_ERROR_RAISE_EXCEPTION")
 else()
     add_definitions("-D_HAS_EXCEPTIONS=0")
 endif()
+
+# for compatibility between glm 0.9.4 and 0.9.5
+add_definitions("-DGLM_FORCE_RADIANS")
 
 #
 # Sources
@@ -88,6 +92,7 @@ set(api_includes
     ${include_path}/FunctionCall.hpp
     ${include_path}/global.h
     ${include_path}/global.hpp
+    ${include_path}/LocationIdentity.h
     ${include_path}/logging.h
     ${include_path}/logging.hpp
     ${include_path}/LogMessage.h
@@ -100,6 +105,7 @@ set(api_includes
     ${include_path}/Program.h
     ${include_path}/Program.hpp
     ${include_path}/ProgramBinary.h
+    ${include_path}/ProgramUniformSetter.h
     ${include_path}/Query.h
     ${include_path}/ref_ptr.h
     ${include_path}/ref_ptr.hpp
@@ -119,6 +125,7 @@ set(api_includes
     ${include_path}/TransformFeedback.hpp
     ${include_path}/Uniform.h
     ${include_path}/Uniform.hpp
+    ${include_path}/UniformBlock.h
     ${include_path}/UniformSetter.h
     ${include_path}/Version.h
     ${include_path}/VertexArrayObject.h
@@ -136,6 +143,7 @@ set(sources
     ${source_path}/CompositeStringSource.cpp
     ${source_path}/ConsoleLogger.cpp
     ${source_path}/constants.cpp
+    ${source_path}/container_helpers.hpp
     ${source_path}/contextid.h
     ${source_path}/contextid.cpp
     ${source_path}/DebugInfo.cpp
@@ -151,6 +159,7 @@ set(sources
     ${source_path}/global.cpp
     ${source_path}/IncludeProcessor.h
     ${source_path}/IncludeProcessor.cpp
+    ${source_path}/LocationIdentity.cpp
     ${source_path}/logging.cpp
     ${source_path}/LogMessage.cpp
     ${source_path}/LogMessageBuilder.cpp
@@ -160,8 +169,11 @@ set(sources
     ${source_path}/Object.cpp
     ${source_path}/ObjectRegistry.cpp
     ${source_path}/ObjectVisitor.cpp
+    ${source_path}/pixelformat.cpp
+    ${source_path}/pixelformat.h
     ${source_path}/Program.cpp
     ${source_path}/ProgramBinary.cpp
+    ${source_path}/ProgramUniformSetter.cpp
     ${source_path}/Query.cpp
     ${source_path}/Referenced.cpp
     ${source_path}/RenderBufferAttachment.cpp
@@ -174,6 +186,7 @@ set(sources
     ${source_path}/Texture.cpp
     ${source_path}/TextureAttachment.cpp
     ${source_path}/TransformFeedback.cpp
+    ${source_path}/UniformBlock.cpp
     ${source_path}/UniformSetter.cpp
     ${source_path}/Version.cpp
     ${source_path}/VertexArrayObject.cpp

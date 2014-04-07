@@ -8,6 +8,8 @@
 #include <glow/Buffer.h>
 #include <glow/ObjectVisitor.h>
 
+#include "pixelformat.h"
+
 namespace glow
 {
 
@@ -119,6 +121,45 @@ GLint Texture::getLevelParameter(GLint level, GLenum pname)
 	return value;
 }
 
+void Texture::getImage(GLint level, GLenum format, GLenum type, GLvoid * image)
+{
+    bind();
+
+    glGetTexImage(m_target, level, format, type, image);
+    CheckGLError();
+}
+
+std::vector<unsigned char> Texture::getImage(GLint level, GLenum format, GLenum type)
+{
+    GLint width = getLevelParameter(level, GL_TEXTURE_WIDTH);
+    GLint height = getLevelParameter(level, GL_TEXTURE_HEIGHT);
+
+    int byteSize = imageSizeInBytes(width, height, format, type);
+
+    std::vector<unsigned char> data(byteSize);
+    getImage(level, format, type, data.data());
+
+    return data;
+}
+
+void Texture::getCompressedImage(GLint lod, GLvoid * image)
+{
+    bind();
+
+    glGetCompressedTexImage(m_target, lod, image);
+    CheckGLError();
+}
+
+std::vector<unsigned char> Texture::getCompressedImage(GLint lod)
+{
+    GLint size = getLevelParameter(lod, GL_TEXTURE_COMPRESSED_IMAGE_SIZE);
+
+    std::vector<unsigned char> data(size);
+    getCompressedImage(lod, data.data());
+
+    return data;
+}
+
 void Texture::image1D(GLint level, GLenum internalFormat, GLsizei width, GLint border, GLenum format, GLenum type, const GLvoid* data)
 {
     bind();
@@ -132,6 +173,14 @@ void Texture::compressedImage1D(GLint level, GLenum internalFormat, GLsizei widt
     bind();
 
     glCompressedTexImage1D(m_target, level, internalFormat, width, border, imageSize, data);
+    CheckGLError();
+}
+
+void Texture::subImage1D(GLint level, GLint xOffset, GLsizei width, GLenum format, GLenum type, const GLvoid * data)
+{
+    bind();
+
+    glTexSubImage1D(m_target, level, xOffset, width, format, type, data);
     CheckGLError();
 }
 
@@ -174,6 +223,19 @@ void Texture::compressedImage2D(GLint level, GLenum internalFormat, const glm::i
     compressedImage2D(level, internalFormat, size.x, size.y, border, imageSize, data);
 }
 
+void Texture::subImage2D(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * data)
+{
+    bind();
+
+    glTexSubImage2D(m_target, level, xOffset, yOffset, width, height, format, type, data);
+    CheckGLError();
+}
+
+void Texture::subImage2D(GLint level, const glm::ivec2& offset, const glm::ivec2& size, GLenum format, GLenum type, const GLvoid * data)
+{
+    subImage2D(level, offset.x, offset.y, size.x, size.y, format, type, data);
+}
+
 void Texture::image3D(GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* data)
 {
     bind();
@@ -198,6 +260,19 @@ void Texture::compressedImage3D(GLint level, GLenum internalFormat, GLsizei widt
 void Texture::compressedImage3D(GLint level, GLenum internalFormat, const glm::ivec3 & size, GLint border, GLsizei imageSize, const GLvoid * data)
 {
     compressedImage3D(level, internalFormat, size.x, size.y, size.z, border, imageSize, data);
+}
+
+void Texture::subImage3D(GLint level, GLint xOffset, GLint yOffset, GLint zOffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid * data)
+{
+    bind();
+
+    glTexSubImage3D(m_target, level, xOffset, yOffset, zOffset, width, height, depth, format, type, data);
+    CheckGLError();
+}
+
+void Texture::subImage3D(GLint level, const glm::ivec3& offset, const glm::ivec3& size, GLenum format, GLenum type, const GLvoid * data)
+{
+    subImage3D(level, offset.x, offset.y, offset.z, size.x, size.y, size.z, format, type, data);
 }
 
 void Texture::image2DMultisample(GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLboolean fixedSamplesLocations)
@@ -278,6 +353,20 @@ void Texture::texBuffer(GLenum activeTexture, GLenum internalFormat, Buffer * bu
 {
     bindActive(activeTexture);
     texBuffer(internalFormat, buffer);
+}
+
+void Texture::texBufferRange(GLenum internalFormat, Buffer * buffer, GLintptr offset, GLsizeiptr size)
+{
+    bind();
+
+    glTexBufferRange(m_target, internalFormat, buffer ? buffer->id() : 0, offset, size);
+    CheckGLError();
+}
+
+void Texture::texBufferRange(GLenum activeTexture, GLenum internalFormat, Buffer * buffer, GLintptr offset, GLsizeiptr size)
+{
+    bindActive(activeTexture);
+    texBufferRange(internalFormat, buffer, offset, size);
 }
 
 void Texture::clearImage(GLint level, GLenum format, GLenum type, const void * data)
@@ -377,6 +466,19 @@ void Texture::makeNonResident()
 {
     glMakeTextureHandleNonResidentARB(textureHandle());
 	CheckGLError();
+}
+
+void Texture::pageCommitment(GLint level, GLint xOffset, GLint yOffset, GLint zOffset, GLsizei width, GLsizei height, GLsizei depth, GLboolean commit)
+{
+    bind();
+
+    glTexPageCommitmentARB(m_target, level, xOffset, yOffset, zOffset, width, height, depth, commit);
+    CheckGLError();
+}
+
+void Texture::pageCommitment(GLint level, const glm::ivec3& offset, const glm::ivec3& size, GLboolean commit)
+{
+    pageCommitment(level, offset.x, offset.y, offset.z, size.x, size.y, size.z, commit);
 }
 
 } // namespace glow

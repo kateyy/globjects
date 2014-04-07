@@ -36,12 +36,14 @@
 #include "FragmentShaderParticles.h"
 #include "TransformFeedbackParticles.h"
 
+#include <ExampleWindowEventHandler.h>
+
 
 using namespace glowwindow;
 using namespace glm;
 
 
-class EventHandler : public WindowEventHandler, glowutils::AbstractCoordinateProvider
+class EventHandler : public ExampleWindowEventHandler, glowutils::AbstractCoordinateProvider
 {
 public:
     EventHandler()
@@ -188,7 +190,7 @@ public:
             const int i = z *  fdim.x * fdim.y + y * fdim.x + x;
             const vec3 f(glm::sphericalRand<float>(1.0));
 
-            forces[i] = f * (1.f - length(vec3(x, y, z)) / sqrt(3.f));
+            forces[i] = f * (1.f - length(vec3(x, y, z)) / std::sqrt(3.f));
         }
 
         m_forces->image3D(0, GL_RGB32F, fdim.x, fdim.y, fdim.z, 0, GL_RGB, GL_FLOAT, forces.data());
