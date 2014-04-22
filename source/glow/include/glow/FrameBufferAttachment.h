@@ -4,7 +4,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Referenced.h>
 
 namespace glow 
@@ -32,7 +32,9 @@ public:
 	virtual bool isRenderBufferAttachment() const;
 
     TextureAttachment * asTextureAttachment();
+    const TextureAttachment * asTextureAttachment() const;
     RenderBufferAttachment * asRenderBufferAttachment();
+    const RenderBufferAttachment * asRenderBufferAttachment() const;
 
 	std::string attachmentString() const;
 

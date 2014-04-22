@@ -5,7 +5,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Referenced.h>
 #include <glow/AbstractState.h>
 #include <glow/StateSetting.h>
@@ -45,10 +45,13 @@ public:
     virtual void add(StateSetting * setting) override;
 
     Capability * capability(GLenum capability);
+    const Capability * capability(GLenum capability) const;
     std::vector<Capability*> capabilities() const;
 
     StateSetting * setting(const StateSettingType & type);
-    std::vector<StateSetting*> settings() const;
+    const StateSetting * setting(const StateSettingType & type) const;
+    std::vector<StateSetting*> settings();
+    std::vector<const StateSetting*> settings() const;
 protected:
     Mode m_mode;
     std::unordered_map<GLenum, Capability*> m_capabilities;
@@ -56,6 +59,7 @@ protected:
 
     void addCapability(Capability * capability);
     Capability* getCapability(GLenum capability);
+    const Capability* getCapability(GLenum capability) const;
 };
 
 } // namespace glow

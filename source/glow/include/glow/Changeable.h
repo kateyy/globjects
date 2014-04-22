@@ -2,7 +2,7 @@
 
 #include <set>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 
 namespace glow 
 {
@@ -19,7 +19,7 @@ class ChangeListener;
 class GLOW_API Changeable
 {
 public:
-	void changed();
+    void changed() const;
 
 	void registerListener(ChangeListener * listener);
 	void deregisterListener(ChangeListener * listener);

@@ -6,7 +6,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/ObjectVisitor.h>
 
 
@@ -80,7 +80,7 @@ protected:
     InfoGroup & group(const std::string & name);
     void addInfo(const std::string & groupName, const InfoUnit & unit);
 
-    static std::string name(const std::string & typeName, Object * object);
+    static std::string name(const std::string & typeName, const Object * object);
     static std::string humanReadableSize(long long bytes);
 
 protected:

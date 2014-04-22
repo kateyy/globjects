@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/ref_ptr.h>
 #include <glow/FrameBufferAttachment.h>
 
@@ -29,6 +29,7 @@ public:
 
     virtual bool isRenderBufferAttachment() const override;
 	RenderBufferObject * renderBuffer();
+    const RenderBufferObject * renderBuffer() const;
 protected:
 	ref_ptr<RenderBufferObject> m_renderBuffer;
 };

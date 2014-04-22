@@ -2,7 +2,7 @@
 
 #include <set>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 
 namespace glow 
 {
@@ -22,7 +22,7 @@ class GLOW_API ChangeListener
 public:
     virtual ~ChangeListener();
 
-    virtual void notifyChanged(Changeable * sender);
+    virtual void notifyChanged(const Changeable * sender);
 
 private:
     std::set<Changeable*> m_subjects;

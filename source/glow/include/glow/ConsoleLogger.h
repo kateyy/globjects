@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/AbstractLogHandler.h>
 #include <glow/LogMessage.h>
 
@@ -20,7 +20,7 @@ public:
     virtual void handle(const LogMessage & message) override;
 
 protected:
-	std::string levelString(LogMessage::Level level);
+    static std::string levelString(LogMessage::Level level);
 };
 
 } // namespace glow

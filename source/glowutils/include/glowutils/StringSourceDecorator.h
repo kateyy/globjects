@@ -4,7 +4,7 @@
 #include <glow/ChangeListener.h>
 #include <glow/ref_ptr.h>
 
-#include <glowutils/glowutils.h>
+#include <glowutils/glowutils_api.h>
 
 namespace glowutils 
 {
@@ -17,7 +17,7 @@ public:
 
     virtual void update();
 protected:
-    virtual void notifyChanged(Changeable * changeable) override;
+    virtual void notifyChanged(const Changeable * changeable) override;
 protected:
     glow::ref_ptr<glow::AbstractStringSource> m_internal;
 };

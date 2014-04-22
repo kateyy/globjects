@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Referenced.h>
 #include <glow/ChangeListener.h>
 #include <glow/Changeable.h>
@@ -32,7 +32,7 @@ public:
     const void * data() const;
     GLsizei length() const;
 
-     virtual void notifyChanged(Changeable* sender) override;
+     virtual void notifyChanged(const Changeable* sender) override;
 protected:
     GLenum m_binaryFormat;
     ref_ptr<AbstractStringSource> m_dataSource;

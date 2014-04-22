@@ -64,10 +64,11 @@ set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/${target}")
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(api_includes
-    ${include_path}/glow.h
+    ${include_path}/glow_api.h
 
     ${include_path}/AbstractLogHandler.h
     ${include_path}/AbstractUniform.h
+    ${include_path}/AbstractUniform.hpp
     ${include_path}/AbstractState.h
     ${include_path}/AbstractState.hpp
     ${include_path}/AbstractStringSource.h
@@ -118,6 +119,7 @@ set(api_includes
     ${include_path}/StateSetting.h
     ${include_path}/StateSetting.hpp
     ${include_path}/StaticStringSource.h
+    ${include_path}/Sync.h
     ${include_path}/Texture.h
     ${include_path}/TextureAttachment.h
     ${include_path}/TextureHandle.h
@@ -183,6 +185,7 @@ set(sources
     ${source_path}/State.cpp
     ${source_path}/StateSetting.cpp
     ${source_path}/StaticStringSource.cpp
+    ${source_path}/Sync.cpp
     ${source_path}/Texture.cpp
     ${source_path}/TextureAttachment.cpp
     ${source_path}/TransformFeedback.cpp

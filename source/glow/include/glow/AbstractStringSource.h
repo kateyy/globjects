@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Referenced.h>
 #include <glow/Changeable.h>
 
@@ -23,8 +23,8 @@ class GLOW_API AbstractStringSource : public Referenced, public Changeable
 public:
     virtual std::string string() const = 0;
     virtual std::vector<std::string> strings() const;
-    std::vector<AbstractStringSource*> flatten() const;
-    virtual void flattenInto(std::vector<AbstractStringSource*>& vector) const;
+    std::vector<const AbstractStringSource*> flatten() const;
+    virtual void flattenInto(std::vector<const AbstractStringSource*>& vector) const;
 
     virtual std::string shortInfo() const;
 };

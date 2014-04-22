@@ -8,7 +8,7 @@
 
 #include <glow/ref_ptr.h>
 
-#include <glowwindow/glowwindow.h>
+#include <glowwindow/glowwindow_api.h>
 #include <glowwindow/MainLoop.h>
 
 struct GLFWwindow;
@@ -45,7 +45,8 @@ public:
      * reassigning a new, different handler.
      */
     void setEventHandler(WindowEventHandler * eventHandler);
-    WindowEventHandler * eventHandler() const;
+    const WindowEventHandler * eventHandler() const;
+    WindowEventHandler * eventHandler();
 
     void show();
     void hide();

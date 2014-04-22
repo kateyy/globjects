@@ -6,7 +6,7 @@
 #include <array>
 #include <string>
 
-#include <glowutils/glowutils.h>
+#include <glowutils/glowutils_api.h>
 
 #include <glow/ref_ptr.h>
 #include <glow/Referenced.h>
@@ -63,7 +63,7 @@ public:
 
     void enableAll();
 
-    void draw();
+    void draw() const;
 protected:
     glow::ref_ptr<glow::VertexArrayObject> m_vao;
     glow::ref_ptr<glow::Buffer> m_vbo;
