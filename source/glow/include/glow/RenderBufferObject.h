@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Object.h>
 
 namespace glow 
@@ -17,8 +17,7 @@ class ObjectVisitor;
 class GLOW_API RenderBufferObject : public Object
 {
 public:
-	RenderBufferObject();
-	virtual ~RenderBufferObject();
+    RenderBufferObject();
 
     virtual void accept(ObjectVisitor & visitor) override;
 
@@ -38,6 +37,8 @@ public:
     GLint getParameter(GLenum pname) const;
 
 protected:
+    virtual ~RenderBufferObject();
+
 	static GLuint genRenderBuffer();
 };
 

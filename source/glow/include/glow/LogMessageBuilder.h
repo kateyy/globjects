@@ -9,7 +9,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/LogMessage.h>
 #include <glow/ref_ptr.h>
 
@@ -136,6 +136,10 @@ public:
     LogMessageBuilder& operator<<(const glm::ivec2& v);
     LogMessageBuilder& operator<<(const glm::ivec3& v);
     LogMessageBuilder& operator<<(const glm::ivec4& v);
+
+    LogMessageBuilder& operator<<(const glm::uvec2& v);
+    LogMessageBuilder& operator<<(const glm::uvec3& v);
+    LogMessageBuilder& operator<<(const glm::uvec4& v);
 
 	LogMessageBuilder& operator<<(const glm::mat2& m);
 	LogMessageBuilder& operator<<(const glm::mat3& m);

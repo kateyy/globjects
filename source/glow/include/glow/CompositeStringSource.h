@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/ref_ptr.h>
 #include <glow/AbstractStringSource.h>
 #include <glow/ChangeListener.h>
@@ -17,8 +17,6 @@ public:
     CompositeStringSource();
     CompositeStringSource(const std::vector<AbstractStringSource*> & sources);
 
-    ~CompositeStringSource();
-
     void appendSource(AbstractStringSource * source);
 
     virtual std::string string() const override;
@@ -27,6 +25,7 @@ public:
 
     virtual std::string shortInfo() const override;
 protected:
+    virtual ~CompositeStringSource();
     virtual void notifyChanged(const Changeable * changeable) override;
     void update() const;
 protected:

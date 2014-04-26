@@ -4,7 +4,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Object.h>
 
 namespace glow
@@ -65,9 +65,7 @@ public:
 	Query();
 	Query(GLenum target);
 	static Query* timestamp();
-	static Query* current(GLenum target);
-	
-	virtual ~Query();
+    static Query* current(GLenum target);
 	
 	static int counterBits(GLenum target);
 
@@ -103,6 +101,7 @@ protected:
     mutable GLenum m_target;
 	
 	Query(GLuint id, GLenum target);
+    virtual ~Query();
 
 	static GLuint genQuery();
 };
