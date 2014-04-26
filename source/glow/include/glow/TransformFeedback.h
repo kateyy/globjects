@@ -5,7 +5,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Object.h>
 
 namespace glow
@@ -57,7 +57,6 @@ class GLOW_API TransformFeedback : public Object
 {
 public:
 	TransformFeedback();
-	virtual ~TransformFeedback();
 
     virtual void accept(ObjectVisitor & visitor) override;
 
@@ -89,6 +88,8 @@ public:
 	bool isTransformFeedback() const;
 
 protected:
+    virtual ~TransformFeedback();
+
 	static GLuint genTransformFeedback();
 };
 

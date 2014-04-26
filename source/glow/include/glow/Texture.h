@@ -6,7 +6,7 @@
 
 #include <glm/glm.hpp>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Object.h>
 #include <glow/TextureHandle.h>
 
@@ -27,7 +27,8 @@ class GLOW_API Texture : public Object
 public:
     Texture(GLenum target = GL_TEXTURE_2D);
     Texture(GLuint id, GLenum target, bool ownsGLObject = true);
-    virtual ~Texture();
+
+    static Texture * createDefault(GLenum target = GL_TEXTURE_2D);
 
     virtual void accept(ObjectVisitor & visitor) override;
 
@@ -114,6 +115,8 @@ public:
     void pageCommitment(GLint level, const glm::ivec3& offset, const glm::ivec3& size, GLboolean commit) const;
 
 protected:
+    virtual ~Texture();
+
     static GLuint genTexture();
 
 protected:

@@ -5,7 +5,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Referenced.h>
 #include <glow/LocationIdentity.h>
 
@@ -29,7 +29,6 @@ class GLOW_API AbstractUniform : public Referenced
 public:
     AbstractUniform(GLint location);
 	AbstractUniform(const std::string & name);
-	virtual ~AbstractUniform();
 
 	const std::string & name() const;
     GLint location() const;
@@ -48,6 +47,8 @@ public:
     template<typename T> const Uniform<T> * as() const;
 
 protected:
+    virtual ~AbstractUniform();
+
 	void registerProgram(Program * program);
 	void deregisterProgram(Program * program);
 

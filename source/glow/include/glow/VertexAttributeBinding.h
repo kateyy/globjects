@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-#include <glow/glow.h>
+#include <glow/glow_api.h>
 #include <glow/Referenced.h>
 #include <glow/ref_ptr.h>
 
@@ -21,7 +21,6 @@ public:
 	VertexAttributeBinding(
         VertexArrayObject * vao
     ,   const GLint bindingIndex);
-	~VertexAttributeBinding();
 
     const VertexArrayObject * vao() const;
     VertexArrayObject * vao();
@@ -51,6 +50,8 @@ public:
     const Buffer * buffer() const;
 
 protected:
+    ~VertexAttributeBinding();
+
     VertexArrayObject * m_vao; // TODO: weak_ptr?
    
     GLint m_bindingIndex;

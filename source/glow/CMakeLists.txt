@@ -21,10 +21,11 @@ include_directories(
     ${GLEW_INCLUDE_DIR}
 )
 
+get_property(GENERATED_HEADER_PATH GLOBAL PROPERTY GENERATED_HEADER_PATH_PROPERTY)
+
 include_directories(
     BEFORE
-    ${CMAKE_BINARY_DIR}/source/codegeneration
-    ${CMAKE_SOURCE_DIR}/source/codegeneration
+    ${GENERATED_HEADER_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
@@ -64,7 +65,7 @@ set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/${target}")
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(api_includes
-    ${include_path}/glow.h
+    ${include_path}/glow_api.h
 
     ${include_path}/AbstractLogHandler.h
     ${include_path}/AbstractUniform.h
@@ -93,6 +94,7 @@ set(api_includes
     ${include_path}/FunctionCall.hpp
     ${include_path}/global.h
     ${include_path}/global.hpp
+    ${include_path}/HeapOnly.h
     ${include_path}/LocationIdentity.h
     ${include_path}/logging.h
     ${include_path}/logging.hpp
@@ -119,6 +121,7 @@ set(api_includes
     ${include_path}/StateSetting.h
     ${include_path}/StateSetting.hpp
     ${include_path}/StaticStringSource.h
+    ${include_path}/Sync.h
     ${include_path}/Texture.h
     ${include_path}/TextureAttachment.h
     ${include_path}/TextureHandle.h
@@ -158,6 +161,7 @@ set(sources
     ${source_path}/FrameBufferObject.cpp
     ${source_path}/formatString.cpp
     ${source_path}/global.cpp
+    ${source_path}/HeapOnly.cpp
     ${source_path}/IncludeProcessor.h
     ${source_path}/IncludeProcessor.cpp
     ${source_path}/LocationIdentity.cpp
@@ -184,6 +188,7 @@ set(sources
     ${source_path}/State.cpp
     ${source_path}/StateSetting.cpp
     ${source_path}/StaticStringSource.cpp
+    ${source_path}/Sync.cpp
     ${source_path}/Texture.cpp
     ${source_path}/TextureAttachment.cpp
     ${source_path}/TransformFeedback.cpp
