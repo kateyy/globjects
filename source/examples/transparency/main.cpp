@@ -21,11 +21,11 @@
 #include <glowutils/WorldInHandNavigation.h>
 #include <glowutils/File.h>
 #include <glowutils/ScreenAlignedQuad.h>
-#include <glowutils/GlBlendAlgorithm.h>
-#include <glowutils/ABufferAlgorithm.h>
-#include <glowutils/WeightedAverageAlgorithm.h>
-#include <glowutils/HybridAlgorithm.h>
-#include <glowutils/global.h>
+#include "GlBlendAlgorithm.h"
+#include "ABufferAlgorithm.h"
+#include "WeightedAverageAlgorithm.h"
+#include "HybridAlgorithm.h"
+#include <glowutils/glowutils.h>
 
 #include <ExampleWindowEventHandler.h>
 
@@ -46,7 +46,7 @@ private:
 	glowutils::WorldInHandNavigation m_nav;
 	glowutils::AxisAlignedBoundingBox m_aabb;
 	glowutils::ScreenAlignedQuad* m_quad;
-	std::vector<glowutils::AbstractTransparencyAlgorithm*> m_algos;
+    std::vector<AbstractTransparencyAlgorithm*> m_algos;
 	
 public:
     virtual void initialize(glowwindow::Window & window) override {
@@ -60,10 +60,10 @@ public:
 
 		glow::Shader* vertexShader = glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/transparency/transparency.vert");
 
-		m_algos.push_back(new glowutils::GlBlendAlgorithm);
-        m_algos.push_back(new glowutils::ABufferAlgorithm);
-        m_algos.push_back(new glowutils::WeightedAverageAlgorithm);
-        m_algos.push_back(new glowutils::HybridAlgorithm);
+        m_algos.push_back(new GlBlendAlgorithm);
+        m_algos.push_back(new ABufferAlgorithm);
+        m_algos.push_back(new WeightedAverageAlgorithm);
+        m_algos.push_back(new HybridAlgorithm);
         for (auto& algo : m_algos) {
 			algo->initialize("data/transparency/", vertexShader, nullptr);
         }
@@ -235,17 +235,24 @@ public:
 
 int main(int /*argc*/, char* /*argv*/[])
 {
-	glowwindow::ContextFormat format;
-	format.setVersion(4, 3);
-	format.setDepthBufferSize(16);
-	//format.setSamples(4);
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F5" << "\t\t" << "Reload shaders";
+    glow::info() << "\t" << "Left Mouse" << "\t" << "Pan scene";
+    glow::info() << "\t" << "Right Mouse" << "\t" << "Rotate scene";
 
-	glowwindow::Window window;
+    glowwindow::ContextFormat format;
+    format.setVersion(4, 3);
+    format.setDepthBufferSize(16);
+    //format.setSamples(4);
 
-	if (!window.create(format, "Transparency")) return 1;
+    glowwindow::Window window;
+
+    if (!window.create(format, "Transparency")) return 1;
     window.context()->setSwapInterval(glowwindow::Context::NoVerticalSyncronization);
-	window.setEventHandler(new EventHandler());
-	window.show();
-	return glowwindow::MainLoop::run();
-	
+    window.setEventHandler(new EventHandler());
+    window.show();
+    return glowwindow::MainLoop::run();
 }

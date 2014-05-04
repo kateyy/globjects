@@ -11,7 +11,7 @@
 #include <glow/debugmessageoutput.h>
 
 #include <glowutils/File.h>
-#include <glowutils/global.h>
+#include <glowutils/glowutils.h>
 #include <glowutils/StringTemplate.h>
 
 #include <glowwindow/Context.h>
@@ -80,7 +80,7 @@ public:
         CheckGLError();
 
         m_vao = new glow::VertexArrayObject();
-        m_buffer = new glow::Buffer(GL_ARRAY_BUFFER);
+        m_buffer = new glow::Buffer();
 
         glowutils::StringTemplate* vertexShaderSource = new glowutils::StringTemplate(new glowutils::File("data/vertexarrayattributes/test.vert"));
         glowutils::StringTemplate* fragmentShaderSource = new glowutils::StringTemplate(new glowutils::File("data/vertexarrayattributes/test.frag"));
@@ -190,6 +190,11 @@ protected:
 
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+
     ContextFormat format;
     format.setVersion(3, 0);
 

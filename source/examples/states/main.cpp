@@ -10,10 +10,10 @@
 #include <glow/VertexAttributeBinding.h>
 #include <glow/debugmessageoutput.h>
 #include <glow/State.h>
-#include <glow/global.h>
+#include <glow/glow.h>
 
 #include <glowutils/File.h>
-#include <glowutils/global.h>
+#include <glowutils/glowutils.h>
 #include <glowutils/StringTemplate.h>
 
 #include <glowwindow/Context.h>
@@ -62,7 +62,7 @@ public:
         m_enableRasterizerState->disable(GL_RASTERIZER_DISCARD);
 
         m_vao = new glow::VertexArrayObject();
-        m_buffer = new glow::Buffer(GL_ARRAY_BUFFER);
+        m_buffer = new glow::Buffer();
 
         glowutils::StringTemplate* vertexShaderSource = new glowutils::StringTemplate(new glowutils::File("data/states/standard.vert"));
         glowutils::StringTemplate* fragmentShaderSource = new glowutils::StringTemplate(new glowutils::File("data/states/standard.frag"));
@@ -168,6 +168,11 @@ protected:
 
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+
     ContextFormat format;
     format.setVersion(3, 0);
 

@@ -8,7 +8,7 @@
 #include <glowutils/File.h>
 #include <glowutils/File.h>
 #include <glowutils/ScreenAlignedQuad.h>
-#include <glowutils/global.h>
+#include <glowutils/glowutils.h>
 
 #include <glowwindow/ContextFormat.h>
 #include <glowwindow/Context.h>
@@ -57,7 +57,7 @@ public:
             2,3,4,5,6,7,8,9,10,1
         };
 
-        m_buffer = new glow::Buffer(GL_SHADER_STORAGE_BUFFER);
+        m_buffer = new glow::Buffer();
         m_buffer->setData(sizeof(data), data, GL_STATIC_DRAW);
 
         m_buffer->bindBase(GL_SHADER_STORAGE_BUFFER, 1);
@@ -102,6 +102,12 @@ protected:
 */
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F5" << "\t\t" << "Reload shaders";
+
     ContextFormat format;
     format.setVersion(4, 3);
 

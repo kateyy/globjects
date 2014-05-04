@@ -13,7 +13,7 @@
 #include <glowutils/ScreenAlignedQuad.h>
 #include <glowutils/Camera.h>
 #include <glowutils/File.h>
-#include <glowutils/global.h>
+#include <glowutils/glowutils.h>
 
 #include "TransformFeedbackParticles.h"
 
@@ -36,10 +36,10 @@ TransformFeedbackParticles::~TransformFeedbackParticles()
 
 void TransformFeedbackParticles::initialize()
 {
-    m_sourcePositions = new glow::Buffer(GL_ARRAY_BUFFER);
-    m_sourceVelocities = new glow::Buffer(GL_ARRAY_BUFFER);
-    m_targetPositions = new glow::Buffer(GL_ARRAY_BUFFER);
-    m_targetVelocities = new glow::Buffer(GL_ARRAY_BUFFER);
+    m_sourcePositions = new glow::Buffer();
+    m_sourceVelocities = new glow::Buffer();
+    m_targetPositions = new glow::Buffer();
+    m_targetVelocities = new glow::Buffer();
 
     reset();
 

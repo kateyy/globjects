@@ -87,7 +87,7 @@ public:
         
         
         
-		cornerBuffer = new glow::Buffer(GL_ARRAY_BUFFER);
+        cornerBuffer = new glow::Buffer();
         cornerBuffer->ref();
 		program = new glow::Program();
         program->ref();
@@ -141,6 +141,11 @@ private:
 
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+
     ContextFormat format;
     format.setVersion(3, 0);
 

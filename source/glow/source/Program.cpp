@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <glow/logging.h>
-#include <glow/global.h>
+#include <glow/glow.h>
 #include <glow/Error.h>
 #include <glow/Uniform.h>
 #include <glow/ObjectVisitor.h>
@@ -202,6 +202,22 @@ void Program::bindAttributeLocation(GLuint index, const std::string & name) cons
 {
 	glBindAttribLocation(m_id, index, name.c_str());
 	CheckGLError();
+}
+
+GLint Program::getFragDataLocation(const std::string & name) const
+{
+    GLint location = glGetFragDataLocation(m_id, name.c_str());
+    CheckGLError();
+
+    return location;
+}
+
+GLint Program::getFragDataIndex(const std::string & name) const
+{
+    GLint location = glGetFragDataIndex(m_id, name.c_str());
+    CheckGLError();
+
+    return location;
 }
 
 GLint Program::getUniformLocation(const std::string& name) const

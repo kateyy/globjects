@@ -21,8 +21,11 @@ include_directories(
     ${GLEW_INCLUDE_DIR}
 )
 
+get_property(GENERATED_HEADER_PATH GLOBAL PROPERTY GENERATED_HEADER_PATH_PROPERTY)
+
 include_directories(
     BEFORE
+    ${GENERATED_HEADER_PATH}
     ${CMAKE_SOURCE_DIR}/source/glow/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
@@ -67,8 +70,6 @@ set(api_includes
     ${include_path}/glowutils_api.h
 
     ${include_path}/AbstractCoordinateProvider.h
-    ${include_path}/AbstractTransparencyAlgorithm.h
-    ${include_path}/ABufferAlgorithm.h
     ${include_path}/AxisAlignedBoundingBox.h
     ${include_path}/AdaptiveGrid.h
     ${include_path}/AutoTimer.h
@@ -81,9 +82,7 @@ set(api_includes
     ${include_path}/CameraPathRecorder.h
     ${include_path}/File.h
     ${include_path}/FlightNavigation.h
-    ${include_path}/GlBlendAlgorithm.h
-    ${include_path}/global.h
-    ${include_path}/HybridAlgorithm.h
+    ${include_path}/glowutils.h
     ${include_path}/Icosahedron.h
     ${include_path}/Interpolation.h
     ${include_path}/navigationmath.h
@@ -101,7 +100,6 @@ set(api_includes
     ${include_path}/UniformGroup.hpp
     ${include_path}/UnitCube.h
     ${include_path}/VertexDrawable.h
-    ${include_path}/WeightedAverageAlgorithm.h
     ${include_path}/WorldInHandNavigation.h
     
     ${include_path}/math/BezierCurve.h
@@ -109,8 +107,6 @@ set(api_includes
 
 set(sources
     ${source_path}/AbstractCoordinateProvider.cpp
-    ${source_path}/AbstractTransparencyAlgorithm.cpp
-    ${source_path}/ABufferAlgorithm.cpp
     ${source_path}/AdaptiveGrid.cpp
     ${source_path}/AutoTimer.cpp
     ${source_path}/AxisAlignedBoundingBox.cpp
@@ -123,9 +119,7 @@ set(sources
     ${source_path}/FileRegistry.h
     ${source_path}/FileRegistry.cpp
     ${source_path}/FlightNavigation.cpp
-    ${source_path}/GlBlendAlgorithm.cpp
-    ${source_path}/global.cpp
-    ${source_path}/HybridAlgorithm.cpp
+    ${source_path}/glowutils.cpp
     ${source_path}/Icosahedron.cpp
     ${source_path}/navigationmath.cpp
     ${source_path}/Plane3.cpp
@@ -139,7 +133,6 @@ set(sources
     ${source_path}/UniformGroup.cpp
     ${source_path}/UnitCube.cpp
     ${source_path}/VertexDrawable.cpp
-    ${source_path}/WeightedAverageAlgorithm.cpp
     ${source_path}/WorldInHandNavigation.cpp
     
     ${source_path}/math/BezierCurve.cpp

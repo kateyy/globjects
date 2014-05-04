@@ -24,9 +24,7 @@ include_directories(
 
 include_directories(
     BEFORE
-    ${CMAKE_SOURCE_DIR}/source/glow/include
-    ${CMAKE_SOURCE_DIR}/source/glowutils/include
-    ${CMAKE_SOURCE_DIR}/source/glowwindow/include
+    ${GLOW_EXAMPLE_INCLUDES}
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
@@ -38,10 +36,7 @@ set(libs
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARY}
     ${GLFW_LIBRARY}
-    glow
-    glowutils
-    glowwindow
-    examplecommon
+    ${GLOW_EXAMPLES_LIBRARIES}
 )
 
 #
