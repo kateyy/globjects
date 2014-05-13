@@ -26,16 +26,14 @@ class GLOW_API Object : public Referenced
 public:
     virtual void accept(ObjectVisitor & visitor) = 0;
 
-    gl::GLuint id() const;
-
     /**
      * Returns the raw OpenGL ID of this OpenGL object as a GLuint.
      */
-	GLuint id() const;
+	gl::GLuint id() const;
     /**
      * Cast operator to cast this Object to a GLuint
      */
-	operator GLuint() const;
+	operator gl::GLuint() const;
 
 	bool ownsGLObject() const;
 
@@ -73,7 +71,7 @@ protected:
     /**
      * The OpenGL id of this object as a GLuint
      */
-	GLuint m_id;
+	gl::GLuint m_id;
     /**
      * The OpenGL id of this object as a GLuint *//** Flag that indicates if this object is responsible for another OpenGL object.
      */
