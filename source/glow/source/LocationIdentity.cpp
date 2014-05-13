@@ -4,10 +4,12 @@ namespace glow {
 
 LocationIdentity::LocationIdentity()
 : m_invalid(true)
+, m_hasName(false)
+, m_location(-1)
 {
 }
 
-LocationIdentity::LocationIdentity(GLint location)
+LocationIdentity::LocationIdentity(gl::GLint location)
 : m_invalid(false)
 , m_hasName(false)
 , m_location(location)
@@ -32,7 +34,7 @@ bool LocationIdentity::isName() const
     return m_hasName && !m_invalid;
 }
 
-GLint LocationIdentity::location() const
+gl::GLint LocationIdentity::location() const
 {
     return m_location;
 }
@@ -86,7 +88,7 @@ std::size_t LocationIdentity::hash() const
     }
     else
     {
-        return std::hash<GLint>()(m_location);
+        return std::hash<gl::GLint>()(m_location);
     }
 }
 

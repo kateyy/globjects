@@ -1,10 +1,12 @@
 #pragma once
 
-#include <GL/glew.h>
+#include <glbinding/types.h>
+#include <glbinding/constants.h>
+
+#include <glowbase/Referenced.h>
+#include <glowbase/ref_ptr.h>
 
 #include <glow/glow_api.h>
-#include <glow/Referenced.h>
-#include <glow/ref_ptr.h>
 
 namespace glow 
 {
@@ -20,41 +22,42 @@ class GLOW_API VertexAttributeBinding : public Referenced
 public:
 	VertexAttributeBinding(
         VertexArrayObject * vao
-    ,   const GLint bindingIndex);
-	~VertexAttributeBinding();
+    ,   const gl::GLint bindingIndex);
 
     const VertexArrayObject * vao() const;
     VertexArrayObject * vao();
 
-	void setAttribute(GLint attributeIndex);
+	void setAttribute(gl::GLint attributeIndex);
 	void setBuffer(
         const Buffer * vbo
-    ,   GLint baseoffset
-    ,   GLint stride);
+    ,   gl::GLint baseoffset
+    ,   gl::GLint stride);
 
 	void setFormat(
-        GLint size
-    ,   GLenum type
-    ,   GLboolean normalized = GL_FALSE
-    ,   GLuint relativeoffset = 0);
+        gl::GLint size
+    ,   gl::GLenum type
+    ,   gl::GLboolean normalized = static_cast<gl::GLboolean>(gl::FALSE_)
+    ,   gl::GLuint relativeoffset = 0);
 	void setIFormat(
-        GLint size
-    ,   GLenum type
-    ,   GLuint relativeoffset = 0);
+        gl::GLint size
+    ,   gl::GLenum type
+    ,   gl::GLuint relativeoffset = 0);
 	void setLFormat(
-        GLint size
-    ,   GLenum type
-    ,   GLuint relativeoffset = 0);
+        gl::GLint size
+    ,   gl::GLenum type
+    ,   gl::GLuint relativeoffset = 0);
 
-    GLint attributeIndex() const;
-    GLint bindingIndex() const;
+    gl::GLint attributeIndex() const;
+    gl::GLint bindingIndex() const;
     const Buffer * buffer() const;
 
 protected:
+    ~VertexAttributeBinding();
+
     VertexArrayObject * m_vao; // TODO: weak_ptr?
    
-    GLint m_bindingIndex;
-    GLint m_attributeIndex;
+    gl::GLint m_bindingIndex;
+    gl::GLint m_attributeIndex;
     
     const Buffer * m_vbo;
 

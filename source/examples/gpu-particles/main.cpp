@@ -1,6 +1,6 @@
 #include <map>
 
-#include <GL/glew.h>
+#include <glbinding/functions.h>
 
 #include <algorithm>
 #include <vector>
@@ -11,18 +11,20 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
 
+#include <glow/glow.h>
 #include <glow/Error.h>
 #include <glow/logging.h>
 #include <glow/Texture.h>
-#include <glow/global.h>
+#include <glow/NamedString.h>
 #include <glow/debugmessageoutput.h>
+#include <glow/Extension.h>
 
+#include <glowutils/Timer.h>
 #include <glowutils/Camera.h>
 #include <glowutils/File.h>
 #include <glowutils/File.h>
 #include <glowutils/AbstractCoordinateProvider.h>
 #include <glowutils/WorldInHandNavigation.h>
-#include <glowutils/Timer.h>
 
 #include <glowwindow/Context.h>
 #include <glowwindow/ContextFormat.h>
@@ -83,22 +85,17 @@ public:
         delete m_camera;
     }
 
-    virtual void initialize(Window & ) override
+    virtual void initialize(Window & window) override
     {
+        ExampleWindowEventHandler::initialize(window);
+
         glow::debugmessageoutput::enable();
 
-        m_forces = new glow::Texture(GL_TEXTURE_3D);
-
-        m_forces->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        m_forces->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        
-        m_forces->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        m_forces->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        m_forces->setParameter(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        m_forces = glow::Texture::createDefault(gl::TEXTURE_3D);
 
         // Initialize shader includes
 
-        glow::createNamedString("/glow/data/gpu-particles/particleMovement.inc", new glowutils::File("data/gpu-particles/particleMovement.inc"));
+        glow::NamedString::create("/glow/data/gpu-particles/particleMovement.inc", new glowutils::File("data/gpu-particles/particleMovement.inc"));
         
         // initialize camera
 
@@ -112,12 +109,11 @@ public:
         
         // initialize techniques
 
-        // TODO: Implement a better way to check if a feature is supported
-        if (GLEW_ARB_compute_shader) {
+        if (glow::hasExtension(glow::Extension::ARB_compute_shader)) {
             m_techniques[ComputeShaderTechnique] = new ComputeShaderParticles(
                 m_positions, m_velocities, *m_forces, *m_camera);
         }
-        if (GLEW_ARB_transform_feedback3) {
+        if (glow::hasExtension(glow::Extension::ARB_transform_feedback3)) {
             m_techniques[TransformFeedbackTechnique] = new TransformFeedbackParticles(
                 m_positions, m_velocities, *m_forces, *m_camera);
         }
@@ -134,8 +130,8 @@ public:
     
     virtual void framebufferResizeEvent(ResizeEvent & event) override
     {
-        glViewport(0, 0, event.width(), event.height());
-        CheckGLError();
+        gl::Viewport(0, 0, event.width(), event.height());
+
 
         m_camera->setViewport(event.size());
 
@@ -163,10 +159,10 @@ public:
 
     void draw()
     {
-        const long double elapsed = m_timer.elapsed();
+        const long double elapsed = static_cast<long double>(m_timer.elapsed().count());
         m_timer.update();
 
-        const float delta = static_cast<float>((m_timer.elapsed() - elapsed) * 1.0e-9L);
+        const float delta = static_cast<float>((m_timer.elapsed().count() - elapsed) * 1.0e-9L);
 
         step(delta); // requires context to be current
         m_techniques[m_technique]->draw(delta);
@@ -193,7 +189,7 @@ public:
             forces[i] = f * (1.f - length(vec3(x, y, z)) / std::sqrt(3.f));
         }
 
-        m_forces->image3D(0, GL_RGB32F, fdim.x, fdim.y, fdim.z, 0, GL_RGB, GL_FLOAT, forces.data());
+        m_forces->image3D(0, gl::RGB32F, fdim.x, fdim.y, fdim.z, 0, gl::RGB, gl::FLOAT, forces.data());
 
         if (!particles)
             return;
@@ -364,9 +360,24 @@ protected:
 */
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "Left Mouse" << "\t" << "Rotate scene";
+    glow::info() << "\t" << "Mouse Wheel" << "\t" << "Zoom scene";
+    glow::info() << "\t" << "-" << "\t\t" << "Reduce steps per frame";
+    glow::info() << "\t" << "=" << "\t\t" << "Increase steps per frame";
+    glow::info() << "\t" << "R" << "\t\t" << "Compute new forces";
+    glow::info() << "\t" << "Shift + R" << "\t" << "Compute new forces and reset particles";
+    glow::info() << "\t" << "P" << "\t\t" << "Toggle pause";
+    glow::info() << "\t" << "F" << "\t\t" << "Particle computation using fragment shader";
+    glow::info() << "\t" << "T" << "\t\t" << "Particle computation using transform feedback";
+    glow::info() << "\t" << "C" << "\t\t" << "Particle computation using compute shader";
+
     ContextFormat format;
-    format.setVersion(3, 2); // minimum required version is 3.2 due to particle drawing using geometry shader.
-    //format.setProfile(ContextFormat::CoreProfile);
+    format.setVersion(3, 3); // minimum required version is 3.3 due to particle drawing using geometry shader.
+    format.setProfile(ContextFormat::CoreProfile);
 
     Window window;
 

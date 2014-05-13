@@ -9,22 +9,20 @@ message(STATUS "Lib ${target}")
 
 find_package(OpenGL REQUIRED)
 find_package(GLM REQUIRED)
-find_package(GLEW REQUIRED)
+find_package(GLBinding REQUIRED)
 
 #
 # Includes
 #
 
 include_directories(
-    ${OPENGL_INCLUDE_DIR}
     ${GLM_INCLUDE_DIR}
-    ${GLEW_INCLUDE_DIR}
+    ${GLBINDING_INCLUDE_DIR}
 )
 
 include_directories(
     BEFORE
-    ${CMAKE_BINARY_DIR}/source/codegeneration
-    ${CMAKE_SOURCE_DIR}/source/codegeneration
+    ${CMAKE_SOURCE_DIR}/source/glowbase/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
@@ -34,7 +32,8 @@ include_directories(
 
 set(libs
     ${OPENGL_LIBRARIES}
-    ${GLEW_LIBRARY}
+    ${GLBINDING_LIBRARY}
+    glowbase
 )
 
 #
@@ -63,139 +62,146 @@ add_definitions("-DGLM_FORCE_RADIANS")
 set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/${target}")
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
-set(api_includes
-    ${include_path}/glow_api.h
-
-    ${include_path}/AbstractLogHandler.h
-    ${include_path}/AbstractUniform.h
-    ${include_path}/AbstractUniform.hpp
-    ${include_path}/AbstractState.h
-    ${include_path}/AbstractState.hpp
-    ${include_path}/AbstractStringSource.h
-    ${include_path}/Buffer.h
-    ${include_path}/Buffer.hpp
-    ${include_path}/Capability.h
-    ${include_path}/Changeable.h
-    ${include_path}/ChangeListener.h
-    ${include_path}/CompositeStringSource.h
-    ${include_path}/ConsoleLogger.h
-    ${include_path}/constants.h
-    ${include_path}/DebugInfo.h
-    ${include_path}/DebugMessage.h
-    ${include_path}/debugmessageoutput.h
-    ${include_path}/Error.h
-    ${include_path}/Extension.h
-    ${include_path}/FrameBufferAttachment.h
-    ${include_path}/FrameBufferObject.h
-    ${include_path}/formatString.h
-    ${include_path}/formatString.hpp
-    ${include_path}/FunctionCall.h
-    ${include_path}/FunctionCall.hpp
-    ${include_path}/global.h
-    ${include_path}/global.hpp
-    ${include_path}/LocationIdentity.h
-    ${include_path}/logging.h
-    ${include_path}/logging.hpp
-    ${include_path}/LogMessage.h
-    ${include_path}/LogMessageBuilder.h
-    ${include_path}/LogMessageBuilder.hpp
-    ${include_path}/memory.h
-    ${include_path}/Object.h
-    ${include_path}/ObjectRegistry.h
-    ${include_path}/ObjectVisitor.h
-    ${include_path}/Program.h
-    ${include_path}/Program.hpp
-    ${include_path}/ProgramBinary.h
-    ${include_path}/ProgramUniformSetter.h
-    ${include_path}/Query.h
-    ${include_path}/ref_ptr.h
-    ${include_path}/ref_ptr.hpp
-    ${include_path}/Referenced.h
-    ${include_path}/RenderBufferAttachment.h
-    ${include_path}/RenderBufferObject.h
-    ${include_path}/Sampler.h
-    ${include_path}/Shader.h
-    ${include_path}/State.h
-    ${include_path}/StateSetting.h
-    ${include_path}/StateSetting.hpp
-    ${include_path}/StaticStringSource.h
-    ${include_path}/Sync.h
-    ${include_path}/Texture.h
-    ${include_path}/TextureAttachment.h
-    ${include_path}/TextureHandle.h
-    ${include_path}/TransformFeedback.h
-    ${include_path}/TransformFeedback.hpp
-    ${include_path}/Uniform.h
-    ${include_path}/Uniform.hpp
-    ${include_path}/UniformBlock.h
-    ${include_path}/UniformSetter.h
-    ${include_path}/Version.h
-    ${include_path}/VertexArrayObject.h
-    ${include_path}/VertexAttributeBinding.h
+set(sources
+	${source_path}/AbstractState.cpp
+	${source_path}/AbstractStringSource.cpp
+	${source_path}/AbstractUniform.cpp
+	${source_path}/Buffer.cpp
+	${source_path}/Capability.cpp
+	${source_path}/CompositeStringSource.cpp
+	${source_path}/constants.cpp
+	${source_path}/container_helpers.hpp
+	${source_path}/DebugInfo.cpp
+	${source_path}/DebugMessageCallback.cpp
+	${source_path}/DebugMessageCallback.h
+	${source_path}/DebugMessage.cpp
+	${source_path}/debugmessageoutput.cpp
+	${source_path}/debugmessageoutput_private.h
+	${source_path}/Error.cpp
+	${source_path}/FrameBufferAttachment.cpp
+	${source_path}/FrameBufferObject.cpp
+	${source_path}/glmlogging.cpp
+	${source_path}/glow.cpp
+	${source_path}/implementations/AbstractUniformImplementation.cpp
+	${source_path}/implementations/LegacyUniformImplementation.cpp
+	${source_path}/implementations/LegacyBufferImplementation.cpp
+	${source_path}/implementations/LegacyFrameBufferImplementation.cpp
+	${source_path}/implementations/BindlessBufferImplementation.cpp
+	${source_path}/implementations/DebugImplementation.cpp
+	${source_path}/implementations/AbstractBufferImplementation.h
+	${source_path}/implementations/LegacyFrameBufferImplementation.h
+	${source_path}/implementations/BindlessUniformImplementation.cpp
+	${source_path}/implementations/AbstractUniformImplementation.h
+	${source_path}/implementations/BindlessFrameBufferImplementation.h
+	${source_path}/implementations/FallbackDebugImplementation.cpp
+	${source_path}/implementations/BindlessBufferImplementation.h
+	${source_path}/implementations/AbstractDebugImplementation.h
+	${source_path}/implementations/BindlessUniformImplementation.h
+	${source_path}/implementations/AbstractDebugImplementation.cpp
+	${source_path}/implementations/LegacyUniformImplementation.h
+	${source_path}/implementations/AbstractFrameBufferImplementation.cpp
+	${source_path}/implementations/AbstractBufferImplementation.cpp
+	${source_path}/implementations/AbstractFrameBufferImplementation.h
+	${source_path}/implementations/BindlessFrameBufferImplementation.cpp
+	${source_path}/implementations/FallbackDebugImplementation.h
+	${source_path}/implementations/DebugImplementation.h
+	${source_path}/implementations/LegacyBufferImplementation.h
+	${source_path}/IncludeProcessor.cpp
+	${source_path}/IncludeProcessor.h
+	${source_path}/LocationIdentity.cpp
+	${source_path}/memory.cpp
+	${source_path}/NamedString.cpp
+	${source_path}/Object.cpp
+	${source_path}/objectlogging.cpp
+	${source_path}/ObjectVisitor.cpp
+	${source_path}/pixelformat.cpp
+	${source_path}/pixelformat.h
+	${source_path}/ProgramBinary.cpp
+	${source_path}/Program.cpp
+	${source_path}/Query.cpp
+	${source_path}/registry/contextid.h
+	${source_path}/registry/ImplementationRegistry.cpp
+	${source_path}/registry/Registry.cpp
+	${source_path}/registry/Registry.h
+	${source_path}/registry/contextid.cpp
+	${source_path}/registry/NamedStringRegistry.h
+	${source_path}/registry/ObjectRegistry.cpp
+	${source_path}/registry/ExtensionRegistry.h
+	${source_path}/registry/ImplementationRegistry.h
+	${source_path}/registry/ObjectRegistry.h
+	${source_path}/registry/ExtensionRegistry.cpp
+	${source_path}/registry/NamedStringRegistry.cpp
+	${source_path}/RenderBufferAttachment.cpp
+	${source_path}/RenderBufferObject.cpp
+	${source_path}/Sampler.cpp
+	${source_path}/Shader.cpp
+	${source_path}/State.cpp
+	${source_path}/StateSetting.cpp
+	${source_path}/StaticStringSource.cpp
+	${source_path}/Sync.cpp
+	${source_path}/TextureAttachment.cpp
+	${source_path}/Texture.cpp
+	${source_path}/TransformFeedback.cpp
+	${source_path}/UniformBlock.cpp
+	${source_path}/VertexArrayObject.cpp
+	${source_path}/VertexAttributeBinding.cpp
+	${source_path}/VertexAttributeBindingImplementation.cpp
+	${source_path}/VertexAttributeBindingImplementation.h
 )
 
-set(sources
-    ${source_path}/AbstractUniform.cpp
-    ${source_path}/AbstractState.cpp
-    ${source_path}/AbstractStringSource.cpp
-    ${source_path}/Buffer.cpp
-    ${source_path}/Capability.cpp
-    ${source_path}/Changeable.cpp
-    ${source_path}/ChangeListener.cpp
-    ${source_path}/CompositeStringSource.cpp
-    ${source_path}/ConsoleLogger.cpp
-    ${source_path}/constants.cpp
-    ${source_path}/container_helpers.hpp
-    ${source_path}/contextid.h
-    ${source_path}/contextid.cpp
-    ${source_path}/DebugInfo.cpp
-    ${source_path}/DebugMessage.cpp
-    ${source_path}/DebugMessageCallback.h
-    ${source_path}/DebugMessageCallback.cpp
-    ${source_path}/debugmessageoutput.cpp
-    ${source_path}/Error.cpp
-    ${source_path}/Extension.cpp
-    ${source_path}/FrameBufferAttachment.cpp
-    ${source_path}/FrameBufferObject.cpp
-    ${source_path}/formatString.cpp
-    ${source_path}/global.cpp
-    ${source_path}/IncludeProcessor.h
-    ${source_path}/IncludeProcessor.cpp
-    ${source_path}/LocationIdentity.cpp
-    ${source_path}/logging.cpp
-    ${source_path}/LogMessage.cpp
-    ${source_path}/LogMessageBuilder.cpp
-    ${source_path}/memory.cpp
-    ${source_path}/NamedStrings.cpp
-    ${source_path}/NamedStrings.h
-    ${source_path}/Object.cpp
-    ${source_path}/ObjectRegistry.cpp
-    ${source_path}/ObjectVisitor.cpp
-    ${source_path}/pixelformat.cpp
-    ${source_path}/pixelformat.h
-    ${source_path}/Program.cpp
-    ${source_path}/ProgramBinary.cpp
-    ${source_path}/ProgramUniformSetter.cpp
-    ${source_path}/Query.cpp
-    ${source_path}/Referenced.cpp
-    ${source_path}/RenderBufferAttachment.cpp
-    ${source_path}/RenderBufferObject.cpp
-    ${source_path}/Sampler.cpp
-    ${source_path}/Shader.cpp
-    ${source_path}/State.cpp
-    ${source_path}/StateSetting.cpp
-    ${source_path}/StaticStringSource.cpp
-    ${source_path}/Sync.cpp
-    ${source_path}/Texture.cpp
-    ${source_path}/TextureAttachment.cpp
-    ${source_path}/TransformFeedback.cpp
-    ${source_path}/UniformBlock.cpp
-    ${source_path}/UniformSetter.cpp
-    ${source_path}/Version.cpp
-    ${source_path}/VertexArrayObject.cpp
-    ${source_path}/VertexAttributeBinding.cpp
-    ${source_path}/VertexAttributeBindingImplementation.h
-    ${source_path}/VertexAttributeBindingImplementation.cpp
+set(api_includes
+	${include_path}/AbstractState.h
+	${include_path}/AbstractState.hpp
+	${include_path}/AbstractStringSource.h
+	${include_path}/AbstractUniform.h
+	${include_path}/AbstractUniform.hpp
+	${include_path}/Buffer.h
+	${include_path}/Buffer.hpp
+	${include_path}/Capability.h
+	${include_path}/CompositeStringSource.h
+	${include_path}/constants.h
+	${include_path}/DebugInfo.h
+	${include_path}/DebugMessage.h
+	${include_path}/debugmessageoutput.h
+	${include_path}/Error.h
+	${include_path}/Extension.h
+	${include_path}/FrameBufferAttachment.h
+	${include_path}/FrameBufferObject.h
+	${include_path}/glmlogging.h
+	${include_path}/glow_api.h
+	${include_path}/glow.h
+	${include_path}/glow.hpp
+	${include_path}/LocationIdentity.h
+	${include_path}/logging.h
+	${include_path}/memory.h
+	${include_path}/NamedString.h
+	${include_path}/Object.h
+	${include_path}/objectlogging.h
+	${include_path}/objectlogging.hpp
+	${include_path}/ObjectVisitor.h
+	${include_path}/ProgramBinary.h
+	${include_path}/Program.h
+	${include_path}/Program.hpp
+	${include_path}/Query.h
+	${include_path}/RenderBufferAttachment.h
+	${include_path}/RenderBufferObject.h
+	${include_path}/Sampler.h
+	${include_path}/Shader.h
+	${include_path}/State.h
+	${include_path}/StateSetting.h
+	${include_path}/StateSetting.hpp
+	${include_path}/StaticStringSource.h
+	${include_path}/Sync.h
+	${include_path}/TextureAttachment.h
+	${include_path}/Texture.h
+	${include_path}/TextureHandle.h
+	${include_path}/TransformFeedback.h
+	${include_path}/TransformFeedback.hpp
+	${include_path}/UniformBlock.h
+	${include_path}/Uniform.h
+	${include_path}/Uniform.hpp
+	${include_path}/VertexArrayObject.h
+	${include_path}/VertexAttributeBinding.h
 )
 
 # Group source files

@@ -1,5 +1,7 @@
 #include <glow/Query.h>
 
+#include <glbinding/functions.h>
+
 #include <glow/ObjectVisitor.h>
 #include <glow/Error.h>
 
@@ -8,67 +10,78 @@ namespace glow
 
 Query::Query()
 : Object(genQuery())
-, m_target(GLenum(0))
 {
 }
 
-Query::Query(GLenum target)
-: Object(genQuery())
-, m_target(target)
+Query::Query(gl::GLuint id, bool takeOwnership)
+: Object(id, takeOwnership)
 {
 }
 
-Query::Query(GLuint id, GLenum target)
-: Object(id, false)
-, m_target(target)
+Query * Query::fromId(gl::GLuint id, bool takeOwnership)
 {
-}
-
-Query* Query::timestamp()
-{
-	Query* query = new Query();
-	query->counter();
-	
-	return query;
+    return new Query(id, takeOwnership);
 }
 
 Query::~Query()
 {
 	if (ownsGLObject())
 	{
-		glDeleteQueries(1, &m_id);
-		CheckGLError();
+        gl::DeleteQueries(1, &m_id);
 	}
 }
 
-Query* Query::current(GLenum target)
+Query * Query::current(gl::GLenum target)
 {
-    GLint value = 0;
+    gl::GLint id = get(target, gl::CURRENT_QUERY);
+
+    if (id <= 0)
+    {
+        return nullptr;
+    }
 	
-	glGetQueryiv(target, GL_CURRENT_QUERY, &value);
-	CheckGLError();
-	
-	return value > 0 ? new Query(value, target) : nullptr; // TODO: fetch correct query from object registry
+    // TODO: fetch correct query from object registry
+    return Query::fromId(id, false);
 }
 
-int Query::counterBits(GLenum target)
+Query * Query::timestamp()
 {
-    GLint value = 0;
-	
-	glGetQueryiv(target, GL_QUERY_COUNTER_BITS, &value);
-	CheckGLError();
-	
-	return value;
+    Query * query = new Query();
+    query->counter(gl::TIMESTAMP);
+
+    return query;
 }
 
-GLuint Query::genQuery()
-{
-	GLuint id;
+int Query::getCounterBits(gl::GLenum target)
+{	
+    return get(target, gl::QUERY_COUNTER_BITS);
+}
 
-	glGenQueries(1, &id);
-	CheckGLError();
+gl::GLuint Query::genQuery()
+{
+	gl::GLuint id;
+
+    gl::GenQueries(1, &id);
 
 	return id;
+}
+
+gl::GLint Query::get(gl::GLenum target, gl::GLenum pname)
+{
+    gl::GLint value = 0;
+
+    gl::GetQueryiv(target, pname, &value);
+
+    return value;
+}
+
+gl::GLint Query::getIndexed(gl::GLenum target, gl::GLuint index, gl::GLenum pname)
+{
+    gl::GLint value = 0;
+
+    gl::GetQueryIndexediv(target, index, pname, &value);
+
+    return value;
 }
 
 void Query::accept(ObjectVisitor& visitor)
@@ -76,57 +89,47 @@ void Query::accept(ObjectVisitor& visitor)
 	visitor.visitQuery(this);
 }
 
-void Query::begin() const
+void Query::begin(gl::GLenum target) const
 {
-	glBeginQuery(m_target, m_id);
-	CheckGLError();
+    gl::BeginQuery(target, m_id);
 }
 
-void Query::begin(GLenum target) const
+void Query::end(gl::GLenum target) const
 {
-	m_target = target;
-	begin();
+    gl::EndQuery(target);
 }
 
-void Query::end() const
+void Query::beginIndexed(gl::GLenum target, gl::GLuint index) const
 {
-	glEndQuery(m_target);
-	CheckGLError();
+    gl::BeginQueryIndexed(target, index, m_id);
 }
 
-void Query::get(GLenum pname, GLuint * param) const
+void Query::endIndexed(gl::GLenum target, gl::GLuint index) const
 {
-    glGetQueryObjectuiv(m_id, pname, param);
-    CheckGLError();
+    gl::EndQueryIndexed(target, index);
 }
 
-void Query::get64(GLenum pname, GLuint64 * param) const
+gl::GLuint Query::get(gl::GLenum pname) const
 {
-    glGetQueryObjectui64v(m_id, pname, param);
-    CheckGLError();
-}
-
-GLuint Query::get(GLenum pname) const
-{
-    GLuint value = 0;
+    gl::GLuint value = 0;
 	
-    get(pname, &value);
+    gl::GetQueryObjectuiv(m_id, pname, &value);
 	
 	return value;
 }
 
-GLuint64 Query::get64(GLenum pname) const
+gl::GLuint64 Query::get64(gl::GLenum pname) const
 {
-    GLuint64 value = 0;
+    gl::GLuint64 value = 0;
 	
-    get64(pname, &value);
+    gl::GetQueryObjectui64v(m_id, pname, &value);
 	
 	return value;
 }
 
 bool Query::resultAvailable() const
 {
-	return get(GL_QUERY_RESULT_AVAILABLE) == GL_TRUE;
+	return get(gl::QUERY_RESULT_AVAILABLE) == gl::TRUE_;
 }
 
 void Query::wait() const
@@ -134,7 +137,7 @@ void Query::wait() const
     while (!resultAvailable());
 }
 
-void Query::wait(const std::chrono::duration<int, std::nano>& timeout) const
+void Query::wait(const std::chrono::duration<int, std::nano> & timeout) const
 {
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
@@ -145,57 +148,52 @@ void Query::wait(const std::chrono::duration<int, std::nano>& timeout) const
     }
 }
 
-GLuint Query::waitAndGet(GLenum pname) const
+gl::GLuint Query::waitAndGet(gl::GLenum pname) const
 {
     wait();
 	
 	return get(pname);
 }
 
-GLuint64 Query::waitAndGet64(GLenum pname) const
+gl::GLuint64 Query::waitAndGet64(gl::GLenum pname) const
 {
     wait();
 	
     return get64(pname);
 }
 
-GLuint Query::waitAndGet(const std::chrono::duration<int, std::nano>& timeout, GLenum pname) const
+gl::GLuint Query::waitAndGet(const std::chrono::duration<int, std::nano> & timeout, gl::GLenum pname) const
 {
     return waitAndGet(pname, timeout);
 }
 
-GLuint64 Query::waitAndGet64(const std::chrono::duration<int, std::nano>& timeout, GLenum pname) const
+gl::GLuint64 Query::waitAndGet64(const std::chrono::duration<int, std::nano> & timeout, gl::GLenum pname) const
 {
     return waitAndGet64(pname, timeout);
 }
 
-GLuint Query::waitAndGet(GLenum pname, const std::chrono::duration<int, std::nano>& timeout) const
+gl::GLuint Query::waitAndGet(gl::GLenum pname, const std::chrono::duration<int, std::nano> & timeout) const
 {
     wait(timeout);
 
     return get(pname);
 }
 
-GLuint64 Query::waitAndGet64(GLenum pname, const std::chrono::duration<int, std::nano>& timeout) const
+gl::GLuint64 Query::waitAndGet64(gl::GLenum pname, const std::chrono::duration<int, std::nano> & timeout) const
 {
     wait(timeout);
 
     return get64(pname);
 }
 
-void Query::counter(GLenum target) const
+void Query::counter(gl::GLenum target) const
 {
-	m_target = target;
-	
-	glQueryCounter(m_id, m_target);
-	CheckGLError();
+    gl::QueryCounter(m_id, target);
 }
 
-bool Query::isQuery() const
+bool Query::isQuery(gl::GLuint id)
 {
-	bool result = GL_TRUE == glIsQuery(m_id);
-	CheckGLError();
-	return result;
+    return gl::IsQuery(id) == gl::TRUE_;
 }
 
 } // namespace glow

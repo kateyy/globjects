@@ -1,8 +1,9 @@
 #include <glowutils/Icosahedron.h>
 
-#include <cmath>
 #include <iterator>
 #include <algorithm>
+
+#include <glbinding/functions.h>
 
 #include <glm/glm.hpp>
 
@@ -45,38 +46,36 @@ const std::array<vec3, 12> Icosahedron::vertices()
 const std::array<Icosahedron::Face, 20> Icosahedron::indices()
 {
     return std::array<Face, 20>{{
-        Face{{  0, 11,  5}}
-    ,   Face{{  0,  5,  1}}
-    ,   Face{{  0,  1,  7}}
-    ,   Face{{  0,  7, 10}}
-    ,   Face{{  0, 10, 11}}
+        Face{{  0, 11,  5 }}
+    ,   Face{{  0,  5,  1 }}
+    ,   Face{{  0,  1,  7 }}
+    ,   Face{{  0,  7, 10 }}
+    ,   Face{{  0, 10, 11 }}
 
-    ,   Face{{  1,  5,  9}}
-    ,   Face{{  5, 11,  4}}
-    ,   Face{{ 11, 10,  2}}
-    ,   Face{{ 10,  7,  6}}
-    ,   Face{{  7,  1,  8}}
+    ,   Face{{  1,  5,  9 }}
+    ,   Face{{  5, 11,  4 }}
+    ,   Face{{ 11, 10,  2 }}
+    ,   Face{{ 10,  7,  6 }}
+    ,   Face{{  7,  1,  8 }}
 
-    ,   Face{{  3,  9,  4}}
-    ,   Face{{  3,  4,  2}}
-    ,   Face{{  3,  2,  6}}
-    ,   Face{{  3,  6,  8}}
-    ,   Face{{  3,  8,  9}}
+    ,   Face{{  3,  9,  4 }}
+    ,   Face{{  3,  4,  2 }}
+    ,   Face{{  3,  2,  6 }}
+    ,   Face{{  3,  6,  8 }}
+    ,   Face{{  3,  8,  9 }}
 
-    ,   Face{{  4,  9,  5}}
-    ,   Face{{  2,  4, 11}}
-    ,   Face{{  6,  2, 10}}
-    ,   Face{{  8,  6,  7}}
-    ,   Face{{  9,  8,  1}}
+    ,   Face{{  4,  9,  5 }}
+    ,   Face{{  2,  4, 11 }}
+    ,   Face{{  6,  2, 10 }}
+    ,   Face{{  8,  6,  7 }}
+    ,   Face{{  9,  8,  1 }}
     }};
 }
 
-Icosahedron::Icosahedron(
-    const GLsizei iterations
-,   const GLuint vertexAttribLocation)
-:   m_vao(new VertexArrayObject)
-,   m_vertices(new Buffer(GL_ARRAY_BUFFER))
-,   m_indices(new Buffer(GL_ELEMENT_ARRAY_BUFFER))
+Icosahedron::Icosahedron(const gl::GLsizei iterations, const gl::GLuint vertexAttribLocation)
+: m_vao(new VertexArrayObject)
+, m_vertices(new Buffer)
+, m_indices(new Buffer)
 {
     auto v(vertices());
     auto i(indices());
@@ -86,20 +85,20 @@ Icosahedron::Icosahedron(
 
     refine(vertices, indices, static_cast<char>(clamp(iterations, 0, 8)));
 
-    m_indices->setData(indices, GL_STATIC_DRAW);
-    m_vertices->setData(vertices, GL_STATIC_DRAW);
+    m_indices->setData(indices, gl::STATIC_DRAW);
+    m_vertices->setData(vertices, gl::STATIC_DRAW);
 
-    m_size = static_cast<GLsizei>(indices.size() * 3);
+    m_size = static_cast<gl::GLsizei>(indices.size() * 3);
 
     m_vao->bind();
+
+    m_indices->bind(gl::ELEMENT_ARRAY_BUFFER);
 
     auto vertexBinding = m_vao->binding(0);
     vertexBinding->setAttribute(vertexAttribLocation);
     vertexBinding->setBuffer(m_vertices, 0, sizeof(vec3));
-    vertexBinding->setFormat(3, GL_FLOAT, GL_TRUE);
+    vertexBinding->setFormat(3, gl::FLOAT, gl::TRUE_);
     m_vao->enable(0);
-
-    m_indices->bind();
 
     m_vao->unbind();
 }
@@ -108,16 +107,18 @@ Icosahedron::~Icosahedron()
 {
 }
 
-void Icosahedron::draw(const GLenum mode)
+void Icosahedron::draw(const gl::GLenum mode)
 {
-    glEnable(GL_DEPTH_TEST);
-    CheckGLError();
+    gl::Enable(gl::DEPTH_TEST);
+
 
     m_vao->bind();
-    m_vao->drawElements(mode, m_size, GL_UNSIGNED_SHORT, nullptr);
+    m_vao->drawElements(mode, m_size, gl::UNSIGNED_SHORT, nullptr);
     m_vao->unbind();
 
-    // glDisable(GL_DEPTH_TEST); // TODO: Use stackable states
+    m_indices->unbind(gl::ELEMENT_ARRAY_BUFFER);
+
+    // gl::Disable(gl::DEPTH_TEST); // TODO: Use stackable states
 }
 
 void Icosahedron::refine(
@@ -125,7 +126,7 @@ void Icosahedron::refine(
 ,   std::vector<Face> & indices
 ,   const unsigned char levels)
 {
-    std::unordered_map<uint, GLushort> cache;
+    std::unordered_map<uint, gl::GLushort> cache;
 
     for(int i = 0; i < levels; ++i)
     {
@@ -135,13 +136,13 @@ void Icosahedron::refine(
         {
             Face & face = indices[f];
 
-            const GLushort a(face[0]);
-            const GLushort b(face[1]);
-            const GLushort c(face[2]);
+            const gl::GLushort a(face[0]);
+            const gl::GLushort b(face[1]);
+            const gl::GLushort c(face[2]);
 
-            const GLushort ab(split(a, b, vertices, cache));
-            const GLushort bc(split(b, c, vertices, cache));
-            const GLushort ca(split(c, a, vertices, cache));
+            const gl::GLushort ab(split(a, b, vertices, cache));
+            const gl::GLushort bc(split(b, c, vertices, cache));
+            const gl::GLushort ca(split(c, a, vertices, cache));
 
             face = { ab, bc, ca };
 
@@ -152,11 +153,11 @@ void Icosahedron::refine(
     }
 }
 
-GLushort Icosahedron::split(
-    const GLushort a
-,   const GLushort b
+gl::GLushort Icosahedron::split(
+    const gl::GLushort a
+,   const gl::GLushort b
 ,   std::vector<vec3> & points
-,   std::unordered_map<uint, GLushort> & cache)
+,   std::unordered_map<uint, gl::GLushort> & cache)
 {
     const bool aSmaller(a < b);
 
@@ -170,7 +171,7 @@ GLushort Icosahedron::split(
 
     points.push_back(normalize((points[a] + points[b]) * .5f));
 
-    const GLushort i = static_cast<GLushort>(points.size() - 1);
+    const gl::GLushort i = static_cast<gl::GLushort>(points.size() - 1);
 
     cache[hash] = i;
 

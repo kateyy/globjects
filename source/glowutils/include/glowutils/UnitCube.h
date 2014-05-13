@@ -2,12 +2,12 @@
 
 #include <array>
 
-#include <GL/glew.h>
+#include <glbinding/types.h>
 
 #include <glm/glm.hpp>
 
-#include <glow/ref_ptr.h>
-#include <glow/Referenced.h>
+#include <glowbase/ref_ptr.h>
+#include <glowbase/Referenced.h>
 
 #include <glowutils/glowutils_api.h>
 
@@ -25,11 +25,11 @@ class GLOWUTILS_API UnitCube : public glow::Referenced
     static const std::array<glm::vec3, 28> strip();
 
 public:
-    UnitCube(GLuint vertexAttribLocation = 0, GLuint normalAttribLocation = 1);
+    UnitCube(gl::GLuint vertexAttribLocation = 0, gl::GLuint normalAttribLocation = 1);
 
     /** draws the unit cube as single triangle strip. Note: interleaved array 
         is used, so the normal comes from the provoking vertex (expected to be
-        the default GL_LAST_VERTEX_CONVENTION). use flat interpolation to get 
+        the default gl::LAST_VERTEX_CONVENTION). use flat interpolation to get 
         the face normal within the fragment shader.
     */
     void draw();

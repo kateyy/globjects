@@ -1,14 +1,16 @@
 
-#include <GL/glew.h>
 
-#include <glow/global.h>
+
+#include <glow/Error.h>
+#include <glow/NamedString.h>
 #include <glow/Shader.h>
 #include <glow/debugmessageoutput.h>
+#include <glow/logging.h>
 
 #include <glowutils/File.h>
 #include <glowutils/File.h>
 #include <glowutils/ScreenAlignedQuad.h>
-#include <glowutils/global.h>
+#include <glowutils/glowutils.h>
 #include <glowutils/StringTemplate.h>
 
 #include <glowwindow/ContextFormat.h>
@@ -34,21 +36,23 @@ public:
 
     void createAndSetupShaders();
 
-    virtual void initialize(Window & ) override
+    virtual void initialize(Window & window) override
     {
+        ExampleWindowEventHandler::initialize(window);
+
         glow::debugmessageoutput::enable();
 
-        glClearColor(0.2f, 0.3f, 0.4f, 1.f);
-        CheckGLError();
+        gl::ClearColor(0.2f, 0.3f, 0.4f, 1.f);
 
-        glow::createNamedString("/shaderincludes/color.glsl", new glowutils::File("data/shaderincludes/color.glsl"));
+
+        glow::NamedString::create("/shaderincludes/color.glsl", new glowutils::File("data/shaderincludes/color.glsl"));
 
       glowutils::StringTemplate* fragmentShaderString = new glowutils::StringTemplate(new glowutils::File("data/shaderincludes/test.frag"));
 #ifdef MAC_OS
       fragmentShaderString->replace("#version 140", "#version 150");
 #endif
 
-      m_quad = new glowutils::ScreenAlignedQuad(new glow::Shader(GL_FRAGMENT_SHADER, fragmentShaderString));
+      m_quad = new glowutils::ScreenAlignedQuad(new glow::Shader(gl::FRAGMENT_SHADER, fragmentShaderString));
     }
     
     virtual void framebufferResizeEvent(ResizeEvent & event) override
@@ -57,14 +61,14 @@ public:
         int height = event.height();
         int side = std::min<int>(width, height);
 
-        glViewport((width - side) / 2, (height - side) / 2, side, side);
-        CheckGLError();
+        gl::Viewport((width - side) / 2, (height - side) / 2, side, side);
+
     }
 
     virtual void paintEvent(PaintEvent &) override
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        CheckGLError();
+        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+
 
         m_quad->draw();
     }
@@ -89,6 +93,12 @@ protected:
 */
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F5" << "\t\t" << "Reload shaders";
+
     ContextFormat format;
     format.setVersion(3, 0);
 

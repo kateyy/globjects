@@ -1,8 +1,9 @@
 
-#include <GL/glew.h>
+
+
+#include <glowbase/ref_ptr.h>
 
 #include <glow/Error.h>
-#include <glow/ref_ptr.h>
 #include <glow/Buffer.h>
 #include <glow/Program.h>
 #include <glow/Shader.h>
@@ -10,10 +11,10 @@
 #include <glow/VertexAttributeBinding.h>
 #include <glow/debugmessageoutput.h>
 #include <glow/State.h>
-#include <glow/global.h>
+#include <glow/glow.h>
 
 #include <glowutils/File.h>
-#include <glowutils/global.h>
+#include <glowutils/glowutils.h>
 #include <glowutils/StringTemplate.h>
 
 #include <glowwindow/Context.h>
@@ -39,15 +40,17 @@ public:
     {
     }
 
-    virtual void initialize(Window & ) override
+    virtual void initialize(Window & window) override
     {
+        ExampleWindowEventHandler::initialize(window);
+
         glow::debugmessageoutput::enable();
 
-        glClearColor(0.2f, 0.3f, 0.4f, 1.f);
-        CheckGLError();
+        gl::ClearColor(0.2f, 0.3f, 0.4f, 1.f);
+
 
         m_defaultPointSizeState = new glow::State();
-        m_defaultPointSizeState->pointSize(glow::getFloat(GL_POINT_SIZE));
+        m_defaultPointSizeState->pointSize(glow::getFloat(gl::POINT_SIZE));
         m_thinnestPointSizeState = new glow::State();
         m_thinnestPointSizeState->pointSize(2.0f);
         m_thinPointSizeState = new glow::State();
@@ -57,12 +60,12 @@ public:
         m_thickPointSizeState = new glow::State();
         m_thickPointSizeState->pointSize(20.0f);
         m_disableRasterizerState = new glow::State();
-        m_disableRasterizerState->enable(GL_RASTERIZER_DISCARD);
+        m_disableRasterizerState->enable(gl::RASTERIZER_DISCARD);
         m_enableRasterizerState = new glow::State();
-        m_enableRasterizerState->disable(GL_RASTERIZER_DISCARD);
+        m_enableRasterizerState->disable(gl::RASTERIZER_DISCARD);
 
         m_vao = new glow::VertexArrayObject();
-        m_buffer = new glow::Buffer(GL_ARRAY_BUFFER);
+        m_buffer = new glow::Buffer();
 
         glowutils::StringTemplate* vertexShaderSource = new glowutils::StringTemplate(new glowutils::File("data/states/standard.vert"));
         glowutils::StringTemplate* fragmentShaderSource = new glowutils::StringTemplate(new glowutils::File("data/states/standard.frag"));
@@ -73,8 +76,8 @@ public:
 #endif
         
         m_shaderProgram = new glow::Program();
-        m_shaderProgram->attach(new glow::Shader(GL_VERTEX_SHADER, vertexShaderSource),
-                                new glow::Shader(GL_FRAGMENT_SHADER, fragmentShaderSource));
+        m_shaderProgram->attach(new glow::Shader(gl::VERTEX_SHADER, vertexShaderSource),
+                                new glow::Shader(gl::FRAGMENT_SHADER, fragmentShaderSource));
         
         m_buffer->setData(std::vector<glm::vec2>({
               glm::vec2(-0.8, 0.8), glm::vec2(-0.4, 0.8), glm::vec2(0.0, 0.8), glm::vec2(0.4, 0.8), glm::vec2(0.8, 0.8)
@@ -87,63 +90,63 @@ public:
             , glm::vec2(-0.8, -0.6), glm::vec2(-0.4, -0.6), glm::vec2(0.0, -0.6), glm::vec2(0.4, -0.6), glm::vec2(0.8, -0.6)
             , glm::vec2(-0.8, -0.8), glm::vec2(-0.4, -0.8), glm::vec2(0.0, -0.8), glm::vec2(0.4, -0.8), glm::vec2(0.8, -0.8)
             })
-            , GL_STATIC_DRAW
+            , gl::STATIC_DRAW
         );
 
         m_vao->binding(0)->setAttribute(0);
         m_vao->binding(0)->setBuffer(m_buffer, 0, sizeof(glm::vec2));
-        m_vao->binding(0)->setFormat(2, GL_FLOAT);
+        m_vao->binding(0)->setFormat(2, gl::FLOAT);
         m_vao->enable(0);
     }
     
     virtual void framebufferResizeEvent(ResizeEvent & event) override
     {
-        glViewport(0, 0, event.width(), event.height());
-        CheckGLError();
+        gl::Viewport(0, 0, event.width(), event.height());
+
     }
 
     virtual void paintEvent(PaintEvent &) override
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        CheckGLError();
+        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+
 
         m_shaderProgram->use();
 
         m_defaultPointSizeState->apply();
-        m_vao->drawArrays(GL_POINTS, 0, 5);
+        m_vao->drawArrays(gl::POINTS, 0, 5);
 
         m_thinnestPointSizeState->apply();
-        m_vao->drawArrays(GL_POINTS, 5, 5);
+        m_vao->drawArrays(gl::POINTS, 5, 5);
 
         m_thinPointSizeState->apply();
-        m_vao->drawArrays(GL_POINTS, 10, 5);
+        m_vao->drawArrays(gl::POINTS, 10, 5);
 
         m_normalPointSizeState->apply();
-        m_vao->drawArrays(GL_POINTS, 15, 5);
+        m_vao->drawArrays(gl::POINTS, 15, 5);
 
         m_thickPointSizeState->apply();
 
-        m_vao->drawArrays(GL_POINTS, 20, 1);
+        m_vao->drawArrays(gl::POINTS, 20, 1);
         m_disableRasterizerState->apply();
-        m_vao->drawArrays(GL_POINTS, 21, 1);
+        m_vao->drawArrays(gl::POINTS, 21, 1);
         m_enableRasterizerState->apply();
-        m_vao->drawArrays(GL_POINTS, 22, 1);
+        m_vao->drawArrays(gl::POINTS, 22, 1);
         m_disableRasterizerState->apply();
-        m_vao->drawArrays(GL_POINTS, 23, 1);
+        m_vao->drawArrays(gl::POINTS, 23, 1);
         m_enableRasterizerState->apply();
-        m_vao->drawArrays(GL_POINTS, 24, 1);
+        m_vao->drawArrays(gl::POINTS, 24, 1);
 
         m_normalPointSizeState->apply();
-        m_vao->drawArrays(GL_POINTS, 25, 5);
+        m_vao->drawArrays(gl::POINTS, 25, 5);
 
         m_thinPointSizeState->apply();
-        m_vao->drawArrays(GL_POINTS, 30, 5);
+        m_vao->drawArrays(gl::POINTS, 30, 5);
 
         m_thinnestPointSizeState->apply();
-        m_vao->drawArrays(GL_POINTS, 35, 5);
+        m_vao->drawArrays(gl::POINTS, 35, 5);
 
         m_defaultPointSizeState->apply();
-        m_vao->drawArrays(GL_POINTS, 35, 5);
+        m_vao->drawArrays(gl::POINTS, 35, 5);
 
         m_shaderProgram->release();
     }
@@ -168,6 +171,11 @@ protected:
 
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+
     ContextFormat format;
     format.setVersion(3, 0);
 

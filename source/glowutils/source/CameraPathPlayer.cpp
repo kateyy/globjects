@@ -27,6 +27,7 @@ namespace glowutils
 
 CameraPathPlayer::CameraPathPlayer(Camera & camera)
 : m_camera(camera)
+, m_bufferSize(0)
 {
 }
 
@@ -194,7 +195,7 @@ CameraPathPoint CameraPathPlayer::interpolate(const PathSection& section, const 
 
     vec3 eye = math::BezierCurve(p1.eye, section.c1, section.c2, p2.eye)(t);
 
-    //glow::debug() << eye << " (" << (p1.eye*(1.0f-t) + p2.eye*t) << ")";
+    //glowbase::debug() << eye << " (" << (p1.eye*(1.0f-t) + p2.eye*t) << ")";
 
     //eye = p1.eye*(1.0f-t) + p2.eye*t;
 
@@ -227,7 +228,7 @@ void CameraPathPlayer::createVao()
 {
     m_bufferSize = 100;
 
-    m_buffer = new glow::Buffer(GL_ARRAY_BUFFER);
+    m_buffer = new glow::Buffer();
 
     std::vector<vec4> array;
 
@@ -247,7 +248,7 @@ void CameraPathPlayer::createVao()
     m_vao = new glow::VertexArrayObject();
 
     m_vao->binding(0)->setBuffer(m_buffer, 0, sizeof(vec4));
-    m_vao->binding(0)->setFormat(4, GL_FLOAT);
+    m_vao->binding(0)->setFormat(4, gl::FLOAT);
     m_vao->binding(0)->setAttribute(0);
 
     m_vao->enable(0);
@@ -263,8 +264,8 @@ void CameraPathPlayer::createVao()
 #endif
 
     m_program->attach(
-        new glow::Shader(GL_VERTEX_SHADER, vertexShaderSource),
-        new glow::Shader(GL_FRAGMENT_SHADER, fragmentShaderSource)
+        new glow::Shader(gl::VERTEX_SHADER, vertexShaderSource),
+        new glow::Shader(gl::FRAGMENT_SHADER, fragmentShaderSource)
     );
 
     m_program->addUniform(new glow::Uniform<mat4>("transform"));
@@ -276,7 +277,7 @@ void CameraPathPlayer::draw(const mat4& viewProjection)
 
     m_program->use();
     m_vao->bind();
-    m_vao->drawArrays(GL_LINE_STRIP, 0, m_bufferSize);
+    m_vao->drawArrays(gl::LINE_STRIP, 0, m_bufferSize);
     m_vao->unbind();
     m_program->release();
 }

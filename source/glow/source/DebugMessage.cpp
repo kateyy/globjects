@@ -2,127 +2,115 @@
 
 #include <sstream>
 
+#include <glbinding/constants.h>
+
 namespace glow {
 
-DebugMessage::DebugMessage(
-    GLenum source,
-    GLenum type,
-    GLuint id,
-    GLenum severity,
-    const std::string& message
-)
-: source(source)
-, type(type)
-, id(id)
-, severity(severity)
-, message(message)
-, file(nullptr)
-, line(0)
+DebugMessage::DebugMessage(gl::GLenum source, gl::GLenum type, gl::GLuint id, gl::GLenum severity, const std::string & message)
+: m_source(source)
+, m_type(type)
+, m_id(id)
+, m_severity(severity)
+, m_message(message)
 {
 }
 
-DebugMessage::DebugMessage(
-    GLenum source,
-    GLenum type,
-    GLuint id,
-    GLenum severity,
-    const std::string& message,
-    const char* file, int line
-)
-: source(source)
-, type(type)
-, id(id)
-, severity(severity)
-, message(message)
-, file(file)
-, line(line)
+bool DebugMessage::isManualErrorMessage() const
 {
+    return false;
 }
 
-const char* DebugMessage::severityString() const
+gl::GLenum DebugMessage::source() const
 {
-    return severityString(severity);
+    return m_source;
 }
 
-const char* DebugMessage::sourceString() const
+gl::GLenum DebugMessage::type() const
 {
-    return sourceString(source);
+    return m_type;
 }
 
-const char* DebugMessage::typeString() const
+gl::GLuint DebugMessage::id() const
 {
-    return typeString(type);
+    return m_id;
+}
+
+gl::GLenum DebugMessage::severity() const
+{
+    return m_severity;
+}
+
+const std::string & DebugMessage::message() const
+{
+    return m_message;
 }
 
 std::string DebugMessage::toString() const
 {
     std::stringstream stream;
 
-    stream << typeString(type);
-    if (file) {
-        stream << " [" << file << ":" << line << "]";
-    }
     stream
-    << ": " << std::hex << "0x" << id << std::dec
-    << ", " << severityString(severity) << " severity"
-    << " (" << sourceString(source) << ")"
-    << std::endl
-    << "\t" << message;
+        << typeString()
+        << ": " << std::hex << "0x" << m_id << std::dec
+        << ", " << severityString() << " severity"
+        << " (" << sourceString() << ")"
+        << std::endl
+        << "\t" << m_message;
 
     return stream.str();
 }
 
-const char* DebugMessage::severityString(GLenum severity)
+std::string DebugMessage::severityString() const
 {
-    switch (severity)
+    switch (m_severity)
     {
-        case GL_DEBUG_SEVERITY_HIGH_ARB:
+        case gl::DEBUG_SEVERITY_HIGH_ARB:
             return "high";
-        case GL_DEBUG_SEVERITY_MEDIUM_ARB:
+        case gl::DEBUG_SEVERITY_MEDIUM_ARB:
             return "medium";
-        case GL_DEBUG_SEVERITY_LOW_ARB:
+        case gl::DEBUG_SEVERITY_LOW_ARB:
             return "low";
         default:
             return "unknown";
     }
 }
 
-const char* DebugMessage::sourceString(GLenum source)
+std::string DebugMessage::sourceString() const
 {
-    switch (source)
+    switch (m_source)
     {
-        case GL_DEBUG_SOURCE_API_ARB:
+        case gl::DEBUG_SOURCE_API_ARB:
             return "API";
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
+        case gl::DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
             return "Window System";
-        case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
+        case gl::DEBUG_SOURCE_SHADER_COMPILER_ARB:
             return "Shader Compiler";
-        case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
+        case gl::DEBUG_SOURCE_THIRD_PARTY_ARB:
             return "Third Party";
-        case GL_DEBUG_SOURCE_APPLICATION_ARB:
+        case gl::DEBUG_SOURCE_APPLICATION_ARB:
             return "Application";
-        case GL_DEBUG_SOURCE_OTHER_ARB:
+        case gl::DEBUG_SOURCE_OTHER_ARB:
             return "Other";
         default:
             return "Unknown";
     }
 }
 
-const char* DebugMessage::typeString(GLenum type)
+std::string DebugMessage::typeString() const
 {
-    switch (type)
+    switch (m_type)
     {
-        case GL_DEBUG_TYPE_OTHER_ARB:
+        case gl::DEBUG_TYPE_OTHER_ARB:
             return "other";
-        case GL_DEBUG_TYPE_ERROR_ARB:
+        case gl::DEBUG_TYPE_ERROR_ARB:
             return "error";
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
+        case gl::DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
             return "deprecated behavior";
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
+        case gl::DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
             return "undefined behavior";
-        case GL_DEBUG_TYPE_PORTABILITY_ARB:
+        case gl::DEBUG_TYPE_PORTABILITY_ARB:
             return "portability";
-        case GL_DEBUG_TYPE_PERFORMANCE_ARB:
+        case gl::DEBUG_TYPE_PERFORMANCE_ARB:
             return "performance";
         default:
             return "unknown";

@@ -5,14 +5,16 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-# Code Generation
-add_subdirectory(codegeneration)
-
 # Libraries
 set(IDE_FOLDER "")
 add_subdirectory(glow)
-add_subdirectory(glowutils)
-add_subdirectory(glowwindow)
+add_subdirectory(glowbase)
+if (OPTION_BUILD_GLOW_UTILS)
+	add_subdirectory(glowutils)
+endif()
+if (OPTION_BUILD_GLOW_WINDOW)
+	add_subdirectory(glowwindow)
+endif()
 
 # Examples
 set(IDE_FOLDER "Examples")

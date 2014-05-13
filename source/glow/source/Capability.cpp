@@ -2,23 +2,23 @@
 
 #include <glow/State.h>
 #include <glow/Error.h>
-#include <glow/global.h>
+#include <glow/glow.h>
 
 namespace glow {
 
-Capability::Capability(GLenum capability)
+Capability::Capability(gl::GLenum capability)
 : m_capability(capability)
 , m_enabled(false)
 {
 }
 
-Capability::Capability(GLenum capability, bool enabled)
+Capability::Capability(gl::GLenum capability, bool enabled)
 : m_capability(capability)
 , m_enabled(enabled)
 {
 }
 
-GLenum Capability::capability() const
+gl::GLenum Capability::capability() const
 {
     return m_capability;
 }

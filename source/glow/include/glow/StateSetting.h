@@ -3,10 +3,10 @@
 #include <utility>
 #include <set>
 
-#include <GL/glew.h>
+#include <glbinding/types.h>
 
 #include <glow/glow_api.h>
-#include <glow/FunctionCall.h>
+#include <glowbase/FunctionCall.h>
 
 namespace glow
 {
@@ -20,10 +20,10 @@ public:
     bool operator==(const StateSettingType & other) const;
     std::size_t hash() const;
 
-    void specializeType(GLenum subtype);
+    void specializeType(gl::GLenum subtype);
 protected:
     void * m_functionIdentifier;
-    std::set<GLenum> m_subtypes;
+    std::set<gl::GLenum> m_subtypes;
 };
 
 class GLOW_API StateSetting

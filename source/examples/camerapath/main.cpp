@@ -1,5 +1,5 @@
 
-#include <GL/glew.h>
+
 
 #include <algorithm>
 #include <random>
@@ -20,6 +20,7 @@
 #include <glow/VertexArrayObject.h>
 #include <glow/debugmessageoutput.h>
 
+#include <glowutils/Timer.h>
 #include <glowutils/File.h>
 #include <glowutils/AxisAlignedBoundingBox.h>
 #include <glowutils/Icosahedron.h>
@@ -29,9 +30,7 @@
 #include <glowutils/WorldInHandNavigation.h>
 #include <glowutils/CameraPathRecorder.h>
 #include <glowutils/CameraPathPlayer.h>
-#include <glowutils/AutoTimer.h>
-#include <glowutils/Timer.h>
-#include <glowutils/global.h>
+#include <glowutils/glowutils.h>
 #include <glowutils/StringTemplate.h>
 
 #include <glowwindow/ContextFormat.h>
@@ -111,9 +110,11 @@ public:
 
     virtual void initialize(Window & window) override
     {
+        ExampleWindowEventHandler::initialize(window);
+
         debugmessageoutput::enable();
 
-        glClearColor(1.0f, 1.0f, 1.0f, 0.f);
+        gl::ClearColor(1.0f, 1.0f, 1.0f, 0.f);
 
 
         m_sphere = new Program();
@@ -127,8 +128,8 @@ public:
 #endif
       
         m_sphere->attach(
-            new Shader(GL_VERTEX_SHADER, vertexShaderSource)
-        ,   new Shader(GL_FRAGMENT_SHADER, fragmentShaderSource));
+            new Shader(gl::VERTEX_SHADER, vertexShaderSource)
+        ,   new Shader(gl::FRAGMENT_SHADER, fragmentShaderSource));
 
         m_icosahedron = new Icosahedron(iterations);
         m_agrid = new AdaptiveGrid(16U);
@@ -154,13 +155,13 @@ public:
 
     virtual void framebufferResizeEvent(ResizeEvent & event) override
     {
-        glViewport(0, 0, event.width(), event.height());
+        gl::Viewport(0, 0, event.width(), event.height());
         m_camera.setViewport(event.width(), event.height());
     }
 
     virtual void paintEvent(PaintEvent &) override
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
         m_agrid->update();
         m_sphere->setUniform("transform", m_camera.viewProjection());
@@ -279,12 +280,12 @@ public:
 
     virtual float depthAt(const ivec2 & windowCoordinates) const override
     {
-        return AbstractCoordinateProvider::depthAt(m_camera, GL_DEPTH_COMPONENT, windowCoordinates);
+        return AbstractCoordinateProvider::depthAt(m_camera, gl::DEPTH_COMPONENT, windowCoordinates);
     }
 
     virtual vec3 objAt(const ivec2 & windowCoordinates) const override
     {
-        return unproject(m_camera, static_cast<GLenum>(GL_DEPTH_COMPONENT), windowCoordinates);
+        return unproject(m_camera, static_cast<gl::GLenum>(gl::DEPTH_COMPONENT), windowCoordinates);
     }
 
     virtual vec3 objAt(const ivec2 & windowCoordinates, const float depth) const override
@@ -302,12 +303,12 @@ public:
 
 protected:
 
-    ref_ptr<Program> m_sphere;
+    glow::ref_ptr<Program> m_sphere;
 
-    ref_ptr<Icosahedron> m_icosahedron;
-    ref_ptr<AdaptiveGrid> m_agrid;
+    glow::ref_ptr<Icosahedron> m_icosahedron;
+    glow::ref_ptr<AdaptiveGrid> m_agrid;
 
-    Timer timer;
+    glowutils::Timer timer;
     Camera m_camera;
     float angle;
     CameraPath path;
@@ -325,6 +326,19 @@ protected:
 */
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+    //glowbase::info() << "\t" << "F5" << "\t\t" << "Reload shaders";
+    //glowbase::info() << "\t" << "Space" << "\t\t" << "Reset camera";
+    glow::info() << "\t" << "Left Mouse" << "\t" << "Pan scene";
+    glow::info() << "\t" << "Right Mouse" << "\t" << "Rotate scene";
+    glow::info() << "\t" << "Mouse Wheel" << "\t" << "Zoom scene";
+    glow::info() << "\t" << "T" << "\t\t" << "Toggle camera path usage";
+    glow::info() << "\t" << "/" << "\t\t" << "Increase Icosahedron resolution";
+    glow::info() << "\t" << "]" << "\t\t" << "Decrease Icosahedron resolution";
+
     ContextFormat format;
     format.setVersion(3, 0);
     format.setDepthBufferSize(16);
@@ -332,9 +346,16 @@ int main(int /*argc*/, char* /*argv*/[])
     Window window;
     window.setEventHandler(new EventHandler());
 
-    window.create(format, "Camera Path Example");
-    window.context()->setSwapInterval(Context::VerticalSyncronization);
-    window.show();
+    if (window.create(format, "Camera Path Example"))
+    {
+        window.context()->setSwapInterval(Context::VerticalSyncronization);
 
-    return MainLoop::run();
+        window.show();
+
+        return MainLoop::run();
+    }
+    else
+    {
+        return 1;
+    }
 }

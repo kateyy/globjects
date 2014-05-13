@@ -2,10 +2,11 @@
 
 #include <vector>
 
-#include <GL/glew.h>
 
-#include <glow/Referenced.h>
-#include <glow/ref_ptr.h>
+
+#include <glowbase/Referenced.h>
+#include <glowbase/ref_ptr.h>
+
 #include <glow/AbstractState.h>
 #include <glow/StateSetting.h>
 
@@ -28,19 +29,19 @@ public:
     void push();
     void pop();
 
-    virtual void enable(GLenum capability) override;
-    virtual void disable(GLenum capability) override;
-    virtual bool isEnabled(GLenum capability) const override;
-    virtual void enable(GLenum capability, int index) override;
-    virtual void disable(GLenum capability, int index) override;
-    virtual bool isEnabled(GLenum capability, int index) const override;
+    virtual void enable(gl::GLenum capability) override;
+    virtual void disable(gl::GLenum capability) override;
+    virtual bool isEnabled(gl::GLenum capability) const override;
+    virtual void enable(gl::GLenum capability, int index) override;
+    virtual void disable(gl::GLenum capability, int index) override;
+    virtual bool isEnabled(gl::GLenum capability, int index) const override;
     virtual void add(glow::StateSetting * setting) override;
 protected:
     glow::State* m_currentState;
     std::vector<glow::ref_ptr<glow::State>> m_stack;
 
     void undoState(glow::State * state);
-    glow::Capability * findCapability(GLenum capability);
+    glow::Capability * findCapability(gl::GLenum capability);
     glow::StateSetting * findSetting(const glow::StateSettingType & type);
 protected:
     static StackedState * s_instance;

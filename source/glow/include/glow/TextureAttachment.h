@@ -1,15 +1,17 @@
 #pragma once
 
-#include <GL/glew.h>
+#include <glbinding/types.h>
+
+#include <glowbase/ref_ptr.h>
 
 #include <glow/glow_api.h>
-#include <glow/ref_ptr.h>
 #include <glow/FrameBufferAttachment.h>
 
 namespace glow 
 {
 
 class Texture;
+class FrameBufferObject;
 
 /** \brief Encapsulates texture attachments of a frame buffer object.
     
@@ -21,20 +23,20 @@ class Texture;
 class GLOW_API TextureAttachment : public FrameBufferAttachment
 {
 public:
-    TextureAttachment(Texture * texture, GLenum attachment, GLint level, GLint layer = -1);
+    TextureAttachment(FrameBufferObject * fbo, gl::GLenum attachment, Texture * texture, gl::GLint level, gl::GLint layer = -1);
 
     virtual bool isTextureAttachment() const override;
 	Texture * texture();
     const Texture * texture() const;
 
-    GLint level() const;
+    gl::GLint level() const;
 
     bool hasLayer() const;
-    GLint layer() const;
+    gl::GLint layer() const;
 protected:
-	ref_ptr<Texture> m_texture;
-    GLint m_level;
-    GLint m_layer;
+    ref_ptr<Texture> m_texture;
+    gl::GLint m_level;
+    gl::GLint m_layer;
 };
 
 } // namespace glow

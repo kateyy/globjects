@@ -1,5 +1,5 @@
 
-#include <GL/glew.h>
+#include <glbinding/functions.h>
 
 #include <algorithm>
 #include <random>
@@ -17,14 +17,13 @@
 #include <glow/logging.h>
 #include <glow/debugmessageoutput.h>
 
+#include <glowutils/Timer.h>
 #include <glowutils/Icosahedron.h>
 #include <glowutils/AdaptiveGrid.h>
 #include <glowutils/Camera.h>
 #include <glowutils/File.h>
 #include <glowutils/File.h>
-#include <glowutils/AutoTimer.h>
-#include <glowutils/Timer.h>
-#include <glowutils/global.h>
+#include <glowutils/glowutils.h>
 
 #include <glowwindow/ContextFormat.h>
 #include <glowwindow/Context.h>
@@ -50,21 +49,23 @@ public:
     {
     }
 
-    virtual void initialize(Window & ) override
+    virtual void initialize(Window & window) override
     {
+        ExampleWindowEventHandler::initialize(window);
+
         glow::debugmessageoutput::enable();
 
-        glClearColor(1.0f, 1.0f, 1.0f, 0.f);
-        CheckGLError();
+        gl::ClearColor(1.0f, 1.0f, 1.0f, 0.f);
+
 
         m_sphere = new glow::Program();
         m_sphere->attach(
-            glowutils::createShaderFromFile(GL_VERTEX_SHADER, "data/tessellation/sphere.vert")
-        ,   glowutils::createShaderFromFile(GL_TESS_CONTROL_SHADER, "data/tessellation/sphere.tcs")
-        ,   glowutils::createShaderFromFile(GL_TESS_EVALUATION_SHADER, "data/tessellation/sphere.tes")
-        ,   glowutils::createShaderFromFile(GL_GEOMETRY_SHADER, "data/tessellation/sphere.geom")
-        ,   glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/tessellation/sphere.frag")
-        ,   glowutils::createShaderFromFile(GL_FRAGMENT_SHADER, "data/common/phong.frag"));
+            glowutils::createShaderFromFile(gl::VERTEX_SHADER, "data/tessellation/sphere.vert")
+        ,   glowutils::createShaderFromFile(gl::TESS_CONTROL_SHADER, "data/tessellation/sphere.tcs")
+        ,   glowutils::createShaderFromFile(gl::TESS_EVALUATION_SHADER, "data/tessellation/sphere.tes")
+        ,   glowutils::createShaderFromFile(gl::GEOMETRY_SHADER, "data/tessellation/sphere.geom")
+        ,   glowutils::createShaderFromFile(gl::FRAGMENT_SHADER, "data/tessellation/sphere.frag")
+        ,   glowutils::createShaderFromFile(gl::FRAGMENT_SHADER, "data/common/phong.frag"));
 
         m_icosahedron = new glowutils::Icosahedron();
         m_agrid = new glowutils::AdaptiveGrid(16U);
@@ -83,20 +84,20 @@ public:
         int width = event.width();
         int height = event.height();
 
-        glViewport(0, 0, width, height);
-        CheckGLError();
+        gl::Viewport(0, 0, width, height);
+
 
         m_camera.setViewport(width, height);
     }
 
     virtual void paintEvent(PaintEvent &) override
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        CheckGLError();
+        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+
 
         m_agrid->update();
 
-        float t = static_cast<float>(m_time.elapsed() * 4e-10f);
+        float t = static_cast<float>(m_time.elapsed().count()) * 4e-10f;
         mat4 R = glm::rotate(t * 10.f, vec3(sin(t * 0.321), cos(t * 0.234), sin(t * 0.123)));
 
         m_sphere->setUniform("transform", m_camera.viewProjection());
@@ -106,8 +107,8 @@ public:
         m_sphere->setUniform("level", level);
 
         m_sphere->use();
-        glPatchParameteri(GL_PATCH_VERTICES, 3);
-        m_icosahedron->draw(GL_PATCHES);
+        gl::PatchParameteri(gl::PATCH_VERTICES, 3);
+        m_icosahedron->draw(gl::PATCHES);
         m_sphere->release();
 
         m_agrid->draw();
@@ -145,6 +146,12 @@ protected:
 */
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F5" << "\t\t" << "Reload shaders";
+
     ContextFormat format;
     format.setVersion(4, 0);
     format.setProfile(ContextFormat::CoreProfile);

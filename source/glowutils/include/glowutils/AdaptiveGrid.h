@@ -2,8 +2,8 @@
 
 #include <glm/glm.hpp>
 
-#include <glow/ref_ptr.h>
-#include <glow/Referenced.h>
+#include <glowbase/ref_ptr.h>
+#include <glowbase/Referenced.h>
 
 #include <glowutils/glowutils_api.h>
 
@@ -45,15 +45,13 @@ class Camera;
 
     \endcode
 */
-class GLOWUTILS_API AdaptiveGrid : public glow::Referenced 
+class GLOWUTILS_API AdaptiveGrid : public glow::Referenced
 {
 public:
     AdaptiveGrid(
         unsigned short segments = 16
     ,   const glm::vec3 & location = glm::vec3(0.f, 0.f, 0.f)
     ,   const glm::vec3 & normal = glm::vec3(0.f, 1.f, 0.f));
-
-    virtual ~AdaptiveGrid();
 
     void setColor(const glm::vec3 & color);
 
@@ -96,6 +94,8 @@ private:
     glm::mat4 m_transform;
 
     unsigned short m_size;
+protected:
+    virtual ~AdaptiveGrid();
 };
 
 } // namespace glowutils

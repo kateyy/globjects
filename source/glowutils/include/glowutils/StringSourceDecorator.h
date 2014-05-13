@@ -1,8 +1,9 @@
 #pragma once
 
+#include <glowbase/ChangeListener.h>
+#include <glowbase/ref_ptr.h>
+
 #include <glow/AbstractStringSource.h>
-#include <glow/ChangeListener.h>
-#include <glow/ref_ptr.h>
 
 #include <glowutils/glowutils_api.h>
 
@@ -13,10 +14,11 @@ class GLOWUTILS_API StringSourceDecorator : public glow::AbstractStringSource, p
 {
 public:
     StringSourceDecorator(glow::AbstractStringSource * source);
-    virtual ~StringSourceDecorator();
 
     virtual void update();
 protected:
+    virtual ~StringSourceDecorator();
+
     virtual void notifyChanged(const Changeable * changeable) override;
 protected:
     glow::ref_ptr<glow::AbstractStringSource> m_internal;

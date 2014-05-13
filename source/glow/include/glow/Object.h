@@ -2,14 +2,13 @@
 
 #include <string>
 
-#include <GL/glew.h>
+#include <glbinding/types.h>
+
+#include <glowbase/Referenced.h>
 
 #include <glow/glow_api.h>
-#include <glow/Referenced.h>
 
-
-namespace glow
-{
+namespace glow {
 
 class ObjectVisitor;
 
@@ -25,10 +24,9 @@ class GLOW_API Object : public Referenced
 {
     
 public:
-    
-	virtual ~Object();
+    virtual void accept(ObjectVisitor & visitor) = 0;
 
-	virtual void accept(ObjectVisitor & visitor) = 0;
+    gl::GLuint id() const;
 
     /**
      * Returns the raw OpenGL ID of this OpenGL object as a GLuint.
@@ -41,8 +39,12 @@ public:
 
 	bool ownsGLObject() const;
 
+    void takeOwnership();
+    void releaseOwnership();
+
 	const std::string & name() const;
 	void setName(const std::string & name);
+    bool hasName() const;
 
     
 private:
@@ -64,9 +66,9 @@ private:
 
     
 protected:
-    Object(GLuint id, bool ownsGLObject = true);
+    Object(gl::GLuint id, bool takeOwnership = true);
+    virtual ~Object();
 
-    
 protected:
     /**
      * The OpenGL id of this object as a GLuint

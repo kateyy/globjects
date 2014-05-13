@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8.9 FATAL_ERROR)
 set(META_PROJECT_NAME        "glow")
 set(META_VERSION_MAJOR       "0")
 set(META_VERSION_MINOR       "3")
-set(META_VERSION_PATCH       "0")
+set(META_VERSION_PATCH       "1")
 set(META_VERSION             "${META_VERSION_MAJOR}.${META_VERSION_MINOR}.${META_VERSION_PATCH}")
 set(META_AUTHOR_ORGANIZATION "hpicgs group")
 set(META_AUTHOR_DOMAIN       "https://github.com/hpicgs/glow/")
@@ -18,9 +18,11 @@ option(OPTION_LIMIT_CONFIGS       "Generate limited configs (Release; Debug)" ON
 option(OPTION_PORTABLE_INSTALL    "Install to a local directory instead of the system" OFF)
 option(OPTION_BUILD_STATIC        "Build static libraries" OFF)
 option(OPTION_BUILD_TESTS         "Build tests (if gmock and gtest are found)" ON)
-option(OPTION_BUILD_EXAMPLES      "Build examples" ON)
+option(OPTION_BUILD_EXAMPLES      "Build examples (requires optional modules glowutils and glowwindow)" ON)
 option(OPTION_ERRORS_AS_EXCEPTION "Throw exceptions" OFF)
 option(OPTION_GENERATE_GL_INFO    "Automatically generate OpenGL extension and enum information" OFF)
+option(OPTION_BUILD_GLOW_UTILS    "Build glowutils (required for examples)" ON)
+option(OPTION_BUILD_GLOW_WINDOW   "Build glowwindow (required for examples)" ON)
 
 
 #

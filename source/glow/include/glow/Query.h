@@ -2,7 +2,9 @@
 
 #include <chrono>
 
-#include <GL/glew.h>
+#include <glbinding/constants.h>
+
+
 
 #include <glow/glow_api.h>
 #include <glow/Object.h>
@@ -28,7 +30,7 @@ namespace glow
     An example time measurement:
     \code{.cpp}
 
-        Query * query = new Query(GL_TIME_ELAPSED);
+        Query * query = new Query(gl::TIME_ELAPSED);
         query->begin();
     
         // more GL calls
@@ -36,7 +38,7 @@ namespace glow
         query->end();
     
         query->wait();
-        GLuint timeElapsed = query->get();
+        gl::GLuint timeElapsed = query->get();
         // Note: sometimes it's important to use the 64 bit equivalent, because the 32 bit version can only capture time up to 4 seconds.
 
     \endcode
@@ -51,7 +53,7 @@ namespace glow
         // even more GL calls
     
         query->wait();
-        GLuint64 timestamp = query->get64();
+        gl::GLuint64 timestamp = query->get64();
         // Note: the result is the timestamp on the GPU right after the first GL calls finished and before the second calls started.
 
     \endcode
@@ -62,49 +64,50 @@ namespace glow
 class GLOW_API Query : public Object
 {
 public:
-	Query();
-	Query(GLenum target);
-	static Query* timestamp();
-	static Query* current(GLenum target);
+    Query();
+    static Query * fromId(gl::GLuint id, bool takeOwnership = false);
+
+    static Query * current(gl::GLenum target);
+    static Query * timestamp();
 	
-	virtual ~Query();
-	
-	static int counterBits(GLenum target);
+    static gl::GLint get(gl::GLenum target, gl::GLenum pname);
+    static gl::GLint getIndexed(gl::GLenum target, gl::GLuint index, gl::GLenum pname);
+
+    static gl::GLint getCounterBits(gl::GLenum target);
 
     virtual void accept(ObjectVisitor& visitor) override;
 
-    void begin() const;
-    void begin(GLenum target) const;
-    void end() const;
-	
-	bool isQuery() const;
-	
-    void get(GLenum pname, GLuint * param) const;
-    void get64(GLenum pname, GLuint64 * param) const;
+    void begin(gl::GLenum target) const;
+    void end(gl::GLenum target) const;
 
-	GLuint get(GLenum pname = GL_QUERY_RESULT) const;
-    GLuint64 get64(GLenum pname = GL_QUERY_RESULT) const;
+    void beginIndexed(gl::GLenum target, gl::GLuint index) const;
+    void endIndexed(gl::GLenum target, gl::GLuint index) const;
+	
+    static bool isQuery(gl::GLuint id);
+
+	gl::GLuint get(gl::GLenum pname = gl::QUERY_RESULT) const;
+    gl::GLuint64 get64(gl::GLenum pname = gl::QUERY_RESULT) const;
 	
 	bool resultAvailable() const;
     void wait() const;
-    void wait(const std::chrono::duration<int, std::nano>& timeout) const;
+    void wait(const std::chrono::duration<int, std::nano> & timeout) const;
 	
-    GLuint waitAndGet(GLenum pname = GL_QUERY_RESULT) const;
-    GLuint64 waitAndGet64(GLenum pname = GL_QUERY_RESULT) const;
+    gl::GLuint waitAndGet(gl::GLenum pname = gl::QUERY_RESULT) const;
+    gl::GLuint64 waitAndGet64(gl::GLenum pname = gl::QUERY_RESULT) const;
 
-    GLuint waitAndGet(const std::chrono::duration<int, std::nano>& timeout, GLenum pname = GL_QUERY_RESULT) const;
-    GLuint64 waitAndGet64(const std::chrono::duration<int, std::nano>& timeout, GLenum pname = GL_QUERY_RESULT) const;
+    gl::GLuint waitAndGet(const std::chrono::duration<int, std::nano> & timeout, gl::GLenum pname = gl::QUERY_RESULT) const;
+    gl::GLuint64 waitAndGet64(const std::chrono::duration<int, std::nano> & timeout, gl::GLenum pname = gl::QUERY_RESULT) const;
 
-    GLuint waitAndGet(GLenum pname, const std::chrono::duration<int, std::nano>& timeout) const;
-    GLuint64 waitAndGet64(GLenum pname, const std::chrono::duration<int, std::nano>& timeout) const;
+    gl::GLuint waitAndGet(gl::GLenum pname, const std::chrono::duration<int, std::nano> & timeout) const;
+    gl::GLuint64 waitAndGet64(gl::GLenum pname, const std::chrono::duration<int, std::nano> & timeout) const;
 	
-    void counter(GLenum target = GL_TIMESTAMP) const;
+    void counter(gl::GLenum target = gl::TIMESTAMP) const;
 protected:
-    mutable GLenum m_target;
 	
-	Query(GLuint id, GLenum target);
+    Query(gl::GLuint id, bool takeOwnership);
+    virtual ~Query();
 
-	static GLuint genQuery();
+	static gl::GLuint genQuery();
 };
 
 } // namespace glow

@@ -7,13 +7,10 @@
 namespace glow
 {
 
-RenderBufferAttachment::RenderBufferAttachment(
-    RenderBufferObject * renderBuffer
-,   GLenum attachment)
-: FrameBufferAttachment(attachment)
+RenderBufferAttachment::RenderBufferAttachment(FrameBufferObject * fbo,  gl::GLenum attachment, RenderBufferObject * renderBuffer)
+: FrameBufferAttachment(fbo, attachment)
 , m_renderBuffer(renderBuffer)
 {
-    assert(renderBuffer != nullptr);
 }
 
 bool RenderBufferAttachment::isRenderBufferAttachment() const

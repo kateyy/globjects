@@ -1,10 +1,13 @@
 
 #include <iostream>
 
-#include <GL/glew.h>
+
+
+#include <glbinding/constants.h>
 
 #include <glow/Error.h>
 #include <glow/debugmessageoutput.h>
+#include <glow/logging.h>
 
 #include <glowwindow/Window.h>
 #include <glowwindow/ContextFormat.h>
@@ -27,30 +30,32 @@ public:
     {
     }
 
-    virtual void initialize(Window & ) override
+    virtual void initialize(Window & window) override
     {
+        ExampleWindowEventHandler::initialize(window);
+
         glow::debugmessageoutput::enable();
 
-        glClearColor(1.f, 1.f, 1.f, 1.f);
-        CheckGLError();
+        gl::ClearColor(1.f, 1.f, 1.f, 1.f);
+
     }
 
     virtual void framebufferResizeEvent(ResizeEvent & event) override
     {
-        glViewport(0, 0, event.width(), event.height());
-        CheckGLError();
+        gl::Viewport(0, 0, event.width(), event.height());
+
     }
 
     virtual void paintEvent(PaintEvent &) override
     {
-        glClearColor(
+        gl::ClearColor(
             static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
             static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
             static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
             1.f);
-        CheckGLError();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        CheckGLError();
+
+        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+
     }
 
     virtual void idle(Window & window) override
@@ -66,6 +71,11 @@ public:
 */
 int main(int /*argc*/, char* /*argv*/[])
 {
+    glow::info() << "Usage:";
+    glow::info() << "\t" << "ESC" << "\t\t" << "Close example";
+    glow::info() << "\t" << "ALT + Enter" << "\t" << "Toggle fullscreen";
+    glow::info() << "\t" << "F11" << "\t\t" << "Toggle fullscreen";
+
     ContextFormat format;
     format.setVersion(3, 0);
 
@@ -82,9 +92,6 @@ int main(int /*argc*/, char* /*argv*/[])
 
         windows[i].show();
         windows[i].context()->setSwapInterval(Context::NoVerticalSyncronization);
-
-        // make some random windows post quit on destroy ;)
-        windows[i].quitOnDestroy(0 != rand() % 2);
     }
 
     return MainLoop::run();

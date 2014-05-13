@@ -4,6 +4,11 @@
 # GLOW_LIBRARIES
 # GLOW_INCLUDES
 
+# GLOW_BASE_LIBRARY
+# GLOW_BASE_LIBRARY_RELEASE
+# GLOW_BASE_LIBRARY_DEBUG
+# GLOW_BASE_INCLUDE_DIR
+
 # GLOW_LIBRARY
 # GLOW_LIBRARY_RELEASE
 # GLOW_LIBRARY_DEBUG
@@ -60,7 +65,7 @@ macro (find LIB_NAME HEADER)
 
     find_path(${LIB_NAME_UPPER}_INCLUDE_DIR ${HEADER}
         ${ENVGLOW_DIR}/include
-        ${ENVTEMPLATE_DIR}/source/${LIBNAME}/include
+        ${ENVGLOW_DIR}/source/${LIBNAME}/include
         ${GLOW_DIR}/include
         ${GLOW_DIR}/source/${LIBNAME}/include
         ${ENVPROGRAMFILES}/glow/include
@@ -98,6 +103,7 @@ macro (find LIB_NAME HEADER)
 
 endmacro()
 
+find(base glowbase/glowbase_api.h ${LIB_PATHS})
 find(glow   glow/glow_api.h             ${LIB_PATHS})
 find(utils  glowutils/glowutils_api.h   ${LIB_PATHS})
 find(window glowwindow/glowwindow_api.h ${LIB_PATHS})

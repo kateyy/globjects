@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
+#include <glbinding/types.h>
 
 #include <glow/glow_api.h>
 #include <glow/Object.h>
@@ -16,22 +16,24 @@ class GLOW_API Sampler : public Object
 {
 public:
     Sampler();
-    Sampler(GLuint id, bool ownsGLObject = true);
-    virtual ~Sampler();
+    static Sampler * fromId(gl::GLuint id, bool takeOwnership = false);
 
     virtual void accept(ObjectVisitor & visitor) override;
 
-    void bind(GLuint unit) const;
+    void bind(gl::GLuint unit) const;
+    static void unbind(gl::GLuint unit);
 
-    void setParameter(GLenum name, GLint value);
-    void setParameter(GLenum name, GLfloat value);
+    void setParameter(gl::GLenum name, gl::GLint value);
+    void setParameter(gl::GLenum name, gl::GLfloat value);
 
-    GLint getParameteri(GLenum pname) const;
-    GLfloat getParameterf(GLenum pname) const;
+    gl::GLint getParameteri(gl::GLenum pname) const;
+    gl::GLfloat getParameterf(gl::GLenum pname) const;
 
 protected:
-    static GLuint genSampler();
+    Sampler(gl::GLuint id, bool takeOwnership = true);
+    virtual ~Sampler();
 
+    static gl::GLuint genSampler();
 };
 
 } // namespace glow

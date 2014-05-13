@@ -1,55 +1,55 @@
 #include <glow/Sync.h>
+
+#include <glbinding/functions.h>
+
 #include <glow/Error.h>
 
 namespace glow
 {
 
-Sync * Sync::fence(GLenum condition, GLbitfield flags)
+Sync * Sync::fence(gl::GLenum condition, gl::GLbitfield flags)
 {
     return new Sync(fenceSync(condition, flags));
 }
 
-Sync::Sync(GLsync sync)
+Sync::Sync(gl::GLsync sync)
 : m_sync(sync)
 {
 }
 
 Sync::~Sync()
 {
-    glDeleteSync(m_sync);
+    gl::DeleteSync(m_sync);
 }
 
-GLsync Sync::fenceSync(GLenum condition, GLbitfield flags)
+gl::GLsync Sync::fenceSync(gl::GLenum condition, gl::GLbitfield flags)
 {
-    GLsync sync = glFenceSync(condition, flags);
-    CheckGLError();
-
-    return sync;
+    return gl::FenceSync(condition, flags);
 }
 
-GLenum Sync::clientWait(GLbitfield flags, GLuint64 timeout)
+gl::GLsync Sync::sync() const
 {
-    GLenum result = glClientWaitSync(m_sync, flags, timeout);
-    CheckGLError();
-
-    return result;
+    return m_sync;
 }
 
-void Sync::wait(GLbitfield flags, GLuint64 timeout)
+gl::GLenum Sync::clientWait(gl::GLbitfield flags, gl::GLuint64 timeout)
 {
-    glWaitSync(m_sync, flags, timeout);
-    CheckGLError();
+    return gl::ClientWaitSync(m_sync, flags, timeout);
 }
 
-void Sync::get(GLenum pname, GLsizei bufsize, GLsizei * length, GLint * values)
+void Sync::wait(gl::GLbitfield flags, gl::GLuint64 timeout)
 {
-    glGetSynciv(m_sync, pname, bufsize, length, values);
-    CheckGLError();
+    gl::WaitSync(m_sync, flags, timeout);
 }
 
-GLint Sync::get(GLenum pname)
+void Sync::get(gl::GLenum pname, gl::GLsizei bufsize, gl::GLsizei * length, gl::GLint * values)
 {
-    GLint result = 0;
+    gl::GetSynciv(m_sync, pname, bufsize, length, values);
+}
+
+gl::GLint Sync::get(gl::GLenum pname)
+{
+    gl::GLint result = 0;
     get(pname, sizeof(result), nullptr, &result);
 
     return result;

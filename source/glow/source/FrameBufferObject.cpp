@@ -2,6 +2,10 @@
 
 #include <cassert>
 
+#include <glbinding/functions.h>
+
+#include <glm/gtc/type_ptr.hpp>
+
 #include <glow/logging.h>
 #include <glow/Error.h>
 #include <glow/ObjectVisitor.h>
@@ -11,45 +15,59 @@
 #include <glow/Buffer.h>
 #include <glow/RenderBufferObject.h>
 #include <glow/Texture.h>
+#include <glow/constants.h>
 #include "pixelformat.h"
+
+#include "registry/ImplementationRegistry.h"
+#include "implementations/AbstractFrameBufferImplementation.h"
+
+namespace {
+
+const glow::AbstractFrameBufferImplementation & implementation()
+{
+    return glow::ImplementationRegistry::current().frameBufferImplementation();
+}
+
+}
 
 namespace glow
 {
 
-FrameBufferObject FrameBufferObject::s_defaultFBO(0, false);
-
 FrameBufferObject::FrameBufferObject()
 : Object(genFrameBuffer())
-, m_target(GL_FRAMEBUFFER)
 {
 }
 
-FrameBufferObject::FrameBufferObject(GLuint id, bool ownsGLObject)
-: Object(id, ownsGLObject)
-, m_target(GL_FRAMEBUFFER)
+FrameBufferObject::FrameBufferObject(gl::GLuint id, bool takeOwnership)
+: Object(id, takeOwnership)
 {
+}
+
+FrameBufferObject * FrameBufferObject::fromId(gl::GLuint id, bool takeOwnership)
+{
+    return new FrameBufferObject(id, takeOwnership);
 }
 
 FrameBufferObject * FrameBufferObject::defaultFBO()
 {
-    return &s_defaultFBO;
+    // TODO: this is dangerous as the receiver needs to delete this object.
+    // better store default objects in the ObjectRegistry
+    return new FrameBufferObject(0, false);
 }
 
 FrameBufferObject::~FrameBufferObject()
 {
 	if (ownsGLObject())
 	{
-		glDeleteFramebuffers(1, &m_id);
-		CheckGLError();
+        gl::DeleteFramebuffers(1, &m_id);
 	}
 }
 
-GLuint FrameBufferObject::genFrameBuffer()
+gl::GLuint FrameBufferObject::genFrameBuffer()
 {
-	GLuint id = 0;
+	gl::GLuint id = 0;
 
-	glGenFramebuffers(1, &id);
-	CheckGLError();
+    gl::GenFramebuffers(1, &id);
 
 	return id;
 }
@@ -59,247 +77,173 @@ void FrameBufferObject::accept(ObjectVisitor& visitor)
 	visitor.visitFrameBufferObject(this);
 }
 
-void FrameBufferObject::bind() const
+void FrameBufferObject::bind(gl::GLenum target) const
 {
-	glBindFramebuffer(m_target, m_id);
-	CheckGLError();
+    gl::BindFramebuffer(target, m_id);
 }
 
-void FrameBufferObject::bind(GLenum target) const
+void FrameBufferObject::unbind(gl::GLenum target)
 {
-	m_target = target;
-	glBindFramebuffer(target, m_id);
-	CheckGLError();
+    gl::BindFramebuffer(target, 0);
 }
 
-void FrameBufferObject::unbind() const
+void FrameBufferObject::setParameter(gl::GLenum pname, gl::GLint param)
 {
-	glBindFramebuffer(m_target, 0);
-	CheckGLError();
+    implementation().setParameter(this, pname, param);
 }
 
-void FrameBufferObject::unbind(GLenum target)
+gl::GLint FrameBufferObject::getAttachmentParameter(gl::GLenum attachment, gl::GLenum pname) const
 {
-    glBindFramebuffer(target, 0);
-    CheckGLError();
+    return implementation().getAttachmentParameter(this, attachment, pname);
 }
 
-void FrameBufferObject::setParameter(GLenum pname, GLint param)
+void FrameBufferObject::attachTexture(gl::GLenum attachment, Texture * texture, gl::GLint level)
 {
-	bind();
+    implementation().attachTexture(this, attachment, texture, level);
 
-	glFramebufferParameteri(m_target, pname, param);
-	CheckGLError();
+    addAttachment(new TextureAttachment(this, attachment, texture, level));
 }
 
-int FrameBufferObject::getAttachmentParameter(GLenum attachment, GLenum pname) const
+void FrameBufferObject::attachTexture1D(gl::GLenum attachment, Texture * texture, gl::GLint level)
 {
-    bind();
+    implementation().attachTexture1D(this, attachment, texture, level);
 
-    int result = 0;
-
-    glGetFramebufferAttachmentParameteriv(m_target, attachment, pname, &result);
-    CheckGLError();
-
-    return result;
+    addAttachment(new TextureAttachment(this, attachment, texture, level));
 }
 
-void FrameBufferObject::attachTexture(GLenum attachment, Texture* texture, GLint level)
+void FrameBufferObject::attachTexture2D(gl::GLenum attachment, Texture* texture, gl::GLint level)
 {
-    assert(texture != nullptr);
+    implementation().attachTexture2D(this, attachment, texture, level);
 
-	bind();
-
-	glFramebufferTexture(m_target, attachment, texture->id(), level);
-	CheckGLError();
-
-    attach(new TextureAttachment(texture, attachment, level));
+    addAttachment(new TextureAttachment(this, attachment, texture, level));
 }
 
-void FrameBufferObject::attachTexture1D(GLenum attachment, Texture* texture, GLint level)
+void FrameBufferObject::attachTexture3D(gl::GLenum attachment, Texture * texture, gl::GLint level, gl::GLint layer)
 {
-    assert(texture != nullptr);
+    implementation().attachTexture3D(this, attachment, texture, level, layer);
 
-	bind();
-
-	glFramebufferTexture1D(m_target, attachment, texture->target(), texture->id(), level);
-	CheckGLError();
-
-    attach(new TextureAttachment(texture, attachment, level));
+    addAttachment(new TextureAttachment(this, attachment, texture, level, layer));
 }
 
-void FrameBufferObject::attachTexture2D(GLenum attachment, Texture* texture, GLint level)
+void FrameBufferObject::attachTextureLayer(gl::GLenum attachment, Texture * texture, gl::GLint level, gl::GLint layer)
 {
-    assert(texture != nullptr);
+    implementation().attachTextureLayer(this, attachment, texture, level, layer);
 
-	bind();
-
-	glFramebufferTexture2D(m_target, attachment, texture->target(), texture->id(), level);
-	CheckGLError();
-
-    attach(new TextureAttachment(texture, attachment, level));
+    addAttachment(new TextureAttachment(this, attachment, texture, level, layer));
 }
 
-void FrameBufferObject::attachTexture3D(GLenum attachment, Texture * texture, GLint level, GLint layer)
+void FrameBufferObject::attachRenderBuffer(gl::GLenum attachment, RenderBufferObject * renderBuffer)
 {
-    assert(texture != nullptr);
+    implementation().attachRenderBuffer(this, attachment, renderBuffer);
 
-    bind();
-
-    glFramebufferTexture3D(m_target, attachment, texture->target(), texture->id(), level, layer);
-    CheckGLError();
-
-    attach(new TextureAttachment(texture, attachment, level));
+    addAttachment(new RenderBufferAttachment(this, attachment, renderBuffer));
 }
 
-void FrameBufferObject::attachTextureLayer(GLenum attachment, Texture* texture, GLint level, GLint layer)
+bool FrameBufferObject::detach(gl::GLenum attachment)
 {
-    assert(texture != nullptr);
+    FrameBufferAttachment * attachmentObject = getAttachment(attachment);
 
-	bind();
+    if (!attachmentObject)
+        return false;
 
-	glFramebufferTextureLayer(m_target, attachment, texture->id(), level, layer);
-	CheckGLError();
-
-    attach(new TextureAttachment(texture, attachment, level, layer));
-}
-
-void FrameBufferObject::attachRenderBuffer(GLenum attachment, RenderBufferObject* renderBuffer)
-{
-    assert(renderBuffer != nullptr);
-
-	bind();
-	renderBuffer->bind();
-
-	glFramebufferRenderbuffer(m_target, attachment, GL_RENDERBUFFER, renderBuffer->id());
-	CheckGLError();
-
-	attach(new RenderBufferAttachment(renderBuffer, attachment));
-}
-
-void FrameBufferObject::detach(GLenum attachment)
-{
-    FrameBufferAttachment* fAttachment = this->attachment(attachment);
-    if (!fAttachment)
-        return;
-
-    m_attachments.erase(attachment);
-
-    bind();
-
-    if (fAttachment->isTextureAttachment())
+    if (attachmentObject->isTextureAttachment())
     {
-        TextureAttachment * tAttachment = fAttachment->asTextureAttachment();
-        if (tAttachment->hasLayer())
+        TextureAttachment * textureAttachment = attachmentObject->asTextureAttachment();
+
+        if (textureAttachment->hasLayer())
         {
-            glFramebufferTextureLayer(m_target, attachment, 0, tAttachment->level(), tAttachment->layer());
-            CheckGLError();
+            implementation().attachTextureLayer(this, attachment, nullptr, textureAttachment->level(), textureAttachment->layer());
         }
         else
         {
-            glFramebufferTexture(m_target, attachment, 0, tAttachment->level());
-            CheckGLError();
+            implementation().attachTexture(this, attachment, nullptr, textureAttachment->level());
         }
     }
-    else if (fAttachment->isRenderBufferAttachment())
+    else if (attachmentObject->isRenderBufferAttachment())
     {
-        glFramebufferRenderbuffer(m_target, attachment, GL_RENDERBUFFER, 0);
-        CheckGLError();
+        implementation().attachRenderBuffer(this, attachment, nullptr);
     }
+
+    m_attachments.erase(attachment);
+
+    return true;
 }
 
-void FrameBufferObject::attach(FrameBufferAttachment* attachment)
+void FrameBufferObject::setReadBuffer(gl::GLenum mode) const
 {
-    assert(attachment != nullptr);
-
-	m_attachments[attachment->attachment()] = attachment;
+    implementation().setReadBuffer(this, mode);
 }
 
-void FrameBufferObject::setReadBuffer(GLenum mode) const
+void FrameBufferObject::setDrawBuffer(gl::GLenum mode) const
 {
-	bind(GL_READ_FRAMEBUFFER);
-
-	glReadBuffer(mode);
-	CheckGLError();
+    implementation().setDrawBuffer(this, mode);
 }
 
-void FrameBufferObject::setDrawBuffer(GLenum mode) const
-{
-	bind(GL_DRAW_FRAMEBUFFER);
-
-	glDrawBuffer(mode);
-	CheckGLError();
-}
-
-void FrameBufferObject::setDrawBuffers(GLsizei n, const GLenum* modes) const
+void FrameBufferObject::setDrawBuffers(gl::GLsizei n, const gl::GLenum * modes) const
 {
     assert(modes != nullptr || n == 0);
 
-	bind(GL_DRAW_FRAMEBUFFER);
-
-	glDrawBuffers(n, modes);
-	CheckGLError();
+    implementation().setDrawBuffers(this, n, modes);
 }
 
-void FrameBufferObject::setDrawBuffers(const std::vector<GLenum>& modes) const
+void FrameBufferObject::setDrawBuffers(const std::vector<gl::GLenum> & modes) const
 {
     setDrawBuffers(static_cast<int>(modes.size()), modes.data());
 }
 
-void FrameBufferObject::clear(GLbitfield mask)
+void FrameBufferObject::clear(gl::GLbitfield mask)
 {
-    bind(GL_FRAMEBUFFER);
-    glClear(mask);
-    CheckGLError();
+    bind(gl::FRAMEBUFFER);
+
+    gl::Clear(mask);
 }
 
-void FrameBufferObject::clearBufferiv(GLenum buffer, GLint drawBuffer, const GLint * value)
+void FrameBufferObject::clearBufferiv(gl::GLenum buffer, gl::GLint drawBuffer, const gl::GLint * value)
 {
-    bind(GL_FRAMEBUFFER);
-    glClearBufferiv(buffer, drawBuffer, value);
-    CheckGLError();
+    bind(gl::FRAMEBUFFER);
+
+    gl::ClearBufferiv(buffer, drawBuffer, value);
 }
 
-void FrameBufferObject::clearBufferuiv(GLenum buffer, GLint drawBuffer, const GLuint * value)
+void FrameBufferObject::clearBufferuiv(gl::GLenum buffer, gl::GLint drawBuffer, const gl::GLuint * value)
 {
-    bind(GL_FRAMEBUFFER);
-    glClearBufferuiv(buffer, drawBuffer, value);
-    CheckGLError();
+    bind(gl::FRAMEBUFFER);
+
+    gl::ClearBufferuiv(buffer, drawBuffer, value);
 }
 
-void FrameBufferObject::clearBufferfv(GLenum buffer, GLint drawBuffer, const GLfloat * value)
+void FrameBufferObject::clearBufferfv(gl::GLenum buffer, gl::GLint drawBuffer, const gl::GLfloat * value)
 {
-    bind(GL_FRAMEBUFFER);
-    glClearBufferfv(buffer, drawBuffer, value);
-    CheckGLError();
+    bind(gl::FRAMEBUFFER);
+
+    gl::ClearBufferfv(buffer, drawBuffer, value);
 }
 
-void FrameBufferObject::clearBufferfi(GLenum buffer, GLint drawBuffer, GLfloat depth, GLint stencil)
+void FrameBufferObject::clearBufferfi(gl::GLenum buffer, gl::GLint drawBuffer, gl::GLfloat depth, gl::GLint stencil)
 {
-    bind(GL_FRAMEBUFFER);
-    glClearBufferfi(buffer, drawBuffer, depth, stencil);
-    CheckGLError();
+    bind(gl::FRAMEBUFFER);
+
+    gl::ClearBufferfi(buffer, drawBuffer, depth, stencil);
 }
 
-void FrameBufferObject::clearBuffer(GLenum buffer, GLint drawBuffer, const glm::ivec4 & value)
+void FrameBufferObject::clearBuffer(gl::GLenum buffer, gl::GLint drawBuffer, const glm::ivec4 & value)
 {
     clearBufferiv(buffer, drawBuffer, glm::value_ptr(value));
 }
 
-void FrameBufferObject::clearBuffer(GLenum buffer, GLint drawBuffer, const glm::uvec4 & value)
+void FrameBufferObject::clearBuffer(gl::GLenum buffer, gl::GLint drawBuffer, const glm::uvec4 & value)
 {
     clearBufferuiv(buffer, drawBuffer, glm::value_ptr(value));
 }
 
-void FrameBufferObject::clearBuffer(GLenum buffer, GLint drawBuffer, const glm::vec4 & value)
+void FrameBufferObject::clearBuffer(gl::GLenum buffer, gl::GLint drawBuffer, const glm::vec4 & value)
 {
     clearBufferfv(buffer, drawBuffer, glm::value_ptr(value));
 }
 
-void FrameBufferObject::colorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
+void FrameBufferObject::colorMask(gl::GLboolean red, gl::GLboolean green, gl::GLboolean blue, gl::GLboolean alpha)
 {
-    glColorMask(red, green, blue, alpha);
-    CheckGLError();
+    gl::ColorMask(red, green, blue, alpha);
 }
 
 void FrameBufferObject::colorMask(const glm::bvec4 & mask)
@@ -307,21 +251,19 @@ void FrameBufferObject::colorMask(const glm::bvec4 & mask)
     colorMask(mask[0], mask[1], mask[2], mask[3]);
 }
 
-void FrameBufferObject::colorMaski(GLuint buffer, GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
+void FrameBufferObject::colorMaski(gl::GLuint buffer, gl::GLboolean red, gl::GLboolean green, gl::GLboolean blue, gl::GLboolean alpha)
 {
-    glColorMaski(buffer, red, green, blue, alpha);
-    CheckGLError();
+    gl::ColorMaski(buffer, red, green, blue, alpha);
 }
 
-void FrameBufferObject::colorMaski(GLuint buffer, const glm::bvec4 & mask)
+void FrameBufferObject::colorMaski(gl::GLuint buffer, const glm::bvec4 & mask)
 {
     colorMaski(buffer, mask[0], mask[1], mask[2], mask[3]);
 }
 
-void FrameBufferObject::clearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
+void FrameBufferObject::clearColor(gl::GLfloat red, gl::GLfloat green, gl::GLfloat blue, gl::GLfloat alpha)
 {
-    glClearColor(red, green, blue, alpha);
-    CheckGLError();
+    gl::ClearColor(red, green, blue, alpha);
 }
 
 void FrameBufferObject::clearColor(const glm::vec4 & color)
@@ -329,33 +271,30 @@ void FrameBufferObject::clearColor(const glm::vec4 & color)
     clearColor(color.r, color.g, color.b, color.a);
 }
 
-void FrameBufferObject::clearDepth(GLclampd depth)
+void FrameBufferObject::clearDepth(gl::GLclampd depth)
 {
-    glClearDepth(depth);
-    CheckGLError();
+    gl::ClearDepth(depth);
 }
 
-void FrameBufferObject::readPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid * data) const
+void FrameBufferObject::readPixels(gl::GLint x, gl::GLint y, gl::GLsizei width, gl::GLsizei height, gl::GLenum format, gl::GLenum type, gl::GLvoid * data) const
 {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
-    CheckGLError();
+    bind(gl::READ_FRAMEBUFFER);
 
-	glReadPixels(x, y, width, height, format, type, data);
-	CheckGLError();
+    gl::ReadPixels(x, y, width, height, format, type, data);
 }
 
-void FrameBufferObject::readPixels(const std::array<GLint, 4> & rect, GLenum format, GLenum type, GLvoid * data) const
+void FrameBufferObject::readPixels(const std::array<gl::GLint, 4> & rect, gl::GLenum format, gl::GLenum type, gl::GLvoid * data) const
 {
     readPixels(rect[0], rect[1], rect[2], rect[3], format, type, data);
 }
 
-void FrameBufferObject::readPixels(GLenum readBuffer, const std::array<GLint, 4> & rect, GLenum format, GLenum type, GLvoid * data) const
+void FrameBufferObject::readPixels(gl::GLenum readBuffer, const std::array<gl::GLint, 4> & rect, gl::GLenum format, gl::GLenum type, gl::GLvoid * data) const
 {
     setReadBuffer(readBuffer);
     readPixels(rect, format, type, data);
 }
 
-std::vector<unsigned char> FrameBufferObject::readPixelsToByteArray(const std::array<GLint, 4> & rect, GLenum format, GLenum type) const
+std::vector<unsigned char> FrameBufferObject::readPixelsToByteArray(const std::array<gl::GLint, 4> & rect, gl::GLenum format, gl::GLenum type) const
 {
     int size = imageSizeInBytes(rect[2], rect[3], format, type);
     std::vector<unsigned char> data(size);
@@ -365,102 +304,67 @@ std::vector<unsigned char> FrameBufferObject::readPixelsToByteArray(const std::a
     return data;
 }
 
-std::vector<unsigned char> FrameBufferObject::readPixelsToByteArray(GLenum readBuffer, const std::array<GLint, 4> & rect, GLenum format, GLenum type) const
+std::vector<unsigned char> FrameBufferObject::readPixelsToByteArray(gl::GLenum readBuffer, const std::array<gl::GLint, 4> & rect, gl::GLenum format, gl::GLenum type) const
 {
     setReadBuffer(readBuffer);
     return readPixelsToByteArray(rect, format, type);
 }
 
-void FrameBufferObject::readPixelsToBuffer(const std::array<GLint, 4> & rect, GLenum format, GLenum type, Buffer * pbo) const
+void FrameBufferObject::readPixelsToBuffer(const std::array<gl::GLint, 4> & rect, gl::GLenum format, gl::GLenum type, Buffer * pbo) const
 {
     assert(pbo != nullptr);
 
-	pbo->bind(GL_PIXEL_PACK_BUFFER);
+	pbo->bind(gl::PIXEL_PACK_BUFFER);
     readPixels(rect, format, type, nullptr);
-	pbo->unbind();
+    pbo->unbind(gl::PIXEL_PACK_BUFFER);
 }
 
-void FrameBufferObject::blit(GLenum readBuffer, const std::array<GLint, 4> & srcRect, FrameBufferObject * destFbo, GLenum drawBuffer, const std::array<GLint, 4> & destRect, GLbitfield mask, GLenum filter) const
+void FrameBufferObject::blit(gl::GLenum readBuffer, const std::array<gl::GLint, 4> & srcRect, FrameBufferObject * destFbo, gl::GLenum drawBuffer, const std::array<gl::GLint, 4> & destRect, gl::GLbitfield mask, gl::GLenum filter) const
 {
-    blit(readBuffer, srcRect, destFbo, std::vector<GLenum>{ drawBuffer }, destRect, mask, filter);
+    blit(readBuffer, srcRect, destFbo, std::vector<gl::GLenum>{ drawBuffer }, destRect, mask, filter);
 }
 
-void FrameBufferObject::blit(GLenum readBuffer, const std::array<GLint, 4> & srcRect, FrameBufferObject * destFbo, const std::vector<GLenum> & drawBuffers, const std::array<GLint, 4> & destRect, GLbitfield mask, GLenum filter) const
+void FrameBufferObject::blit(gl::GLenum readBuffer, const std::array<gl::GLint, 4> & srcRect, FrameBufferObject * destFbo, const std::vector<gl::GLenum> & drawBuffers, const std::array<gl::GLint, 4> & destRect, gl::GLbitfield mask, gl::GLenum filter) const
 {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
-    CheckGLError();
-
     setReadBuffer(readBuffer);
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, destFbo->id());
-    CheckGLError();
-
     destFbo->setDrawBuffers(drawBuffers);
+
+    bind(gl::READ_FRAMEBUFFER);
+    destFbo->bind(gl::DRAW_FRAMEBUFFER);
 
     blit(srcRect, destRect, mask, filter);
 }
 
-void FrameBufferObject::blit(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint destX0, GLint destY0, GLint destX1, GLint destY1, GLbitfield mask, GLenum filter)
+void FrameBufferObject::blit(gl::GLint srcX0, gl::GLint srcY0, gl::GLint srcX1, gl::GLint srcY1, gl::GLint destX0, gl::GLint destY0, gl::GLint destX1, gl::GLint destY1, gl::GLbitfield mask, gl::GLenum filter)
 {
-    glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, destX0, destY0, destX1, destY1, mask, filter);
-    CheckGLError();
+    gl::BlitFramebuffer(srcX0, srcY0, srcX1, srcY1, destX0, destY0, destX1, destY1, mask, filter);
+
 }
 
-void FrameBufferObject::blit(const std::array<GLint, 4> & srcRect, const std::array<GLint, 4> & destRect, GLbitfield mask, GLenum filter)
+void FrameBufferObject::blit(const std::array<gl::GLint, 4> & srcRect, const std::array<gl::GLint, 4> & destRect, gl::GLbitfield mask, gl::GLenum filter)
 {
     blit(srcRect[0], srcRect[1], srcRect[2], srcRect[3], destRect[0], destRect[1], destRect[2], destRect[3], mask, filter);
 }
 
-GLenum FrameBufferObject::checkStatus() const
+gl::GLenum FrameBufferObject::checkStatus() const
 {
-	bind();
-
-	GLenum result = glCheckFramebufferStatus(m_target);
-	CheckGLError();
-	return result;
+    return implementation().checkStatus(this);
 }
 
 std::string FrameBufferObject::statusString() const
 {
-	return statusString(checkStatus());
-}
-
-std::string FrameBufferObject::statusString(GLenum status)
-{
-	switch (status)
-	{
-		case GL_FRAMEBUFFER_COMPLETE:
-			return "GL_FRAMEBUFFER_COMPLETE​";
-		case GL_FRAMEBUFFER_UNDEFINED:
-			return "GL_FRAMEBUFFER_UNDEFINED";
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-			return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-			return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-			return "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-			return "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
-		case GL_FRAMEBUFFER_UNSUPPORTED:
-			return "GL_FRAMEBUFFER_UNSUPPORTED";
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-			return "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
-		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-			return "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
-		default:
-			return "unknown framebuffer error";
-	}
+    return enumName(checkStatus());
 }
 
 void FrameBufferObject::printStatus(bool onlyErrors) const
 {
-	GLenum status = checkStatus();
+	gl::GLenum status = checkStatus();
 
-	if (onlyErrors && status == GL_FRAMEBUFFER_COMPLETE) return;
+	if (onlyErrors && status == gl::FRAMEBUFFER_COMPLETE) return;
 
-	if (status == GL_FRAMEBUFFER_COMPLETE)
+	if (status == gl::FRAMEBUFFER_COMPLETE)
 	{
-		info() << statusString(GL_FRAMEBUFFER_COMPLETE);
+        info() << enumName(gl::FRAMEBUFFER_COMPLETE);
 	}
 	else
 	{
@@ -468,11 +372,18 @@ void FrameBufferObject::printStatus(bool onlyErrors) const
 		ss.flags(std::ios::hex | std::ios::showbase);
 		ss << status;
 
-		critical() << statusString(status) << " (" << ss.str() << ")";
+        critical() << enumName(status) << " (" << ss.str() << ")";
 	}
 }
 
-FrameBufferAttachment* FrameBufferObject::attachment(GLenum attachment)
+void FrameBufferObject::addAttachment(FrameBufferAttachment * attachment)
+{
+    assert(attachment != nullptr);
+
+    m_attachments[attachment->attachment()] = attachment;
+}
+
+FrameBufferAttachment * FrameBufferObject::getAttachment(gl::GLenum attachment)
 {
 	return m_attachments[attachment];
 }
@@ -481,7 +392,7 @@ std::vector<FrameBufferAttachment*> FrameBufferObject::attachments()
 {
 	std::vector<FrameBufferAttachment*> attachments;
 
-	for (std::pair<GLenum, ref_ptr<FrameBufferAttachment>> pair: m_attachments)
+    for (std::pair<gl::GLenum, ref_ptr<FrameBufferAttachment>> pair: m_attachments)
 	{
 		attachments.push_back(pair.second);
 	}

@@ -3,10 +3,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include <GL/glew.h>
+#include <glbinding/types.h>
+
+#include <glowbase/Referenced.h>
 
 #include <glow/glow_api.h>
-#include <glow/Referenced.h>
 #include <glow/AbstractState.h>
 #include <glow/StateSetting.h>
 
@@ -26,7 +27,6 @@ public:
 
 public:
     State(Mode = ImmediateMode);
-    ~State();
 
     static State * currentState();
 
@@ -35,17 +35,17 @@ public:
 
     void apply();
 
-    virtual void enable(GLenum capability) override;
-    virtual void disable(GLenum capability) override;
-    virtual bool isEnabled(GLenum capability) const override;
-    virtual void enable(GLenum capability, int index) override;
-    virtual void disable(GLenum capability, int index) override;
-    virtual bool isEnabled(GLenum capability, int index) const override;
+    virtual void enable(gl::GLenum capability) override;
+    virtual void disable(gl::GLenum capability) override;
+    virtual bool isEnabled(gl::GLenum capability) const override;
+    virtual void enable(gl::GLenum capability, int index) override;
+    virtual void disable(gl::GLenum capability, int index) override;
+    virtual bool isEnabled(gl::GLenum capability, int index) const override;
 
     virtual void add(StateSetting * setting) override;
 
-    Capability * capability(GLenum capability);
-    const Capability * capability(GLenum capability) const;
+    Capability * capability(gl::GLenum capability);
+    const Capability * capability(gl::GLenum capability) const;
     std::vector<Capability*> capabilities() const;
 
     StateSetting * setting(const StateSettingType & type);
@@ -53,13 +53,15 @@ public:
     std::vector<StateSetting*> settings();
     std::vector<const StateSetting*> settings() const;
 protected:
+    virtual ~State();
+
     Mode m_mode;
-    std::unordered_map<GLenum, Capability*> m_capabilities;
+    std::unordered_map<gl::GLenum, Capability*> m_capabilities;
     std::unordered_map<StateSettingType, StateSetting*> m_settings;
 
     void addCapability(Capability * capability);
-    Capability* getCapability(GLenum capability);
-    const Capability* getCapability(GLenum capability) const;
+    Capability* getCapability(gl::GLenum capability);
+    const Capability* getCapability(gl::GLenum capability) const;
 };
 
 } // namespace glow

@@ -3,9 +3,10 @@
 #include <string>
 #include <map>
 
+#include <glowbase/CachedValue.h>
+
 #include <glowutils/glowutils_api.h>
 #include <glowutils/StringSourceDecorator.h>
-#include <glowutils/CachedValue.h>
 
 namespace glowutils 
 {
@@ -14,7 +15,6 @@ class GLOWUTILS_API StringTemplate : public StringSourceDecorator
 {
 public:
     StringTemplate(AbstractStringSource * source);
-    virtual ~StringTemplate();
 
     virtual std::string string() const override;
     virtual void update() override;
@@ -25,8 +25,10 @@ public:
     void clearReplacements();
 
 protected:
-    CachedValue<std::string> m_modifiedSource;
+    glow::CachedValue<std::string> m_modifiedSource;
 	std::map<std::string, std::string> m_replacements;
+
+    virtual ~StringTemplate();
 
     void invalidate();
     std::string modifiedSource() const;

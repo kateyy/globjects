@@ -4,13 +4,15 @@
 #include <algorithm>
 #include <cctype>
 
+#include <glowbase/Version.h>
+
 #include <glow/Error.h>
 #include <glow/logging.h>
-#include <glow/global.h>
-#include <glow/Version.h>
+#include <glow/glow.h>
 #include <glow/AbstractStringSource.h>
 #include <glow/StaticStringSource.h>
 #include <glow/CompositeStringSource.h>
+#include <glow/NamedString.h>
 
 namespace {
     // From http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
@@ -74,6 +76,8 @@ CompositeStringSource* IncludeProcessor::process(const AbstractStringSource* sou
     std::istringstream sourcestream(source->string());
     std::stringstream destinationstream;
 
+    bool inMultiLineComment = false;
+
     do
     {
         std::string line;
@@ -86,7 +90,17 @@ CompositeStringSource* IncludeProcessor::process(const AbstractStringSource* sou
         {
             if (trimmedLine[0] == '#')
             {
-                if (contains(trimmedLine, "extension"))
+                if (contains(trimmedLine, "/*"))
+                {
+                    inMultiLineComment = true;
+                }
+
+                if (contains(trimmedLine, "*/"))
+                {
+                    inMultiLineComment = false;
+                }
+
+                if (!inMultiLineComment && contains(trimmedLine, "extension"))
                 {
                     // #extension GL_ARB_shading_language_include : require
                     if (contains(trimmedLine, "GL_ARB_shading_language_include"))
@@ -98,7 +112,7 @@ CompositeStringSource* IncludeProcessor::process(const AbstractStringSource* sou
                         destinationstream << line << '\n';
                     }
                 }
-                else if (contains(trimmedLine, "include"))
+                else if (!inMultiLineComment && contains(trimmedLine, "include"))
                 {
                     size_t leftBracketPosition = trimmedLine.find_first_of('<');
                     size_t rightBracketPosition = trimmedLine.find_last_of('>');
@@ -125,7 +139,7 @@ CompositeStringSource* IncludeProcessor::process(const AbstractStringSource* sou
 
                         if (include.size() == 0 || endsWith(include, '/'))
                         {
-                            glow::warning() << "Malformed #include " << include;
+                            warning() << "Malformed #include " << include;
                         }
                         else
                         {
@@ -134,36 +148,31 @@ CompositeStringSource* IncludeProcessor::process(const AbstractStringSource* sou
                                 m_includes.insert(include);
                                 compositeSource->appendSource(new StaticStringSource(destinationstream.str()));
 
-                                bool found = false;
-                                std::string fullPath;
+                                NamedString * namedString = nullptr;
                                 if (startsWith(include, '/'))
                                 {
-                                    if (isNamedString(include, true))
-                                    {
-                                        found = true;
-                                        fullPath = include;
-                                    }
+                                    namedString = NamedString::obtain(include);
                                 }
                                 else
                                 {
                                     for (const std::string& prefix : m_includePaths)
                                     {
-                                        fullPath = expandPath(include, prefix);
-                                        if (isNamedString(fullPath, true))
+                                        std::string fullPath = expandPath(include, prefix);
+                                        namedString = NamedString::obtain(fullPath);
+                                        if (namedString)
                                         {
-                                            found = true;
                                             break;
                                         }
                                     }
                                 }
 
-                                if (found)
+                                if (namedString)
                                 {
-                                    compositeSource->appendSource(processComposite(getNamedStringSource(fullPath)));
+                                    compositeSource->appendSource(processComposite(namedString->stringSource()));
                                 }
                                 else
                                 {
-                                    glow::warning() << "Did not find include " << include;
+                                    warning() << "Did not find include " << include;
                                 }
 
                                 destinationstream.str("");
@@ -172,7 +181,7 @@ CompositeStringSource* IncludeProcessor::process(const AbstractStringSource* sou
                     }
                     else
                     {
-                        glow::warning() << "Malformed #include " << trimmedLine;
+                        warning() << "Malformed #include " << trimmedLine;
                     }
                 }
                 else
@@ -187,11 +196,11 @@ CompositeStringSource* IncludeProcessor::process(const AbstractStringSource* sou
                 destinationstream << line << '\n';
             }
         }
-	else
-	{
-		// empty line
-		destinationstream << '\n';
-	}
+        else
+        {
+            // empty line
+            destinationstream << line << '\n';
+        }
     }
     while (sourcestream.good());
 
