@@ -9,18 +9,55 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include <glowbase/StaticStringSource.h>
+
 #include <glow/Buffer.h>
 #include <glow/Program.h>
 #include <glow/VertexArrayObject.h>
 #include <glow/VertexAttributeBinding.h>
 #include <glow/logging.h>
-#include <glow/StaticStringSource.h>
 
 #include <glowutils/Camera.h>
 #include <glowutils/StringTemplate.h>
 #include <glowutils/math/BezierCurve.h>
 
 using namespace glm;
+
+namespace {
+
+    const char* vertexSource = R"(
+#version 140
+#extension GL_ARB_explicit_attrib_location : require
+
+uniform mat4 transform;
+
+layout(location = 0) in vec4 vertex;
+
+out float t;
+
+void main()
+{
+    gl_Position = transform * vec4(vertex.xyz, 1.0);
+    t = vertex.w;
+
+}
+)";
+
+    const char* fragmentSource = R"(
+#version 140
+#extension GL_ARB_explicit_attrib_location : require
+
+layout(location=0) out vec4 fragColor;
+
+in float t;
+
+void main()
+{
+    fragColor = vec4(vec3(1.0, 0.2+t*0.8, t/2.0), 1.0);
+}
+)";
+
+}
 
 namespace glowutils
 {
@@ -83,51 +120,6 @@ void CameraPathPlayer::prepare()
     }
 
     prepareControlPoints();
-}
-
-namespace {
-vec3 intersection(const vec3& a, const vec3& r, const vec3& p, const vec3& n)
-{
-    float rDotN = dot(r, n);
-
-    assert(std::abs(rDotN) < std::numeric_limits<float>::epsilon());
-
-    float t = dot(p - a, n) / rDotN;
-    return a + r * t;
-}
-
-const char* vertexSource = R"(
-#version 140
-#extension GL_ARB_explicit_attrib_location : require
-
-uniform mat4 transform;
-
-layout(location = 0) in vec4 vertex;
-
-out float t;
-
-void main()
-{
-    gl_Position = transform * vec4(vertex.xyz, 1.0);
-    t = vertex.w;
-
-}
-)";
-
-const char* fragmentSource = R"(
-#version 140
-#extension GL_ARB_explicit_attrib_location : require
-
-layout(location=0) out vec4 fragColor;
-
-in float t;
-
-void main()
-{
-    fragColor = vec4(vec3(1.0, 0.2+t*0.8, t/2.0), 1.0);
-}
-)";
-
 }
 
 void CameraPathPlayer::prepareControlPoints()
@@ -248,7 +240,7 @@ void CameraPathPlayer::createVao()
     m_vao = new glow::VertexArrayObject();
 
     m_vao->binding(0)->setBuffer(m_buffer, 0, sizeof(vec4));
-    m_vao->binding(0)->setFormat(4, gl::FLOAT);
+    m_vao->binding(0)->setFormat(4, gl::GL_FLOAT);
     m_vao->binding(0)->setAttribute(0);
 
     m_vao->enable(0);
@@ -264,8 +256,8 @@ void CameraPathPlayer::createVao()
 #endif
 
     m_program->attach(
-        new glow::Shader(gl::VERTEX_SHADER, vertexShaderSource),
-        new glow::Shader(gl::FRAGMENT_SHADER, fragmentShaderSource)
+        new glow::Shader(gl::GL_VERTEX_SHADER, vertexShaderSource),
+        new glow::Shader(gl::GL_FRAGMENT_SHADER, fragmentShaderSource)
     );
 
     m_program->addUniform(new glow::Uniform<mat4>("transform"));
@@ -277,7 +269,7 @@ void CameraPathPlayer::draw(const mat4& viewProjection)
 
     m_program->use();
     m_vao->bind();
-    m_vao->drawArrays(gl::LINE_STRIP, 0, m_bufferSize);
+    m_vao->drawArrays(gl::GL_LINE_STRIP, 0, m_bufferSize);
     m_vao->unbind();
     m_program->release();
 }

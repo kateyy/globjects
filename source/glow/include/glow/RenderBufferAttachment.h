@@ -1,16 +1,14 @@
 #pragma once
 
-
-
 #include <glowbase/ref_ptr.h>
 
 #include <glow/glow_api.h>
 #include <glow/FrameBufferAttachment.h>
+#include <glow/RenderBufferObject.h>
 
 namespace glow 
 {
 
-class RenderBufferObject;
 class FrameBufferObject;
 
 /** \brief Wrapper of render buffer attachments of a frame buffer object.

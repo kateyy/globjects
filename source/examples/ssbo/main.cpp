@@ -5,8 +5,8 @@
 #include <glow/debugmessageoutput.h>
 #include <glow/Program.h>
 
-#include <glowutils/File.h>
-#include <glowutils/File.h>
+#include <glowbase/File.h>
+#include <glowbase/File.h>
 #include <glowutils/ScreenAlignedQuad.h>
 #include <glowutils/glowutils.h>
 
@@ -37,10 +37,10 @@ public:
 
         glow::debugmessageoutput::enable();
 
-        gl::ClearColor(0.2f, 0.3f, 0.4f, 1.f);
+        gl::glClearColor(0.2f, 0.3f, 0.4f, 1.f);
 
 
-        m_quad = new glowutils::ScreenAlignedQuad(glowutils::createShaderFromFile(gl::FRAGMENT_SHADER, "data/ssbo/ssbo.frag"));
+        m_quad = new glowutils::ScreenAlignedQuad(glow::Shader::fromFile(gl::GL_FRAGMENT_SHADER, "data/ssbo/ssbo.frag"));
 
         m_quad->program()->setUniform("maximum", 10);
         m_quad->program()->setUniform("rowCount", 10);
@@ -60,9 +60,9 @@ public:
         };
 
         m_buffer = new glow::Buffer();
-        m_buffer->setData(sizeof(data), data, gl::STATIC_DRAW);
+        m_buffer->setData(sizeof(data), data, gl::GL_STATIC_DRAW);
 
-        m_buffer->bindBase(gl::SHADER_STORAGE_BUFFER, 1);
+        m_buffer->bindBase(gl::GL_SHADER_STORAGE_BUFFER, 1);
     }
     
     virtual void framebufferResizeEvent(ResizeEvent & event) override
@@ -71,13 +71,13 @@ public:
         int height = event.height();
         int side = std::min<int>(width, height);
 
-        gl::Viewport((width - side) / 2, (height - side) / 2, side, side);
+        gl::glViewport((width - side) / 2, (height - side) / 2, side, side);
 
     }
 
     virtual void paintEvent(PaintEvent &) override
     {
-        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+        gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
 
 
         m_quad->draw();
@@ -91,7 +91,7 @@ public:
     virtual void keyReleaseEvent(KeyEvent & event) override
     {
         if (GLFW_KEY_F5 == event.key())
-            glowutils::File::reloadAll();
+            glow::File::reloadAll();
     }
 
 protected:

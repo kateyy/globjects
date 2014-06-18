@@ -12,7 +12,6 @@
 #include <glowbase/formatString.h>
 
 #include <glow/glow.h>
-#include <glow/Error.h>
 #include <glow/Uniform.h>
 #include <glow/Program.h>
 #include <glow/Shader.h>
@@ -71,7 +70,7 @@ public:
         glow::ref_ptr<glow::Sampler> sampler(new glow::Sampler());
         std::cout << "glow::Sampler = "; glow::info() << sampler.get();
 
-        glow::ref_ptr<glow::Shader> shader(new glow::Shader(gl::VERTEX_SHADER));
+        glow::ref_ptr<glow::Shader> shader(new glow::Shader(gl::GL_VERTEX_SHADER));
         std::cout << "glow::Shader = "; glow::info() << shader.get();
 
         glow::ref_ptr<glow::Texture> texture(new glow::Texture());

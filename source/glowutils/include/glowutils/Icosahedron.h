@@ -6,22 +6,15 @@
 
 #include <glbinding/constants.h>
 
-
-
 #include <glm/glm.hpp>
 
 #include <glowbase/Referenced.h>
 #include <glowbase/ref_ptr.h>
 
+#include <glow/VertexArrayObject.h>
+#include <glow/Buffer.h>
+
 #include <glowutils/glowutils_api.h>
-
-namespace glow
-{
-
-class VertexArrayObject;
-class Buffer;
-
-}
 
 namespace glowutils 
 {
@@ -45,14 +38,15 @@ public:
 public:
     Icosahedron(
         gl::GLsizei iterations = 0
-    ,   gl::GLuint vertexAttribLocation = 0);
+    ,   const gl::GLint positionLocation = 0
+    ,   const gl::GLint normalLocation = 1);
 
 
 
 
     /** draws the icosahedron as single triangles (TODO: generate set of triangle strips?)
     */
-    void draw(gl::GLenum mode = gl::TRIANGLES);
+    void draw(gl::GLenum mode = gl::GL_TRIANGLES);
 
 private:
     /** Splits a triangle edge by adding an appropriate new point (normalized

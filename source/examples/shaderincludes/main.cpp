@@ -1,14 +1,9 @@
+#include <glowbase/File.h>
 
-
-
-#include <glow/Error.h>
 #include <glow/NamedString.h>
 #include <glow/Shader.h>
 #include <glow/debugmessageoutput.h>
-#include <glow/logging.h>
 
-#include <glowutils/File.h>
-#include <glowutils/File.h>
 #include <glowutils/ScreenAlignedQuad.h>
 #include <glowutils/glowutils.h>
 #include <glowutils/StringTemplate.h>
@@ -34,25 +29,23 @@ public:
     {
     }
 
-    void createAndSetupShaders();
-
     virtual void initialize(Window & window) override
     {
         ExampleWindowEventHandler::initialize(window);
 
         glow::debugmessageoutput::enable();
 
-        gl::ClearColor(0.2f, 0.3f, 0.4f, 1.f);
+        gl::glClearColor(0.2f, 0.3f, 0.4f, 1.f);
 
+        glow::NamedString::create("/shaderincludes/color.glsl", new glow::File("data/shaderincludes/color.glsl"));
 
-        glow::NamedString::create("/shaderincludes/color.glsl", new glowutils::File("data/shaderincludes/color.glsl"));
+        glowutils::StringTemplate* fragmentShaderString = new glowutils::StringTemplate(new glow::File("data/shaderincludes/test.frag"));
 
-      glowutils::StringTemplate* fragmentShaderString = new glowutils::StringTemplate(new glowutils::File("data/shaderincludes/test.frag"));
 #ifdef MAC_OS
-      fragmentShaderString->replace("#version 140", "#version 150");
+        fragmentShaderString->replace("#version 140", "#version 150");
 #endif
 
-      m_quad = new glowutils::ScreenAlignedQuad(new glow::Shader(gl::FRAGMENT_SHADER, fragmentShaderString));
+        m_quad = new glowutils::ScreenAlignedQuad(new glow::Shader(gl::GL_FRAGMENT_SHADER, fragmentShaderString));
     }
     
     virtual void framebufferResizeEvent(ResizeEvent & event) override
@@ -61,14 +54,12 @@ public:
         int height = event.height();
         int side = std::min<int>(width, height);
 
-        gl::Viewport((width - side) / 2, (height - side) / 2, side, side);
-
+        gl::glViewport((width - side) / 2, (height - side) / 2, side, side);
     }
 
     virtual void paintEvent(PaintEvent &) override
     {
-        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-
+        gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
 
         m_quad->draw();
     }
@@ -81,7 +72,7 @@ public:
     virtual void keyReleaseEvent(KeyEvent & event) override
     {
         if (GLFW_KEY_F5 == event.key())
-            glowutils::File::reloadAll();
+            glow::File::reloadAll();
     }
 
 protected:

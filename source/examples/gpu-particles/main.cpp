@@ -12,7 +12,6 @@
 #include <glm/gtc/random.hpp>
 
 #include <glow/glow.h>
-#include <glow/Error.h>
 #include <glow/logging.h>
 #include <glow/Texture.h>
 #include <glow/NamedString.h>
@@ -21,8 +20,8 @@
 
 #include <glowutils/Timer.h>
 #include <glowutils/Camera.h>
-#include <glowutils/File.h>
-#include <glowutils/File.h>
+#include <glowbase/File.h>
+#include <glowbase/File.h>
 #include <glowutils/AbstractCoordinateProvider.h>
 #include <glowutils/WorldInHandNavigation.h>
 
@@ -91,11 +90,11 @@ public:
 
         glow::debugmessageoutput::enable();
 
-        m_forces = glow::Texture::createDefault(gl::TEXTURE_3D);
+        m_forces = glow::Texture::createDefault(gl::GL_TEXTURE_3D);
 
         // Initialize shader includes
 
-        glow::NamedString::create("/glow/data/gpu-particles/particleMovement.inc", new glowutils::File("data/gpu-particles/particleMovement.inc"));
+        glow::NamedString::create("/glow/data/gpu-particles/particleMovement.inc", new glow::File("data/gpu-particles/particleMovement.inc"));
         
         // initialize camera
 
@@ -130,7 +129,7 @@ public:
     
     virtual void framebufferResizeEvent(ResizeEvent & event) override
     {
-        gl::Viewport(0, 0, event.width(), event.height());
+        gl::glViewport(0, 0, event.width(), event.height());
 
 
         m_camera->setViewport(event.size());
@@ -189,7 +188,7 @@ public:
             forces[i] = f * (1.f - length(vec3(x, y, z)) / std::sqrt(3.f));
         }
 
-        m_forces->image3D(0, gl::RGB32F, fdim.x, fdim.y, fdim.z, 0, gl::RGB, gl::FLOAT, forces.data());
+        m_forces->image3D(0, gl::GL_RGB32F, fdim.x, fdim.y, fdim.z, 0, gl::GL_RGB, gl::GL_FLOAT, forces.data());
 
         if (!particles)
             return;
@@ -252,7 +251,7 @@ public:
             break;
 
         case GLFW_KEY_F5:
-            glowutils::File::reloadAll();
+            glow::File::reloadAll();
             break;
         }
     }

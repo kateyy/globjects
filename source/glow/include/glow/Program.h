@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
 #include <glowbase/ChangeListener.h>
 #include <glowbase/ref_ptr.h>
@@ -13,14 +13,12 @@
 #include <glow/Object.h>
 #include <glow/LocationIdentity.h>
 #include <glow/UniformBlock.h>
+#include <glow/Shader.h>
+#include <glow/ProgramBinary.h>
+#include <glow/AbstractUniform.h>
 
 namespace glow
 {
-class Shader;
-class ProgramBinary;
-
-class AbstractUniform;
-template<typename T> class Uniform;
 
 /** \brief Wraps an OpenGL program.
     
@@ -42,8 +40,8 @@ template<typename T> class Uniform;
 
         Program * program = new Program();
         program->attach(
-            Shader::fromString(gl::VERTEX_SHADER, "...")
-          , Shader::fromString(gl::FRAGMENT_SHADER, "...")
+            Shader::fromString(gl::GL_VERTEX_SHADER, "...")
+          , Shader::fromString(gl::GL_FRAGMENT_SHADER, "...")
           , ...);
         program->use();
     
@@ -57,7 +55,7 @@ template<typename T> class Uniform;
     \code{.cpp}
 
         Program * program = new Program();
-        program->attach(Shader::fromString(gl::COMPUTE_SHADER, "..."));
+        program->attach(Shader::fromString(gl::GL_COMPUTE_SHADER, "..."));
     
         program->dispatchCompute(128, 1, 1);
     

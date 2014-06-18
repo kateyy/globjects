@@ -5,7 +5,9 @@
 
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include <glow/glow_api.h>
 #include <glow/Object.h>
@@ -26,10 +28,10 @@ class Buffer;
 class GLOW_API Texture : public Object
 {
 public:
-    Texture(gl::GLenum target = gl::TEXTURE_2D);
+    Texture(gl::GLenum target = gl::GL_TEXTURE_2D);
     static Texture * fromId(gl::GLuint id, gl::GLenum  target, bool takeOwnership = false);
 
-    static Texture * createDefault(gl::GLenum target = gl::TEXTURE_2D);
+    static Texture * createDefault(gl::GLenum target = gl::GL_TEXTURE_2D);
 
     virtual void accept(ObjectVisitor & visitor) override;
 
@@ -40,6 +42,7 @@ public:
     void bindActive(gl::GLenum texture) const;
     void unbindActive(gl::GLenum texture) const;
 
+    void setParameter(gl::GLenum name, gl::GLenum value);
     void setParameter(gl::GLenum name, gl::GLint value);
     void setParameter(gl::GLenum name, gl::GLfloat value);
 

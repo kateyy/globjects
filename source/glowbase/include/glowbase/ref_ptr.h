@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace glow
 {
 
@@ -17,7 +19,7 @@ class Referenced;
         
         ref_ptr<VertexArrayObject> vao = new VertexArrayObject(); 
         ...
-        vao->drawElements(gl::TRIANGLE_STRIP, 0, 4);
+        vao->drawElements(gl::GL_TRIANGLE_STRIP, 0, 4);
     
         // vao will be deleted automatically as the ref_ptr goes out of scope
 
@@ -28,8 +30,7 @@ class Referenced;
 template<typename T>
 class ref_ptr
 {
-    // This prevents T to be forward declared when using ref_ptr
-    //static_assert(std::is_base_of<Referenced, T>::value, "T is not a subclass of Referenced");
+    static_assert(std::is_base_of<Referenced, T>::value, "T is not a subclass of Referenced");
 public:
 	ref_ptr();
 	ref_ptr(T * referenced);
@@ -59,7 +60,7 @@ protected:
 	void decreaseRef();
 
 protected:
-    mutable Referenced * m_referenced;
+    mutable T * m_referenced;
 };
 
 template <typename T>

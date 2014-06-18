@@ -10,14 +10,13 @@
 #include <glowbase/Changeable.h>
 #include <glowbase/ChangeListener.h>
 #include <glowbase/ref_ptr.h>
+#include <glowbase/AbstractStringSource.h>
 
 #include <glow/Object.h>
 
-// http://www.opengl.org/wiki/Shader
-
 namespace glow 
 {
-class AbstractStringSource;
+
 class Program;
 
 /** \brief Encapsulates OpenGL shaders.
@@ -28,6 +27,8 @@ class Program;
     to react to changing shader sources and to propagate this change to 
     ChangeListeners.
 
+    \see  http://www.opengl.org/wiki/Shader
+
     \see Program
     \see ShaderSource
     \see ChangeListener
@@ -35,11 +36,11 @@ class Program;
  */
 class GLOW_API Shader : public Object, protected ChangeListener, public Changeable
 {
-	friend class Program;
-    friend class ShaderCompiler;
+    friend class Program;
 
 public:
     static Shader * fromString(const gl::GLenum type, const std::string & sourceString);
+    static Shader * fromFile(const gl::GLenum type, const std::string & filename);
 
 public:
     Shader(const gl::GLenum type);
