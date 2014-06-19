@@ -83,13 +83,13 @@ Shader::~Shader()
 
 	if (ownsGLObject())
 	{
-		gl::glDeleteShader(m_id);
+		gl::DeleteShader(m_id);
 	}
 }
 
 gl::GLuint Shader::create(gl::GLenum type)
 {
-    gl::GLuint result = gl::glCreateShader(type);
+    gl::GLuint result = gl::CreateShader(type);
 
 	return result;
 }
@@ -155,7 +155,7 @@ void Shader::updateSource()
 
     std::vector<const char*> cStrings = collectCStrings(sources);
 
-    gl::glShaderSource(m_id, static_cast<gl::GLint>(cStrings.size()), cStrings.data(), nullptr);
+    gl::ShaderSource(m_id, static_cast<gl::GLint>(cStrings.size()), cStrings.data(), nullptr);
 
     invalidate();
 }
@@ -168,11 +168,11 @@ bool Shader::compile() const
     if (hasExtension(gl::Extension::ARB_shading_language_include) && !forceFallbackIncludeProcessor)
     {
         std::vector<const char*> cStrings = collectCStrings(m_includePaths);
-        gl::glCompileShaderIncludeARB(m_id, static_cast<gl::GLint>(cStrings.size()), cStrings.data(), nullptr);
+        gl::CompileShaderIncludeARB(m_id, static_cast<gl::GLint>(cStrings.size()), cStrings.data(), nullptr);
     }
     else
     {
-        gl::glCompileShader(m_id);
+        gl::CompileShader(m_id);
     }
 
     m_compiled = checkCompileStatus();
@@ -206,26 +206,26 @@ void Shader::setIncludePaths(const std::vector<std::string> & includePaths)
 gl::GLint Shader::get(gl::GLenum pname) const
 {
     gl::GLint value = 0;
-    gl::glGetShaderiv(m_id, pname, &value);
+    gl::GetShaderiv(m_id, pname, &value);
 
     return value;
 }
 
 std::string Shader::getSource() const
 {
-    gl::GLint sourceLength = get(gl::GL_SHADER_SOURCE_LENGTH);
+    gl::GLint sourceLength = get(gl::SHADER_SOURCE_LENGTH);
     std::vector<char> source(sourceLength);
 
-    gl::glGetShaderSource(m_id, sourceLength, nullptr, source.data());
+    gl::GetShaderSource(m_id, sourceLength, nullptr, source.data());
 
     return std::string(source.data(), sourceLength);
 }
 
 bool Shader::checkCompileStatus() const
 {
-    gl::GLint status = get(gl::GL_COMPILE_STATUS);
+    gl::GLint status = get(gl::COMPILE_STATUS);
 
-    if (status == gl::GL_FALSE)
+    if (status == gl::FALSE_)
     {
         critical()
             << "Compiler error:" << std::endl
@@ -240,10 +240,10 @@ bool Shader::checkCompileStatus() const
 
 std::string Shader::infoLog() const
 {
-    gl::GLsizei length = get(gl::GL_INFO_LOG_LENGTH);
+    gl::GLsizei length = get(gl::INFO_LOG_LENGTH);
 	std::vector<char> log(length);
 
-	gl::glGetShaderInfoLog(m_id, length, &length, log.data());
+	gl::GetShaderInfoLog(m_id, length, &length, log.data());
 
 	return std::string(log.data(), length);
 }
@@ -272,17 +272,17 @@ std::string Shader::typeString(gl::GLenum type)
 {
     switch (type)
 	{
-    case gl::GL_GEOMETRY_SHADER:
+    case gl::GEOMETRY_SHADER:
         return "gl::GL_GEOMETRY_SHADER";
-    case gl::GL_FRAGMENT_SHADER:
+    case gl::FRAGMENT_SHADER:
         return "gl::GL_FRAGMENT_SHADER";
-    case gl::GL_VERTEX_SHADER:
+    case gl::VERTEX_SHADER:
         return "gl::GL_VERTEX_SHADER";
-    case gl::GL_TESS_EVALUATION_SHADER:
+    case gl::TESS_EVALUATION_SHADER:
         return "gl::GL_TESS_EVALUATION_SHADER";
-    case gl::GL_TESS_CONTROL_SHADER:
+    case gl::TESS_CONTROL_SHADER:
         return "gl::GL_TESS_CONTROL_SHADER";
-    case gl::GL_COMPUTE_SHADER:
+    case gl::COMPUTE_SHADER:
         return "gl::GL_COMPUTE_SHADER";
 	default:
 		return "Unknown Shader Type";

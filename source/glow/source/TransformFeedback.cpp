@@ -19,7 +19,7 @@ TransformFeedback::~TransformFeedback()
 {
 	if (ownsGLObject())
 	{
-		gl::glDeleteTransformFeedbacks(1, &m_id);
+		gl::DeleteTransformFeedbacks(1, &m_id);
 	}
 }
 
@@ -27,7 +27,7 @@ gl::GLuint TransformFeedback::genTransformFeedback()
 {
     gl::GLuint id = 0;
 
-	gl::glGenTransformFeedbacks(1, &id);
+	gl::GenTransformFeedbacks(1, &id);
 
 	return id;
 }
@@ -39,48 +39,48 @@ void TransformFeedback::accept(ObjectVisitor& visitor)
 
 void TransformFeedback::bind(gl::GLenum target) const
 {
-    gl::glBindTransformFeedback(target, m_id);
+    gl::BindTransformFeedback(target, m_id);
 }
 
 void TransformFeedback::unbind(gl::GLenum target)
 {
-    gl::glBindTransformFeedback(target, 0);
+    gl::BindTransformFeedback(target, 0);
 }
 
 void TransformFeedback::begin(gl::GLenum primitiveMode)
 {
-	gl::glBeginTransformFeedback(primitiveMode);
+	gl::BeginTransformFeedback(primitiveMode);
 }
 
 void TransformFeedback::pause()
 {
-    gl::glPauseTransformFeedback();
+    gl::PauseTransformFeedback();
 }
 
 void TransformFeedback::resume()
 {
-    gl::glResumeTransformFeedback();
+    gl::ResumeTransformFeedback();
 }
 
 void TransformFeedback::end()
 {
-	gl::glEndTransformFeedback();
+	gl::EndTransformFeedback();
 }
 
 void TransformFeedback::draw(gl::GLenum primitiveMode) const
 {
-    bind(gl::GL_TRANSFORM_FEEDBACK); // TODO: is this necessary
+    bind(gl::TRANSFORM_FEEDBACK); // TODO: is this necessary
 
-    gl::glDrawTransformFeedback(primitiveMode, m_id);
+    gl::DrawTransformFeedback(primitiveMode, m_id);
 }
 
 void TransformFeedback::setVaryings(const Program * program, gl::GLsizei count, const char** varyingNames, gl::GLenum bufferMode) const
 {
     assert(varyingNames != nullptr || count == 0);
 
-    bind(gl::GL_TRANSFORM_FEEDBACK);
+    bind(gl::TRANSFORM_FEEDBACK);
 
-    gl::glTransformFeedbackVaryings(program->id(), count, varyingNames, bufferMode);
+    gl::TransformFeedbackVaryings(program->id(), count, varyingNames, bufferMode);
 
 	program->invalidate();
 }
@@ -92,7 +92,7 @@ void TransformFeedback::setVaryings(const Program *program, const std::vector<co
 
 bool TransformFeedback::isTransformFeedback(gl::GLuint id)
 {
-    return gl::glIsTransformFeedback(id) == gl::GL_TRUE;
+    return gl::IsTransformFeedback(id) == gl::TRUE_;
 }
 
 } // namespace glow

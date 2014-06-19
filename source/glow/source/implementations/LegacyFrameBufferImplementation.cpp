@@ -8,20 +8,20 @@
 
 namespace glow {
 
-gl::GLenum LegacyFrameBufferImplementation::s_workingTarget = gl::GL_FRAMEBUFFER;
+gl::GLenum LegacyFrameBufferImplementation::s_workingTarget = gl::FRAMEBUFFER;
 
 gl::GLenum LegacyFrameBufferImplementation::checkStatus(const FrameBufferObject * fbo) const
 {
     fbo->bind(s_workingTarget);
 
-    return gl::glCheckFramebufferStatus(s_workingTarget);
+    return gl::CheckFramebufferStatus(s_workingTarget);
 }
 
 void LegacyFrameBufferImplementation::setParameter(const FrameBufferObject * fbo, gl::GLenum pname, gl::GLint param) const
 {
     fbo->bind(s_workingTarget);
 
-    gl::glFramebufferParameteri(s_workingTarget, pname, param);
+    gl::FramebufferParameteri(s_workingTarget, pname, param);
 }
 
 gl::GLint LegacyFrameBufferImplementation::getAttachmentParameter(const FrameBufferObject * fbo, gl::GLenum attachment, gl::GLenum pname) const
@@ -30,7 +30,7 @@ gl::GLint LegacyFrameBufferImplementation::getAttachmentParameter(const FrameBuf
 
     gl::GLint result = 0;
 
-    gl::glGetFramebufferAttachmentParameteriv(s_workingTarget, attachment, pname, &result);
+    gl::GetFramebufferAttachmentParameteriv(s_workingTarget, attachment, pname, &result);
 
     return result;
 }
@@ -39,64 +39,64 @@ void LegacyFrameBufferImplementation::attachTexture(const FrameBufferObject * fb
 {
     fbo->bind(s_workingTarget);
 
-    gl::glFramebufferTexture(s_workingTarget, attachment, texture ? texture->id() : 0, level);
+    gl::FramebufferTexture(s_workingTarget, attachment, texture ? texture->id() : 0, level);
 }
 
 void LegacyFrameBufferImplementation::attachTexture1D(const FrameBufferObject * fbo, gl::GLenum attachment, Texture * texture, gl::GLint level) const
 {
     fbo->bind(s_workingTarget);
 
-    gl::glFramebufferTexture1D(s_workingTarget, attachment, texture ? texture->target() : gl::GL_TEXTURE_1D, texture ? texture->id() : 0, level);
+    gl::FramebufferTexture1D(s_workingTarget, attachment, texture ? texture->target() : gl::TEXTURE_1D, texture ? texture->id() : 0, level);
 }
 
 void LegacyFrameBufferImplementation::attachTexture2D(const FrameBufferObject * fbo, gl::GLenum attachment, Texture * texture, gl::GLint level) const
 {
     fbo->bind(s_workingTarget);
 
-    gl::glFramebufferTexture2D(s_workingTarget, attachment, texture ? texture->target() : gl::GL_TEXTURE_2D, texture ? texture->id() : 0, level);
+    gl::FramebufferTexture2D(s_workingTarget, attachment, texture ? texture->target() : gl::TEXTURE_2D, texture ? texture->id() : 0, level);
 }
 
 void LegacyFrameBufferImplementation::attachTexture3D(const FrameBufferObject * fbo, gl::GLenum attachment, Texture * texture, gl::GLint level, gl::GLint layer) const
 {
     fbo->bind(s_workingTarget);
 
-    gl::glFramebufferTexture3D(s_workingTarget, attachment, texture ? texture->target() : gl::GL_TEXTURE_3D, texture ? texture->id() : 0, level, layer);
+    gl::FramebufferTexture3D(s_workingTarget, attachment, texture ? texture->target() : gl::TEXTURE_3D, texture ? texture->id() : 0, level, layer);
 }
 
 void LegacyFrameBufferImplementation::attachTextureLayer(const FrameBufferObject * fbo, gl::GLenum attachment, Texture * texture, gl::GLint level, gl::GLint layer) const
 {
     fbo->bind(s_workingTarget);
 
-    gl::glFramebufferTextureLayer(s_workingTarget, attachment, texture ? texture->id() : 0, level, layer);
+    gl::FramebufferTextureLayer(s_workingTarget, attachment, texture ? texture->id() : 0, level, layer);
 }
 
 void LegacyFrameBufferImplementation::attachRenderBuffer(const FrameBufferObject * fbo, gl::GLenum attachment, RenderBufferObject * renderBuffer) const
 {
     fbo->bind(s_workingTarget);
-    renderBuffer->bind(gl::GL_RENDERBUFFER);
+    renderBuffer->bind(gl::RENDERBUFFER);
 
-    gl::glFramebufferRenderbuffer(s_workingTarget, attachment, gl::GL_RENDERBUFFER, renderBuffer->id());
+    gl::FramebufferRenderbuffer(s_workingTarget, attachment, gl::RENDERBUFFER, renderBuffer->id());
 }
 
 void LegacyFrameBufferImplementation::setReadBuffer(const FrameBufferObject * fbo, gl::GLenum mode) const
 {
-    fbo->bind(gl::GL_READ_FRAMEBUFFER);
+    fbo->bind(gl::READ_FRAMEBUFFER);
 
-    gl::glReadBuffer(mode);
+    gl::ReadBuffer(mode);
 }
 
 void LegacyFrameBufferImplementation::setDrawBuffer(const FrameBufferObject * fbo, gl::GLenum mode) const
 {
-    fbo->bind(gl::GL_DRAW_FRAMEBUFFER);
+    fbo->bind(gl::DRAW_FRAMEBUFFER);
 
-    gl::glDrawBuffer(mode);
+    gl::DrawBuffer(mode);
 }
 
 void LegacyFrameBufferImplementation::setDrawBuffers(const FrameBufferObject * fbo, gl::GLsizei n, const gl::GLenum * modes) const
 {
-    fbo->bind(gl::GL_DRAW_FRAMEBUFFER);
+    fbo->bind(gl::DRAW_FRAMEBUFFER);
 
-    gl::glDrawBuffers(n, modes);
+    gl::DrawBuffers(n, modes);
 }
 
 } // namespace glow

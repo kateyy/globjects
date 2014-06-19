@@ -16,7 +16,7 @@ Error::Error(gl::GLenum errorCode)
 }
 
 Error::Error()
-: Error(gl::GL_NO_ERROR)
+: Error(gl::NO_ERROR_)
 {
 }
 
@@ -29,17 +29,17 @@ std::string Error::name() const
 {
     switch(m_errorCode)
     {
-        case gl::GL_NO_ERROR:
+        case gl::NO_ERROR_:
             return "GL_NO_ERROR";
-        case gl::GL_INVALID_ENUM:
+        case gl::INVALID_ENUM:
             return "GL_INVALID_ENUM";
-        case gl::GL_INVALID_VALUE:
+        case gl::INVALID_VALUE:
             return "GL_INVALID_VALUE";
-        case gl::GL_INVALID_OPERATION:
+        case gl::INVALID_OPERATION:
             return "GL_INVALID_OPERATION";
-        case gl::GL_INVALID_FRAMEBUFFER_OPERATION:
+        case gl::INVALID_FRAMEBUFFER_OPERATION:
             return "GL_INVALID_FRAMEBUFFER_OPERATION";
-        case gl::GL_OUT_OF_MEMORY:
+        case gl::OUT_OF_MEMORY:
             return "GL_OUT_OF_MEMORY";
         default:
             return "Unknown GLenum.";
@@ -48,7 +48,7 @@ std::string Error::name() const
 
 Error Error::get()
 {
-    return Error(gl::glGetError());
+    return Error(gl::GetError());
 }
 
 void Error::clear()
@@ -58,7 +58,7 @@ void Error::clear()
 
 bool Error::isError() const
 {
-    return m_errorCode != gl::GL_NO_ERROR;
+    return m_errorCode != gl::NO_ERROR_;
 }
 
 Error::operator bool() const

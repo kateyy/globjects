@@ -61,8 +61,8 @@ public:
 
     virtual void accept(ObjectVisitor & visitor) override;
 
-    void bind(gl::GLenum target = gl::GL_TRANSFORM_FEEDBACK) const;
-    static void unbind(gl::GLenum target = gl::GL_TRANSFORM_FEEDBACK);
+    void bind(gl::GLenum target = gl::TRANSFORM_FEEDBACK) const;
+    static void unbind(gl::GLenum target = gl::TRANSFORM_FEEDBACK);
 
 	void begin(gl::GLenum primitiveMode);
 	void pause();

@@ -8,7 +8,7 @@
 #include <glow/debugmessageoutput.h>
 #include <glow/Program.h>
 #include <glow/Shader.h>
-#include <glow/String.h>
+//#include <glow/String.h>
 #include <glow/VertexArrayObject.h>
 #include <glow/VertexAttributeBinding.h>
 // [END] Includes of GLOW
@@ -129,8 +129,8 @@ public:
          * Resizes the viewport without maintaining the aspect ratio of the window, thus,
          * possibly deforming the rendered geometry.
          */
-        glViewport(0, 0, event.width(), event.height());
-        CheckGLError();
+        gl::Viewport(0, 0, event.width(), event.height());
+//        CheckGLError();
     }
     
     /**
@@ -163,11 +163,11 @@ public:
         
         // set color to clear the screen, check for an OpenGL error, actually
         // clear the screen and check for an OpenGL error again.
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        CheckGLError();
+        gl::ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//        CheckGLError();
         
-        glClear(GL_COLOR_BUFFER_BIT);
-        CheckGLError();
+        gl::Clear(gl::COLOR_BUFFER_BIT);
+//        CheckGLError();
 
         
         /*
@@ -193,7 +193,7 @@ public:
          *
          *      glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
          */
-        positionBufferObject->bind();
+        positionBufferObject->bind(gl::ARRAY_BUFFER);
 //        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionsBuffer->id());
 //        CheckGLError();
         
@@ -221,7 +221,7 @@ public:
          * glow groups setting the parameters in a more meaningfull manner.
          */
         vao->binding(0)->setAttribute(0);
-        vao->binding(0)->setFormat(4, GL_FLOAT);
+        vao->binding(0)->setFormat(4, gl::FLOAT);
         vao->binding(0)->setBuffer(positionBufferObject, 0, 0);
 //        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 //        CheckGLError();
@@ -234,7 +234,7 @@ public:
          *  
          *      glDrawArrays(GL_TRIANGLES, 0, 3);
          */
-        vao->drawArrays(GL_TRIANGLES, 0, 3);
+        vao->drawArrays(gl::TRIANGLES, 0, 3);
 //        glDrawArrays(GL_TRIANGLES, 0, 3);
 //        CheckGLError();
         
@@ -254,7 +254,7 @@ public:
          * Some cleanup work, (1) unbind the vertexPositionsBuffer, (2) release
          * the shader program used for rendering.
          */
-        positionBufferObject->unbind();
+        positionBufferObject->unbind(gl::ARRAY_BUFFER);
 //        glBindBuffer(GL_ARRAY_BUFFER, 0);
 //        CheckGLError();
         
@@ -299,8 +299,8 @@ protected:
         
         theProgram = new glow::Program();
 		theProgram->attach(
-                        glow::Shader::fromString(GL_VERTEX_SHADER, vertexShaderSource),
-                        glow::Shader::fromString(GL_FRAGMENT_SHADER, fragmentShaderSource)
+                        glow::Shader::fromString(gl::VERTEX_SHADER, vertexShaderSource),
+                        glow::Shader::fromString(gl::FRAGMENT_SHADER, fragmentShaderSource)
                         );
     }
     
@@ -327,7 +327,7 @@ protected:
          *
          *      glGenBuffers(1, &positionBufferObject);
          */
-		positionBufferObject = new glow::Buffer(GL_ARRAY_BUFFER);
+		positionBufferObject = new glow::Buffer();
         
         /*
          * Bind the new glow::Buffer. This call replaces the call to the OpenGL function glBindBuffer(...)
@@ -339,7 +339,7 @@ protected:
          *
          *      glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
          */
-        positionBufferObject->bind();
+        positionBufferObject->bind(gl::ARRAY_BUFFER);
         
         /**
          * Allocate the memory for the vertex positions data and copy the vertex positions array to the
@@ -360,7 +360,7 @@ protected:
          * value is already GL_STATIC_DRAW, however, we decided to explicitly state it here to stay as
          * close as possible to the original tutorial's code.
          */
-        positionBufferObject->setData(sizeof(vertexPositions), &vertexPositions, GL_STATIC_DRAW);
+        positionBufferObject->setData(sizeof(vertexPositions), &vertexPositions, gl::STATIC_DRAW);
         
         /*
          * Unbind the vertexPositionsBuffer as it is done in the tutorial.
@@ -369,7 +369,7 @@ protected:
          *
          * glBindBuffer(GL_ARRAY_BUFFER, 0);
          */
-        positionBufferObject->unbind();
+        positionBufferObject->unbind(gl::ARRAY_BUFFER);
     }
 // [END] :: protected
 

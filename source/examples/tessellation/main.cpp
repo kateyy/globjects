@@ -54,17 +54,17 @@ public:
 
         glow::debugmessageoutput::enable();
 
-        gl::glClearColor(1.0f, 1.0f, 1.0f, 0.f);
+        gl::ClearColor(1.0f, 1.0f, 1.0f, 0.f);
 
 
         m_sphere = new glow::Program();
         m_sphere->attach(
-            glow::Shader::fromFile(gl::GL_VERTEX_SHADER, "data/tessellation/sphere.vert")
-        ,   glow::Shader::fromFile(gl::GL_TESS_CONTROL_SHADER, "data/tessellation/sphere.tcs")
-        ,   glow::Shader::fromFile(gl::GL_TESS_EVALUATION_SHADER, "data/tessellation/sphere.tes")
-        ,   glow::Shader::fromFile(gl::GL_GEOMETRY_SHADER, "data/tessellation/sphere.geom")
-        ,   glow::Shader::fromFile(gl::GL_FRAGMENT_SHADER, "data/tessellation/sphere.frag")
-        ,   glow::Shader::fromFile(gl::GL_FRAGMENT_SHADER, "data/common/phong.frag"));
+            glow::Shader::fromFile(gl::VERTEX_SHADER, "data/tessellation/sphere.vert")
+        ,   glow::Shader::fromFile(gl::TESS_CONTROL_SHADER, "data/tessellation/sphere.tcs")
+        ,   glow::Shader::fromFile(gl::TESS_EVALUATION_SHADER, "data/tessellation/sphere.tes")
+        ,   glow::Shader::fromFile(gl::GEOMETRY_SHADER, "data/tessellation/sphere.geom")
+        ,   glow::Shader::fromFile(gl::FRAGMENT_SHADER, "data/tessellation/sphere.frag")
+        ,   glow::Shader::fromFile(gl::FRAGMENT_SHADER, "data/common/phong.frag"));
 
         m_icosahedron = new glowutils::Icosahedron();
         m_agrid = new glowutils::AdaptiveGrid(16U);
@@ -83,7 +83,7 @@ public:
         int width = event.width();
         int height = event.height();
 
-        gl::glViewport(0, 0, width, height);
+        gl::Viewport(0, 0, width, height);
 
 
         m_camera.setViewport(width, height);
@@ -91,7 +91,7 @@ public:
 
     virtual void paintEvent(PaintEvent &) override
     {
-        gl::glClear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT);
+        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
 
         m_agrid->update();
@@ -106,8 +106,8 @@ public:
         m_sphere->setUniform("level", level);
 
         m_sphere->use();
-        gl::glPatchParameteri(gl::GL_PATCH_VERTICES, 3);
-        m_icosahedron->draw(gl::GL_PATCHES);
+        gl::PatchParameteri(gl::PATCH_VERTICES, 3);
+        m_icosahedron->draw(gl::PATCHES);
         m_sphere->release();
 
         m_agrid->draw();
