@@ -5,6 +5,7 @@
 #include <iostream>
 
 // [BEGIN] Includes of GLOW
+#include <glow/glow.h>
 #include <glow/Buffer.h>
 #include <glow/Error.h>
 #include <glow/debugmessageoutput.h>
@@ -91,6 +92,8 @@ public:
      */
     virtual void initialize(glowwindow::Window& /*window*/) override {
         
+        glow::init();
+        
         // enable context specific debug message output (don't bother ;)).
         glow::debugmessageoutput::enable();
         
@@ -176,9 +179,7 @@ public:
          * Note that the division is done by 1,000,000,000.0f instead of 1000.0f as (per default)
          * the `glowutils::Timer` has a higher resolution as the corresponding freeglut function.
          */
-        float fElapsedTime {
-            static_cast<float>(timer->elapsed().count() / 1000000000.0f)
-        };
+        float fElapsedTime {timer->elapsed().count() / 1000000000.0f};
         
         
         // set color to clear the screen, check for an OpenGL error, actually

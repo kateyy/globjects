@@ -3,6 +3,7 @@
 #include <string>
 
 // [BEGIN] Includes of GLOW
+#include <glow/glow.h>
 #include <glow/Buffer.h>
 #include <glow/Error.h>
 #include <glow/debugmessageoutput.h>
@@ -71,6 +72,8 @@ public:
      * InitializePorgram() and InitializeVertexBuffer() -- in the original source code of the tutorial.
      */
     virtual void initialize(glowwindow::Window& /*window*/) override {
+        
+        glow::init();
         
         // enable context specific debug message output (don't bother ;)).
         glow::debugmessageoutput::enable();

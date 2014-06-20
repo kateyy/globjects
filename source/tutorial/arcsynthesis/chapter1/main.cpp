@@ -3,6 +3,7 @@
 #include <string>
 
 // [BEGIN] Includes of GLOW
+#include <glow/glow.h>
 #include <glow/Buffer.h>
 #include <glow/Error.h>
 #include <glow/debugmessageoutput.h>
@@ -20,6 +21,7 @@
 // [BEGIN] Includes of GLOWWINDOW
 #include <glowwindow/Context.h>
 #include <glowwindow/events.h>
+
 #include <glowwindow/WindowEventHandler.h>
 #include <glowwindow/Window.h>
 // [END] Includes of GLOWWINDOW
@@ -99,6 +101,8 @@ public:
      * and InitializeVertexBuffer() -- in the original source code of the tutorial.
      */
     virtual void initialize(glowwindow::Window& /*window*/) override {
+        
+        glow::init();
         
         // enable context specific debug message output (don't bother ;)).
         glow::debugmessageoutput::enable();
